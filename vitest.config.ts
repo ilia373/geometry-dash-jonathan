@@ -22,6 +22,14 @@ export default defineConfig({
         'src/components/Game.tsx', // Complex canvas game loop
         'src/utils/gameRenderer.ts', // Canvas rendering
         'src/utils/soundManager.ts', // Audio API
+        // Firebase integration (requires E2E testing)
+        'src/config/firebase.ts',
+        'src/utils/authService.ts',
+        'src/utils/firestoreService.ts',
+        'src/utils/userManager.ts',
+        'src/components/AuthModal.tsx',
+        'src/components/AdminPanel.tsx',
+        'src/types/cheats.ts',
       ],
       thresholds: {
         global: {

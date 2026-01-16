@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LEVELS } from '../constants/gameConfig';
 import { isLevelUnlocked, isLevelCompleted } from '../utils/progressManager';
-import { getTotalCoins } from '../utils/walletManager';
+import { getTotalCoins, syncWalletFromCloud } from '../utils/walletManager';
 import { getSelectedSkin } from '../utils/skinManager';
 import {
   getCurrentUser,
@@ -24,7 +24,7 @@ interface MenuProps {
 }
 
 const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
-  const totalCoins = getTotalCoins();
+  const [coins, setCoins] = useState<number>(getTotalCoins());
   const currentSkin = getSelectedSkin();
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [isHovering, setIsHovering] = useState<boolean>(false);
@@ -35,6 +35,15 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
   const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const userIsAdmin = isAdmin();
+  
+  // Sync wallet from cloud on auth change
+  useEffect(() => {
+    const syncWallet = async () => {
+      await syncWalletFromCloud();
+      setCoins(getTotalCoins());
+    };
+    syncWallet();
+  }, [user]);
   
   // Subscribe to auth state changes
   useEffect(() => {
@@ -136,7 +145,7 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
           <div className="coin-icon">
             <span>★</span>
           </div>
-          <span className="coin-amount">{totalCoins.toLocaleString()}</span>
+          <span className="coin-amount">{coins.toLocaleString()}</span>
         </div>
         
         <div className="top-bar-right">

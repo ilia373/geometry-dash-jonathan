@@ -42,6 +42,7 @@ vi.mock('../../utils/progressManager', () => ({
 
 vi.mock('../../utils/walletManager', () => ({
   getTotalCoins: vi.fn(() => 500),
+  syncWalletFromCloud: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../../utils/skinManager', () => ({

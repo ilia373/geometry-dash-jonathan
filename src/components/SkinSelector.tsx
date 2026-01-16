@@ -40,12 +40,13 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onBack }) => {
     setSelectedSkin(skinId);
   };
 
-  const handleBuySkin = (skinId: number, event: React.MouseEvent) => {
+  const handleBuySkin = async (skinId: number, event: React.MouseEvent) => {
     event.stopPropagation();
     
     const price = getSkinPrice(skinId);
     if (coins >= price && !isSkinUnlocked(skinId)) {
-      if (spendCoins(price)) {
+      const success = await spendCoins(price);
+      if (success) {
         unlockSkin(skinId);
         setCoins(getTotalCoins());
         setUnlockedSkins(prev => [...prev, skinId]);

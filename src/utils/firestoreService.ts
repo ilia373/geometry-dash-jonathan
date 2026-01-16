@@ -9,6 +9,7 @@ import {
 import type { Unsubscribe } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getCurrentUser, isGuest, onAuthChange } from './authService';
+import { setCoins } from './walletManager';
 
 // User data structure stored in Firestore
 export interface UserData {
@@ -229,6 +230,9 @@ export const syncLocalToCloud = async (): Promise<void> => {
   }
 
   await saveUserData(mergedData);
+  
+  // Update wallet cache with merged coins
+  setCoins(mergedData.coins);
 };
 
 // Initialize Firestore sync on auth changes

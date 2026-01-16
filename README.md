@@ -7,10 +7,11 @@
 [![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.3-646cff?style=flat-square&logo=vite)](https://vite.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-11-ffca28?style=flat-square&logo=firebase)](https://firebase.google.com/)
 
 **A modern, feature-rich Geometry Dash clone built with React and TypeScript**
 
-[Play Now](#-getting-started) • [Features](#-features) • [Game Mechanics](#-game-mechanics) • [Skins](#-skin-shop)
+🎮 **[Play Now](https://geometrics-dash.web.app)** • [Features](#-features) • [Game Mechanics](#-game-mechanics) • [Skins](#-skin-shop)
 
 </div>
 
@@ -40,9 +41,12 @@ A browser-based rhythm platformer inspired by Geometry Dash. Navigate your cube 
 | 🪙 **Coin System** | Collect coins during gameplay to spend in the shop |
 | 🎨 **100+ Skins** | Customize your cube with flags, game characters, animals & more |
 | 🔒 **Unlockable Content** | Purchase skins with collected coins (200+ coins each) |
-| 💾 **Progress Saving** | All progress saved to localStorage |
+| 🔐 **Firebase Auth** | Login with Google or email/password, or play as guest |
+| ☁️ **Cloud Sync** | Progress saved to Firebase for logged-in users |
+| 👑 **Admin Panel** | Super admin users get access to cheat controls |
 | 🎵 **Sound Effects** | Immersive audio feedback |
 | ✨ **Modern UI** | Glass-morphism design with smooth animations |
+| 📊 **Analytics** | Google Analytics integration for usage tracking |
 
 ---
 
@@ -95,14 +99,20 @@ geometry-dash-jonathan/
 │   ├── components/
 │   │   ├── Game.tsx          # Main game canvas & logic
 │   │   ├── Menu.tsx          # Main menu with level selection
-│   │   └── SkinSelector.tsx  # Skin shop interface
+│   │   ├── SkinSelector.tsx  # Skin shop interface
+│   │   ├── AdminPanel.tsx    # Admin cheat controls
+│   │   └── AuthModal.tsx     # Login/signup modal
+│   │
+│   ├── config/
+│   │   └── firebase.ts       # Firebase initialization
 │   │
 │   ├── constants/
 │   │   └── gameConfig.ts     # Level definitions & obstacles
 │   │
 │   ├── types/
 │   │   ├── game.ts           # Game state interfaces
-│   │   └── skins.ts          # Skin definitions (100+ skins)
+│   │   ├── skins.ts          # Skin definitions (100+ skins)
+│   │   └── cheats.ts         # Admin cheat interfaces
 │   │
 │   ├── utils/
 │   │   ├── gamePhysics.ts    # Collision & physics engine
@@ -110,7 +120,9 @@ geometry-dash-jonathan/
 │   │   ├── skinManager.ts    # Skin selection & unlocking
 │   │   ├── walletManager.ts  # Coin balance management
 │   │   ├── progressManager.ts # Level progress tracking
-│   │   └── soundManager.ts   # Audio system
+│   │   ├── soundManager.ts   # Audio system
+│   │   ├── authService.ts    # Firebase authentication
+│   │   └── firestoreService.ts # Cloud data sync
 │   │
 │   ├── App.tsx               # Root component & routing
 │   └── main.tsx              # Entry point
@@ -118,6 +130,9 @@ geometry-dash-jonathan/
 ├── public/
 │   └── sounds/               # Audio files
 │
+├── .env.example              # Environment template
+├── .env.local                # Local Firebase config (gitignored)
+├── firebase.json             # Firebase hosting config
 └── index.html
 ```
 
@@ -128,6 +143,7 @@ geometry-dash-jonathan/
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
+- Firebase project (for authentication & cloud sync)
 
 ### Installation
 
@@ -141,11 +157,32 @@ cd geometry-dash-jonathan
 # Install dependencies
 npm install
 
+# Set up Firebase (see Firebase Setup below)
+cp .env.example .env.local
+# Edit .env.local with your Firebase credentials
+
 # Start development server
 npm run dev
 ```
 
 Visit `http://localhost:5173` to play!
+
+### Firebase Setup
+
+1. Create a project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable **Authentication** → Sign-in method → Enable **Email/Password** and **Google**
+3. Create **Firestore Database** (start in test mode)
+4. Copy your Firebase config to `.env.local`:
+
+```env
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+VITE_FIREBASE_MEASUREMENT_ID=your-measurement-id
+```
 
 ### Running Tests
 
@@ -163,11 +200,17 @@ npm run test:coverage
 npm run test:ui
 ```
 
-### Build for Production
+### Build & Deploy
 
 ```bash
+# Build for production
 npm run build
+
+# Deploy to Firebase Hosting
+firebase deploy
 ```
+
+🌐 **Live Demo:** [https://geometrics-dash.web.app](https://geometrics-dash.web.app)
 
 ---
 
@@ -177,9 +220,10 @@ npm run build
 - **Language:** TypeScript 5.8
 - **Build Tool:** Vite 7.3
 - **Testing:** Vitest + React Testing Library
+- **Backend:** Firebase (Auth, Firestore, Hosting, Analytics)
 - **Rendering:** HTML5 Canvas
 - **Styling:** CSS3 with Glass-morphism
-- **Storage:** localStorage for persistence
+- **CI/CD:** GitHub Actions
 
 ---
 
@@ -203,14 +247,35 @@ npm run build
 │  └──────────────────────────────────────────────────────┘   │
 │                           │                                  │
 │  ┌────────────────────────┴────────────────────────────┐    │
-│  │                  localStorage                        │    │
-│  │  • geometry-dash-wallet (coins)                     │    │
-│  │  • geometry-dash-selected-skin                      │    │
-│  │  • geometry-dash-unlocked-skins                     │    │
-│  │  • geometry-dash-progress                           │    │
+│  │                  Storage Layer                      │    │
+│  │  ┌─────────────────┐    ┌─────────────────────┐    │    │
+│  │  │  localStorage   │    │  Firebase Firestore │    │    │
+│  │  │  (Guest users)  │    │  (Logged-in users)  │    │    │
+│  │  └─────────────────┘    └─────────────────────┘    │    │
 │  └──────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🔐 Authentication
+
+| Mode | Data Storage | Features |
+|------|--------------|----------|
+| **Guest** | localStorage only | Play immediately, no signup required |
+| **Email/Password** | Firebase Firestore | Cloud sync across devices |
+| **Google Sign-In** | Firebase Firestore | One-click login |
+
+### Super Admin Access
+
+Users with designated admin emails get access to the **Admin Panel** with cheats:
+- 🛡️ Invincible mode
+- 🎈 Float mode
+- ⚡ Speed boost
+- 🐌 Slow motion
+- 🤖 Auto jump
+- 📏 Size modifiers
+- 👻 Ghost mode
 
 ---
 

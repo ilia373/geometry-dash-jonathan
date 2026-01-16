@@ -3,6 +3,17 @@ import { LEVELS } from '../constants/gameConfig';
 import { isLevelUnlocked, isLevelCompleted } from '../utils/progressManager';
 import { getTotalCoins } from '../utils/walletManager';
 import { getSelectedSkin } from '../utils/skinManager';
+import {
+  getCurrentUser,
+  onAuthChange,
+  isAdmin,
+  logOut,
+  initializeAuth,
+  getDisplayName,
+  isGuest,
+} from '../utils/authService';
+import type { AuthUser } from '../utils/authService';
+import AuthModal from './AuthModal';
 import './Menu.css';
 
 interface MenuProps {
@@ -15,6 +26,29 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
   const currentSkin = getSelectedSkin();
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [isHovering, setIsHovering] = useState<boolean>(false);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
+  
+  // Initialize auth on mount
+  useEffect(() => {
+    initializeAuth();
+    const unsubscribe = onAuthChange((authUser) => {
+      setUser(authUser);
+    });
+    return unsubscribe;
+  }, []);
+  
+  const handleLogout = async () => {
+    try {
+      await logOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+  
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+  };
   
   const handleLevelSelect = (levelId: number) => {
     if (isLevelUnlocked(levelId)) {
@@ -90,12 +124,46 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
           <span className="coin-amount">{totalCoins.toLocaleString()}</span>
         </div>
         
-        <button className="skins-button" onClick={onOpenSkins}>
-          <span className="btn-icon">🎨</span>
-          <span className="btn-text">Skins</span>
-          <div className="btn-shine" />
-        </button>
+        <div className="top-bar-right">
+          {user ? (
+            <div className="user-section">
+              <span className={`user-info ${isAdmin() ? 'is-admin' : ''}`}>
+                {isAdmin() && <span className="admin-crown">👑</span>}
+                {isGuest() && <span className="guest-icon">👤</span>}
+                <span className="user-name">{getDisplayName()}</span>
+              </span>
+              <button className="logout-button" onClick={handleLogout}>
+                <span className="btn-icon">🚪</span>
+                <span className="btn-text">Logout</span>
+                <div className="btn-shine" />
+              </button>
+            </div>
+          ) : (
+            <button 
+              className="login-button" 
+              onClick={() => setShowAuthModal(true)}
+            >
+              <span className="btn-icon">🔐</span>
+              <span className="btn-text">Login</span>
+              <div className="btn-shine" />
+            </button>
+          )}
+          
+          <button className="skins-button" onClick={onOpenSkins}>
+            <span className="btn-icon">🎨</span>
+            <span className="btn-text">Skins</span>
+            <div className="btn-shine" />
+          </button>
+        </div>
       </div>
+      
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+        />
+      )}
 
       {/* Main content */}
       <div className="main-content">

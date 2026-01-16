@@ -1,0 +1,193 @@
+/* Admin Panel Styles */
+
+.admin-toggle {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  border: 2px solid #ffd700;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.admin-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+}
+
+.admin-toggle.has-active {
+  animation: pulse-gold 1.5s infinite;
+}
+
+.admin-toggle .active-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff3366;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 4px 25px rgba(255, 215, 0, 0.8); }
+}
+
+.admin-panel {
+  position: fixed;
+  top: 140px;
+  right: 20px;
+  z-index: 999;
+  background: linear-gradient(135deg, rgba(30, 30, 50, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+  border: 2px solid #ffd700;
+  border-radius: 15px;
+  padding: 20px;
+  min-width: 280px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.2);
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.admin-header h3 {
+  margin: 0;
+  color: #ffd700;
+  font-size: 1.2rem;
+}
+
+.admin-user {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.admin-cheats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.cheat-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cheat-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.cheat-button.active {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00ff88;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.cheat-emoji {
+  font-size: 1.5rem;
+}
+
+.cheat-name {
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.cheat-status {
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.cheat-status.off {
+  background: rgba(255, 255, 255, 0.1);
+  color: #888;
+}
+
+.cheat-status.on {
+  background: #00ff88;
+  color: #000;
+}
+
+.reset-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #ff3366 0%, #ff6b6b 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reset-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 51, 102, 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .admin-panel {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+  }
+  
+  .admin-toggle {
+    right: 10px;
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+}

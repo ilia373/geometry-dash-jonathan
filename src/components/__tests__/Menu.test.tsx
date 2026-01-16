@@ -2,6 +2,27 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Menu from '../Menu';
 
+// Mock Firebase config to prevent initialization errors
+vi.mock('../../config/firebase', () => ({
+  auth: {},
+  db: {},
+  default: {},
+}));
+
+// Mock auth service
+vi.mock('../../utils/authService', () => ({
+  getCurrentUser: vi.fn(() => null),
+  onAuthChange: vi.fn((callback: (user: null) => void) => {
+    callback(null);
+    return () => {};
+  }),
+  isAdmin: vi.fn(() => false),
+  logOut: vi.fn(),
+  initializeAuth: vi.fn(),
+  getDisplayName: vi.fn(() => ''),
+  isGuest: vi.fn(() => false),
+}));
+
 // Mock the dependencies
 vi.mock('../../utils/progressManager', () => ({
   isLevelUnlocked: vi.fn((levelId: number) => levelId <= 2),

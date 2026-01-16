@@ -8,7 +8,6 @@ import {
   onAuthChange,
   isAdmin,
   logOut,
-  initializeAuth,
   getDisplayName,
   isGuest,
 } from '../utils/authService';
@@ -29,9 +28,8 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
   
-  // Initialize auth on mount
+  // Subscribe to auth state changes
   useEffect(() => {
-    initializeAuth();
     const unsubscribe = onAuthChange((authUser) => {
       setUser(authUser);
     });

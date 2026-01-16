@@ -25,7 +25,6 @@ vi.mock('../../utils/authService', () => ({
   }),
   isAdmin: () => mockIsAdmin(),
   logOut: () => mockLogOut(),
-  initializeAuth: vi.fn(),
   getDisplayName: () => mockGetDisplayName(),
   isGuest: () => mockIsGuest(),
   isSuperAdmin: vi.fn(() => false),

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Menu from '../Menu';
 
 // Mock Firebase config to prevent initialization errors
@@ -9,18 +9,30 @@ vi.mock('../../config/firebase', () => ({
   default: {},
 }));
 
+// Create mock functions that can be modified
+const mockGetCurrentUser = vi.fn(() => null);
+const mockIsAdmin = vi.fn(() => false);
+const mockIsGuest = vi.fn(() => false);
+const mockGetDisplayName = vi.fn(() => '');
+const mockLogOut = vi.fn();
+
 // Mock auth service
 vi.mock('../../utils/authService', () => ({
-  getCurrentUser: vi.fn(() => null),
-  onAuthChange: vi.fn((callback: (user: null) => void) => {
-    callback(null);
+  getCurrentUser: () => mockGetCurrentUser(),
+  onAuthChange: vi.fn((callback: (user: unknown) => void) => {
+    callback(mockGetCurrentUser());
     return () => {};
   }),
-  isAdmin: vi.fn(() => false),
-  logOut: vi.fn(),
+  isAdmin: () => mockIsAdmin(),
+  logOut: () => mockLogOut(),
   initializeAuth: vi.fn(),
-  getDisplayName: vi.fn(() => ''),
-  isGuest: vi.fn(() => false),
+  getDisplayName: () => mockGetDisplayName(),
+  isGuest: () => mockIsGuest(),
+  isSuperAdmin: vi.fn(() => false),
+  signInWithEmail: vi.fn(),
+  signUpWithEmail: vi.fn(),
+  signInWithGoogle: vi.fn(),
+  playAsGuest: vi.fn(),
 }));
 
 // Mock the dependencies
@@ -116,5 +128,162 @@ describe('Menu Component', () => {
     render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
     const heroCube = document.querySelector('.hero-cube');
     expect(heroCube).toBeInTheDocument();
+  });
+
+  describe('when user is logged in', () => {
+    beforeEach(() => {
+      mockGetCurrentUser.mockReturnValue({
+        uid: 'test-uid',
+        email: 'test@example.com',
+        displayName: 'TestUser',
+        isGuest: false,
+      });
+      mockGetDisplayName.mockReturnValue('TestUser');
+      mockIsGuest.mockReturnValue(false);
+    });
+
+    it('should display user name', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      expect(screen.getByText('TestUser')).toBeInTheDocument();
+    });
+
+    it('should display logout button', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const logoutButton = screen.getByRole('button', { name: /logout/i });
+      expect(logoutButton).toBeInTheDocument();
+    });
+
+    it('should call logOut when logout button is clicked', async () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const logoutButton = screen.getByRole('button', { name: /logout/i });
+      fireEvent.click(logoutButton);
+      await waitFor(() => {
+        expect(mockLogOut).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('when user is admin', () => {
+    beforeEach(() => {
+      mockGetCurrentUser.mockReturnValue({
+        uid: 'admin-uid',
+        email: 'ilia209@gmail.com',
+        displayName: 'Admin',
+        isGuest: false,
+      });
+      mockGetDisplayName.mockReturnValue('Admin');
+      mockIsAdmin.mockReturnValue(true);
+      mockIsGuest.mockReturnValue(false);
+    });
+
+    it('should show admin crown', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      expect(screen.getByText('👑')).toBeInTheDocument();
+    });
+  });
+
+  describe('when user is guest', () => {
+    beforeEach(() => {
+      mockGetCurrentUser.mockReturnValue({
+        uid: 'guest',
+        email: null,
+        displayName: 'Guest',
+        isGuest: true,
+      });
+      mockGetDisplayName.mockReturnValue('Guest');
+      mockIsGuest.mockReturnValue(true);
+      mockIsAdmin.mockReturnValue(false);
+    });
+
+    it('should show guest icon', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      expect(screen.getByText('👤')).toBeInTheDocument();
+    });
+
+    it('should display Guest as user name', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      expect(screen.getByText('Guest')).toBeInTheDocument();
+    });
+  });
+
+  describe('when no user is logged in', () => {
+    beforeEach(() => {
+      mockGetCurrentUser.mockReturnValue(null);
+      mockGetDisplayName.mockReturnValue('');
+      mockIsGuest.mockReturnValue(false);
+      mockIsAdmin.mockReturnValue(false);
+    });
+
+    it('should display login button', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const loginButton = screen.getByRole('button', { name: /login/i });
+      expect(loginButton).toBeInTheDocument();
+    });
+
+    it('should open auth modal when login is clicked', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const loginButton = screen.getByRole('button', { name: /login/i });
+      fireEvent.click(loginButton);
+      
+      // Auth modal should appear
+      expect(screen.getByText(/welcome back/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('keyboard navigation', () => {
+    it('should handle arrow right for level selection', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      fireEvent.keyDown(window, { code: 'ArrowRight' });
+      // Level 2 should now be selected (since it's unlocked)
+      const selectedCard = document.querySelector('.level-card.selected');
+      expect(selectedCard).toBeInTheDocument();
+    });
+
+    it('should handle enter/space to start game', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      fireEvent.keyDown(window, { code: 'Enter' });
+      expect(mockOnStartGame).toHaveBeenCalled();
+    });
+  });
+
+  describe('level selection', () => {
+    it('should allow clicking on unlocked levels', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const level2Card = screen.getByText('Back on Track').closest('.level-card');
+      if (level2Card) {
+        fireEvent.click(level2Card);
+        expect(level2Card).toHaveClass('selected');
+      }
+    });
+
+    it('should allow double-click to start level', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const level1Card = screen.getByText('Stereo Madness').closest('.level-card');
+      if (level1Card) {
+        fireEvent.doubleClick(level1Card);
+        expect(mockOnStartGame).toHaveBeenCalledWith(1);
+      }
+    });
+  });
+
+  describe('hero cube interaction', () => {
+    it('should add hovering class on mouse enter', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const heroCube = document.querySelector('.hero-cube');
+      if (heroCube) {
+        fireEvent.mouseEnter(heroCube);
+        expect(heroCube).toHaveClass('hovering');
+      }
+    });
+
+    it('should remove hovering class on mouse leave', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const heroCube = document.querySelector('.hero-cube');
+      if (heroCube) {
+        fireEvent.mouseEnter(heroCube);
+        fireEvent.mouseLeave(heroCube);
+        expect(heroCube).not.toHaveClass('hovering');
+      }
+    });
   });
 });

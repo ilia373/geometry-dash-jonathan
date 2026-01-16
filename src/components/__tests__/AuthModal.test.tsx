@@ -174,4 +174,74 @@ describe('AuthModal', () => {
       expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
     });
   });
+
+  it('should show error message on Google sign-in failure', async () => {
+    mockSignInWithGoogle.mockRejectedValue(new Error('Popup closed'));
+    render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    
+    const googleButton = screen.getByText('Continue with Google');
+    fireEvent.click(googleButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Popup closed')).toBeInTheDocument();
+    });
+  });
+
+  it('should show generic error for non-Error Google failures', async () => {
+    mockSignInWithGoogle.mockRejectedValue('unknown error');
+    render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    
+    const googleButton = screen.getByText('Continue with Google');
+    fireEvent.click(googleButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Google sign in failed')).toBeInTheDocument();
+    });
+  });
+
+  it('should show generic error for non-Error email auth failures', async () => {
+    mockSignInWithEmail.mockRejectedValue('unknown error');
+    render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getByText('🔓 Sign In');
+    
+    fireEvent.change(emailInput, { target: { value: 'test@email.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'wrong' } });
+    fireEvent.click(submitButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Authentication failed')).toBeInTheDocument();
+    });
+  });
+
+  it('should call onSuccess after successful Google sign-in', async () => {
+    mockSignInWithGoogle.mockResolvedValue({});
+    render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    
+    const googleButton = screen.getByText('Continue with Google');
+    fireEvent.click(googleButton);
+    
+    await waitFor(() => {
+      expect(mockOnSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('should call onSuccess after successful email sign-in', async () => {
+    mockSignInWithEmail.mockResolvedValue({});
+    render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getByText('🔓 Sign In');
+    
+    fireEvent.change(emailInput, { target: { value: 'test@email.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+    fireEvent.click(submitButton);
+    
+    await waitFor(() => {
+      expect(mockOnSuccess).toHaveBeenCalled();
+    });
+  });
 });

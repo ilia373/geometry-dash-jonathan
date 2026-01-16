@@ -17,7 +17,9 @@ function App() {
   useEffect(() => {
     initializeAuth();
     initializeFirestoreSync();
-    initAnalytics();
+    initAnalytics().catch((error) => {
+      console.error('Failed to initialize analytics', error);
+    });
   }, []);
 
   const handleStartGame = (levelId: number) => {

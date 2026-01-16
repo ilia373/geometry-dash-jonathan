@@ -54,6 +54,13 @@ const isSuperAdmin = (email: string | undefined): boolean => {
  */
 export const setAdminClaim = beforeUserSignedIn(async (event) => {
   const user = event.data;
+  
+  // User should always exist in beforeUserSignedIn, but handle edge case
+  if (!user) {
+    logger.warn('No user data in sign-in event');
+    return;
+  }
+  
   const email = user.email;
   
   logger.info(`User signing in: ${email}`);

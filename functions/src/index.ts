@@ -5,12 +5,13 @@
  * - Admin privilege assignment via custom claims
  * - Secure admin verification that cannot be bypassed client-side
  * 
- * IMPORTANT: Admin emails are stored server-side here to prevent client-side tampering.
+ * IMPORTANT: Admin emails are stored in Google Cloud Secret Manager.
  * Custom claims are cryptographically signed in the JWT token and verified by Firebase.
  */
 
 import { beforeUserSignedIn } from 'firebase-functions/v2/identity';
 import { logger } from 'firebase-functions/v2';
+import { defineSecret } from 'firebase-functions/params';
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -18,23 +19,23 @@ import { getAuth } from 'firebase-admin/auth';
 initializeApp();
 
 /**
- * Super admin email addresses - stored server-side only
- * These emails are granted admin privileges via custom claims
+ * Super admin email addresses - stored in Google Cloud Secret Manager
+ * Format: comma-separated list of emails (e.g., "admin1@example.com,admin2@example.com")
  * 
- * SECURITY: These emails are NOT exposed to the client.
- * The client only receives the `admin: true` claim in the JWT token.
+ * To set the secret, run:
+ *   firebase functions:secrets:set SUPER_ADMIN_EMAILS
+ * 
+ * SECURITY: These emails are stored encrypted in Secret Manager,
+ * not exposed in source code or to the client.
  */
-const SUPER_ADMIN_EMAILS = [
-  'ilia209@gmail.com',
-  'jonathan.aronov.140417@gmail.com', // lowercase for comparison
-];
+const superAdminEmails = defineSecret('SUPER_ADMIN_EMAILS');
 
 /**
  * Check if an email is a super admin
  */
-const isSuperAdmin = (email: string | undefined): boolean => {
+const isSuperAdmin = (email: string | undefined, adminEmailsList: string[]): boolean => {
   if (!email) return false;
-  return SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
+  return adminEmailsList.includes(email.toLowerCase());
 };
 
 /**
@@ -47,13 +48,15 @@ const isSuperAdmin = (email: string | undefined): boolean => {
  * 4. Firestore security rules can verify `request.auth.token.admin === true`
  * 
  * SECURITY BENEFITS:
- * - Admin list is stored server-side, not in client code
+ * - Admin list is stored in Secret Manager, not in client code
  * - Custom claims are cryptographically signed by Firebase
  * - Claims cannot be forged or modified by the client
  * - Firestore rules enforce permissions server-side
  */
-export const setAdminClaim = beforeUserSignedIn(async (event) => {
-  const user = event.data;
+export const setAdminClaim = beforeUserSignedIn(
+  { secrets: [superAdminEmails] },
+  async (event) => {
+    const user = event.data;
   
   // User should always exist in beforeUserSignedIn, but handle edge case
   if (!user) {
@@ -65,8 +68,14 @@ export const setAdminClaim = beforeUserSignedIn(async (event) => {
   
   logger.info(`User signing in: ${email}`);
   
+  // Parse admin emails from secret (comma-separated list)
+  const adminEmailsList = superAdminEmails.value()
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(e => e.length > 0);
+  
   // Check if user should be admin
-  const shouldBeAdmin = isSuperAdmin(email);
+  const shouldBeAdmin = isSuperAdmin(email, adminEmailsList);
   
   // Get current claims to check if update is needed
   const auth = getAuth();

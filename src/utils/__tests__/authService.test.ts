@@ -6,6 +6,7 @@ const mockCreateUserWithEmailAndPassword = vi.fn();
 const mockSignInWithPopup = vi.fn();
 const mockSignOut = vi.fn();
 const mockOnAuthStateChanged = vi.fn();
+const mockGetIdTokenResult = vi.fn();
 
 // Mock Firebase
 vi.mock('../../config/firebase', () => ({
@@ -24,7 +25,6 @@ vi.mock('firebase/auth', () => ({
 
 // Import after mocks
 import {
-  isSuperAdmin,
   isAdmin,
   getCurrentUser,
   isGuest,
@@ -36,48 +36,84 @@ import {
   signInWithEmail,
   signUpWithEmail,
   signInWithGoogle,
-  SUPER_ADMIN_EMAILS,
 } from '../authService';
 
+// Helper to create a mock user with getIdTokenResult
+const createMockUser = (overrides: {
+  uid?: string;
+  email?: string | null;
+  displayName?: string | null;
+  isAdmin?: boolean;
+} = {}) => {
+  mockGetIdTokenResult.mockResolvedValue({
+    claims: { admin: overrides.isAdmin ?? false },
+  });
+  return {
+    uid: overrides.uid ?? 'test-uid',
+    email: overrides.email ?? 'test@example.com',
+    displayName: 'displayName' in overrides ? overrides.displayName : 'Test User',
+    getIdTokenResult: mockGetIdTokenResult,
+  };
+};
+
 describe('authService', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    mockGetIdTokenResult.mockResolvedValue({ claims: { admin: false } });
+    // Reset auth state between tests
+    await logOut();
   });
 
-  describe('SUPER_ADMIN_EMAILS', () => {
-    it('should contain the correct admin emails', () => {
-      expect(SUPER_ADMIN_EMAILS).toContain('ilia209@gmail.com');
-      expect(SUPER_ADMIN_EMAILS).toContain('Jonathan.aronov.140417@gmail.com');
-      expect(SUPER_ADMIN_EMAILS).toHaveLength(2);
-    });
-  });
-
-  describe('isSuperAdmin', () => {
-    it('should return true for admin email', () => {
-      expect(isSuperAdmin('ilia209@gmail.com')).toBe(true);
-    });
-
-    it('should return true for admin email case-insensitive', () => {
-      expect(isSuperAdmin('ILIA209@GMAIL.COM')).toBe(true);
-      expect(isSuperAdmin('Jonathan.Aronov.140417@Gmail.Com')).toBe(true);
-    });
-
-    it('should return false for non-admin email', () => {
-      expect(isSuperAdmin('random@email.com')).toBe(false);
-    });
-
-    it('should return false for null email', () => {
-      expect(isSuperAdmin(null)).toBe(false);
-    });
-
-    it('should return false for empty string', () => {
-      expect(isSuperAdmin('')).toBe(false);
-    });
-  });
-
-  describe('isAdmin', () => {
+  describe('isAdmin (claim-based)', () => {
     it('should return false when no user is logged in', () => {
       expect(isAdmin()).toBe(false);
+    });
+
+    it('should return false for guest users', () => {
+      playAsGuest();
+      expect(isAdmin()).toBe(false);
+    });
+
+    it('should return true for users with admin claim', async () => {
+      const mockUser = createMockUser({ isAdmin: true });
+      mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      await signInWithEmail('admin@example.com', 'password123');
+      
+      expect(isAdmin()).toBe(true);
+    });
+
+    it('should return false for users without admin claim', async () => {
+      const mockUser = createMockUser({ isAdmin: false });
+      mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      await signInWithEmail('user@example.com', 'password123');
+      
+      expect(isAdmin()).toBe(false);
+    });
+
+    it('should include isAdmin field in currentUser from custom claims', async () => {
+      const mockUser = createMockUser({ isAdmin: true });
+      mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      await signInWithEmail('admin@example.com', 'password123');
+      const currentUser = getCurrentUser();
+      
+      expect(currentUser?.isAdmin).toBe(true);
+    });
+
+    it('should default isAdmin to false if getIdTokenResult fails', async () => {
+      const mockUser = {
+        uid: 'test-uid',
+        email: 'test@example.com',
+        displayName: 'Test',
+        getIdTokenResult: vi.fn().mockRejectedValue(new Error('Token error')),
+      };
+      mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      const result = await signInWithEmail('test@example.com', 'password123');
+      
+      expect(result.isAdmin).toBe(false);
     });
   });
 
@@ -105,6 +141,7 @@ describe('authService', () => {
     it('should not grant admin access to guests', () => {
       playAsGuest();
       expect(isAdmin()).toBe(false);
+      expect(getCurrentUser()?.isAdmin).toBe(false);
     });
   });
 
@@ -179,11 +216,11 @@ describe('authService', () => {
 
   describe('signInWithEmail', () => {
     it('should sign in with email and password', async () => {
-      const mockUser = {
+      const mockUser = createMockUser({
         uid: 'test-uid',
         email: 'test@example.com',
         displayName: 'Test User',
-      };
+      });
       mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
 
       const result = await signInWithEmail('test@example.com', 'password123');
@@ -191,6 +228,16 @@ describe('authService', () => {
       expect(result.uid).toBe('test-uid');
       expect(result.email).toBe('test@example.com');
       expect(result.isGuest).toBe(false);
+    });
+
+    it('should read admin claim from ID token', async () => {
+      const mockUser = createMockUser({ email: 'admin@example.com', isAdmin: true });
+      mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      const result = await signInWithEmail('admin@example.com', 'password123');
+      
+      expect(result.isAdmin).toBe(true);
+      expect(mockGetIdTokenResult).toHaveBeenCalled();
     });
 
     it('should throw user-friendly error on invalid email', async () => {
@@ -232,11 +279,11 @@ describe('authService', () => {
 
   describe('signUpWithEmail', () => {
     it('should create account with email and password', async () => {
-      const mockUser = {
+      const mockUser = createMockUser({
         uid: 'new-uid',
         email: 'new@example.com',
         displayName: null,
-      };
+      });
       mockCreateUserWithEmailAndPassword.mockResolvedValue({ user: mockUser });
 
       const result = await signUpWithEmail('new@example.com', 'password123');
@@ -244,6 +291,15 @@ describe('authService', () => {
       expect(result.uid).toBe('new-uid');
       expect(result.email).toBe('new@example.com');
       expect(result.displayName).toBe('new'); // Falls back to email prefix
+    });
+
+    it('should read admin claim for new users', async () => {
+      const mockUser = createMockUser({ email: 'newadmin@example.com', isAdmin: true });
+      mockCreateUserWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      const result = await signUpWithEmail('newadmin@example.com', 'password123');
+      
+      expect(result.isAdmin).toBe(true);
     });
 
     it('should throw error on email already in use', async () => {
@@ -261,11 +317,11 @@ describe('authService', () => {
 
   describe('signInWithGoogle', () => {
     it('should sign in with Google popup', async () => {
-      const mockUser = {
+      const mockUser = createMockUser({
         uid: 'google-uid',
         email: 'google@gmail.com',
         displayName: 'Google User',
-      };
+      });
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
 
       const result = await signInWithGoogle();
@@ -273,6 +329,15 @@ describe('authService', () => {
       expect(result.uid).toBe('google-uid');
       expect(result.email).toBe('google@gmail.com');
       expect(result.displayName).toBe('Google User');
+    });
+
+    it('should read admin claim from Google sign-in', async () => {
+      const mockUser = createMockUser({ email: 'admin@gmail.com', isAdmin: true });
+      mockSignInWithPopup.mockResolvedValue({ user: mockUser });
+
+      const result = await signInWithGoogle();
+      
+      expect(result.isAdmin).toBe(true);
     });
 
     it('should throw error on popup closed', async () => {
@@ -290,12 +355,11 @@ describe('authService', () => {
 
   describe('logOut with authenticated user', () => {
     it('should call Firebase signOut for authenticated users', async () => {
-      // First sign in
-      const mockUser = {
+      const mockUser = createMockUser({
         uid: 'test-uid',
         email: 'test@example.com',
         displayName: 'Test',
-      };
+      });
       mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
       mockSignOut.mockResolvedValue(undefined);
       

@@ -10,17 +10,40 @@ import {
 import type { User } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
-// Super admin email addresses - these users have full admin access
-export const SUPER_ADMIN_EMAILS = [
+/**
+ * List of super admin emails
+ * These users get admin custom claims set by the Cloud Function
+ */
+const SUPER_ADMIN_EMAILS = [
   'ilia209@gmail.com',
-  'Jonathan.aronov.140417@gmail.com',
 ];
+
+/**
+ * Check if an email is a super admin
+ * Used for UI hints only - actual admin verification is done server-side
+ */
+export const isSuperAdmin = (email: string | undefined): boolean => {
+  if (!email) return false;
+  return SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
+};
+
+/**
+ * SECURITY NOTE: Admin privileges are managed server-side via Firebase Custom Claims.
+ * 
+ * The admin claim is set by a Cloud Function (functions/src/index.ts) that runs
+ * on every sign-in. The claim is cryptographically signed in the JWT token and
+ * verified by Firestore security rules.
+ * 
+ * Client-side admin check is ONLY for UI purposes (showing/hiding admin panel).
+ * Actual security is enforced by Firestore rules checking `request.auth.token.admin`.
+ */
 
 export interface AuthUser {
   uid: string;
   email: string | null;
   displayName: string | null;
   isGuest: boolean;
+  isAdmin: boolean; // From custom claims - for UI only
 }
 
 // Current auth state
@@ -28,19 +51,17 @@ let currentUser: AuthUser | null = null;
 let isGuestMode = false;
 let authListeners: ((user: AuthUser | null) => void)[] = [];
 
-// Check if email is a super admin
-export const isSuperAdmin = (email: string | null): boolean => {
-  if (!email) return false;
-  return SUPER_ADMIN_EMAILS.some(
-    (adminEmail) => adminEmail.toLowerCase() === email.toLowerCase()
-  );
-};
-
-// Check if current user is admin (either super admin or guest is never admin)
+/**
+ * Check if current user is admin
+ * 
+ * SECURITY: This is for UI purposes only (showing admin panel).
+ * Server-side security is enforced via Firestore rules checking the custom claim.
+ * The claim is set by a Cloud Function and cannot be forged client-side.
+ */
 export const isAdmin = (): boolean => {
   if (isGuestMode) return false;
   if (!currentUser) return false;
-  return isSuperAdmin(currentUser.email);
+  return currentUser.isAdmin;
 };
 
 // Get current user
@@ -70,20 +91,37 @@ const notifyListeners = () => {
   authListeners.forEach((callback) => callback(currentUser));
 };
 
-// Convert Firebase user to AuthUser
-const convertUser = (user: User): AuthUser => ({
-  uid: user.uid,
-  email: user.email,
-  displayName: user.displayName || user.email?.split('@')[0] || 'User',
-  isGuest: false,
-});
+/**
+ * Convert Firebase user to AuthUser, including admin claim check
+ * 
+ * The admin claim is set by a blocking Cloud Function on sign-in.
+ * We read it from the ID token result.
+ */
+const convertUser = async (user: User): Promise<AuthUser> => {
+  // Get ID token result to access custom claims
+  let isAdminUser = false;
+  try {
+    const idTokenResult = await user.getIdTokenResult();
+    isAdminUser = idTokenResult.claims.admin === true;
+  } catch (error) {
+    console.error('Error getting ID token claims:', error);
+  }
+  
+  return {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName || user.email?.split('@')[0] || 'User',
+    isGuest: false,
+    isAdmin: isAdminUser,
+  };
+};
 
 // Sign in with email and password
 export const signInWithEmail = async (email: string, password: string): Promise<AuthUser> => {
   try {
     isGuestMode = false;
     const result = await signInWithEmailAndPassword(auth, email, password);
-    currentUser = convertUser(result.user);
+    currentUser = await convertUser(result.user);
     notifyListeners();
     return currentUser;
   } catch (error: unknown) {
@@ -98,7 +136,7 @@ export const signUpWithEmail = async (email: string, password: string): Promise<
   try {
     isGuestMode = false;
     const result = await createUserWithEmailAndPassword(auth, email, password);
-    currentUser = convertUser(result.user);
+    currentUser = await convertUser(result.user);
     notifyListeners();
     return currentUser;
   } catch (error: unknown) {
@@ -114,7 +152,7 @@ export const signInWithGoogle = async (): Promise<AuthUser> => {
     isGuestMode = false;
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    currentUser = convertUser(result.user);
+    currentUser = await convertUser(result.user);
     notifyListeners();
     return currentUser;
   } catch (error: unknown) {
@@ -132,6 +170,7 @@ export const playAsGuest = (): void => {
     email: null,
     displayName: 'Guest',
     isGuest: true,
+    isAdmin: false, // Guests are never admins
   };
   notifyListeners();
 };
@@ -153,9 +192,9 @@ export const logOut = async (): Promise<void> => {
 
 // Initialize auth state listener
 export const initializeAuth = (): void => {
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user && !isGuestMode) {
-      currentUser = convertUser(user);
+      currentUser = await convertUser(user);
       notifyListeners();
     } else if (!isGuestMode) {
       currentUser = null;

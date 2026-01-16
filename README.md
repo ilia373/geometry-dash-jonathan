@@ -147,6 +147,22 @@ npm run dev
 
 Visit `http://localhost:5173` to play!
 
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests with UI
+npm run test:ui
+```
+
 ### Build for Production
 
 ```bash
@@ -160,6 +176,7 @@ npm run build
 - **Frontend Framework:** React 19
 - **Language:** TypeScript 5.8
 - **Build Tool:** Vite 7.3
+- **Testing:** Vitest + React Testing Library
 - **Rendering:** HTML5 Canvas
 - **Styling:** CSS3 with Glass-morphism
 - **Storage:** localStorage for persistence

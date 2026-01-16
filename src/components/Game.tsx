@@ -1,5 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import type { Player, Particle, GameState, GameStats } from '../types/game';
+import type { CheatState } from '../types/cheats';
+import { defaultCheatState } from '../types/cheats';
 import { GAME_CONFIG, getCurrentLevel } from '../constants/gameConfig';
 import {
   createPlayer,
@@ -24,6 +26,8 @@ import {
 import { soundManager } from '../utils/soundManager';
 import { markLevelComplete } from '../utils/progressManager';
 import { addCoins, getTotalCoins } from '../utils/walletManager';
+import { isAdmin } from '../utils/authService';
+import AdminPanel from './AdminPanel';
 import './Game.css';
 
 interface GameProps {
@@ -45,6 +49,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
     bestProgress: 0,
     coinsCollected: 0,
   });
+  
+  // Admin panel state
+  const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const cheatsRef = useRef<CheatState>(defaultCheatState);
   
   // Track collected coin indices for current run
   const collectedCoinsRef = useRef<Set<number>>(new Set());
@@ -141,16 +150,40 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
     
     const gameLoop = () => {
       timeRef.current++;
+      const activeCheat = cheatsRef.current;
       
       if (gameState === 'playing') {
+        // Calculate speed modifier from cheats
+        let speedMod = 1;
+        if (activeCheat.speedBoost) speedMod = 2;
+        if (activeCheat.slowMotion) speedMod = 0.5;
+        
         // Update camera (move forward)
-        cameraXRef.current += GAME_CONFIG.playerSpeed;
+        cameraXRef.current += GAME_CONFIG.playerSpeed * speedMod;
+        
+        // Apply float cheat (disable gravity)
+        if (activeCheat.float) {
+          playerRef.current.vy = 0;
+          playerRef.current.y = GAME_CONFIG.canvasHeight - GAME_CONFIG.groundHeight - GAME_CONFIG.playerSize - 50;
+        }
+        
+        // Apply size cheats
+        let sizeMultiplier = 1;
+        if (activeCheat.bigPlayer) sizeMultiplier = 2;
+        if (activeCheat.smallPlayer) sizeMultiplier = 0.5;
+        playerRef.current.width = GAME_CONFIG.playerSize * sizeMultiplier;
+        playerRef.current.height = GAME_CONFIG.playerSize * sizeMultiplier;
         
         // Update player physics
         playerRef.current = updatePlayerPhysics(
           playerRef.current,
           GAME_CONFIG
         );
+        
+        // Auto jump cheat
+        if (activeCheat.autoJump && isOnGround(playerRef.current, GAME_CONFIG)) {
+          playerRef.current = jump(playerRef.current, GAME_CONFIG);
+        }
         
         // Check collisions
         const collisions = checkAllCollisions(
@@ -165,6 +198,10 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
         for (const collision of collisions) {
           switch (collision.type) {
             case 'death':
+              // Skip death if invincible or ghost mode
+              if (activeCheat.invincible || activeCheat.ghostMode) {
+                break;
+              }
               // Player died - no coins saved
               particlesRef.current = [
                 ...particlesRef.current,
@@ -323,6 +360,25 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
     };
   }, [gameState, handleJump, resetGame, onBack]);
   
+  // Cheat handlers
+  const handleToggleCheat = useCallback((cheat: keyof CheatState) => {
+    setCheats(prev => {
+      const newCheats = { ...prev, [cheat]: !prev[cheat] };
+      cheatsRef.current = newCheats;
+      return newCheats;
+    });
+  }, []);
+  
+  const handleResetCheats = useCallback(() => {
+    setCheats(defaultCheatState);
+    cheatsRef.current = defaultCheatState;
+    // Reset player size
+    playerRef.current.width = GAME_CONFIG.playerSize;
+    playerRef.current.height = GAME_CONFIG.playerSize;
+  }, []);
+  
+  const userIsAdmin = isAdmin();
+  
   return (
     <div className="game-container">
       <div className="top-buttons">
@@ -333,6 +389,17 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
           {isMuted ? '🔇' : '🔊'}
         </button>
       </div>
+      
+      {/* Admin Panel - only for InfinityCats */}
+      {userIsAdmin && (
+        <AdminPanel
+          cheats={cheats}
+          onToggleCheat={handleToggleCheat}
+          onReset={handleResetCheats}
+          isVisible={showAdminPanel}
+          onToggleVisibility={() => setShowAdminPanel(!showAdminPanel)}
+        />
+      )}
       
       <canvas
         ref={canvasRef}

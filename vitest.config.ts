@@ -17,11 +17,14 @@ export default defineConfig({
         'vite.config.ts',
         'vitest.config.ts',
         'eslint.config.js',
+        'dist/**',
         'src/main.tsx', // Entry point
         'src/App.tsx', // Root component with routing
         'src/components/Game.tsx', // Complex canvas game loop
         'src/utils/gameRenderer.ts', // Canvas rendering
         'src/utils/soundManager.ts', // Audio API
+        // Firebase SDK initialization (external service)
+        'src/config/firebase.ts',
       ],
       thresholds: {
         global: {

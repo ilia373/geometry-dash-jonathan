@@ -12,8 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (keep .env for production placeholders)
+# .env is committed with empty values - actual values set in hosting env
+.env.local
+.env.*.local
+
 # Test coverage
 coverage
+
+# Firebase
+.firebase
 
 # Editor directories and files
 .vscode/*

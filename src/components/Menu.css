@@ -182,9 +182,56 @@
 }
 
 /* ========================================
-   SKINS BUTTON
+   SKINS BUTTON & AUTH BUTTONS
    ======================================== */
-.skins-button {
+.top-bar-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.user-info.is-admin {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 140, 0, 0.3) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.5);
+}
+
+.admin-crown {
+  font-size: 1rem;
+}
+
+.guest-icon {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.user-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skins-button,
+.login-button,
+.logout-button {
   position: relative;
   display: flex;
   align-items: center;
@@ -200,10 +247,35 @@
   box-shadow: 0 4px 20px rgba(153, 51, 255, 0.3);
 }
 
-.skins-button:hover {
+.login-button {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.8) 0%, rgba(0, 168, 204, 0.8) 100%);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, rgba(255, 100, 100, 0.8) 0%, rgba(204, 50, 50, 0.8) 100%);
+  border-color: rgba(255, 100, 100, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 100, 100, 0.3);
+  padding: 10px 20px;
+}
+
+.skins-button:hover,
+.login-button:hover,
+.logout-button:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 8px 30px rgba(153, 51, 255, 0.5);
   border-color: rgba(170, 68, 255, 0.8);
+}
+
+.login-button:hover {
+  box-shadow: 0 8px 30px rgba(0, 212, 255, 0.5);
+  border-color: rgba(0, 212, 255, 0.8);
+}
+
+.logout-button:hover {
+  box-shadow: 0 8px 30px rgba(255, 100, 100, 0.5);
+  border-color: rgba(255, 100, 100, 0.8);
 }
 
 .btn-icon {
@@ -791,4 +863,150 @@
     flex-wrap: wrap;
     justify-content: center;
   }
+  
+  .top-bar-right {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .user-section {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .login-button,
+  .logout-button,
+  .skins-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .user-info {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+/* ========================================
+   USERNAME MODAL
+   ======================================== */
+.username-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.username-modal {
+  background: linear-gradient(135deg, rgba(30, 30, 50, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+  border: 2px solid rgba(68, 136, 255, 0.5);
+  border-radius: 20px;
+  padding: 30px;
+  min-width: 320px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(68, 136, 255, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.username-modal h3 {
+  margin: 0 0 20px 0;
+  color: #fff;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.username-modal input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.username-modal input:focus {
+  border-color: #4488ff;
+  background: rgba(68, 136, 255, 0.1);
+}
+
+.username-modal input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.admin-hint {
+  margin: 10px 0;
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 8px;
+  color: #ffd700;
+  font-size: 0.9rem;
+  text-align: center;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.username-modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.username-modal-buttons button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+  color: #000;
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

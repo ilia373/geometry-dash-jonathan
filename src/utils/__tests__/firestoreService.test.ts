@@ -20,7 +20,7 @@ vi.mock('firebase/firestore', () => ({
 }));
 
 // Create controllable mock for authService
-const mockGetCurrentUser = vi.fn(() => null);
+const mockGetCurrentUser = vi.fn<[], { uid: string; email: string | null; displayName: string | null; isGuest: boolean; isAdmin: boolean } | null>(() => null);
 const mockIsGuest = vi.fn(() => true);
 const mockOnAuthChange = vi.fn((callback: (user: unknown) => void) => {
   callback(null);
@@ -94,7 +94,7 @@ describe('firestoreService', () => {
 
   describe('loadUserData (authenticated)', () => {
     beforeEach(() => {
-      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com' });
+      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com', displayName: null, isGuest: false, isAdmin: false });
       mockIsGuest.mockReturnValue(false);
     });
 
@@ -167,7 +167,7 @@ describe('firestoreService', () => {
 
   describe('saveUserData (authenticated)', () => {
     beforeEach(() => {
-      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com' });
+      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com', displayName: null, isGuest: false, isAdmin: false });
       mockIsGuest.mockReturnValue(false);
     });
 
@@ -213,7 +213,7 @@ describe('firestoreService', () => {
 
   describe('subscribeToUserData (authenticated)', () => {
     beforeEach(() => {
-      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com' });
+      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com', displayName: null, isGuest: false, isAdmin: false });
       mockIsGuest.mockReturnValue(false);
     });
 
@@ -246,7 +246,7 @@ describe('firestoreService', () => {
     });
 
     it('should upload local data if no cloud data exists', async () => {
-      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com' });
+      mockGetCurrentUser.mockReturnValue({ uid: 'test-user-123', email: 'test@example.com', displayName: null, isGuest: false, isAdmin: false });
       mockIsGuest.mockReturnValue(false);
       mockGetDoc.mockResolvedValue({ exists: () => false });
       mockSetDoc.mockResolvedValue(undefined);

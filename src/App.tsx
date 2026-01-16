@@ -1,0 +1,41 @@
+import { useState } from 'react';
+import Menu from './components/Menu';
+import Game from './components/Game';
+import SkinSelector from './components/SkinSelector';
+import './App.css';
+
+type Screen = 'menu' | 'game' | 'skins';
+
+function App() {
+  const [screen, setScreen] = useState<Screen>('menu');
+  const [currentLevel, setCurrentLevel] = useState<number>(1);
+
+  const handleStartGame = (levelId: number) => {
+    setCurrentLevel(levelId);
+    setScreen('game');
+  };
+
+  const handleBackToMenu = () => {
+    setScreen('menu');
+  };
+
+  const handleOpenSkins = () => {
+    setScreen('skins');
+  };
+
+  return (
+    <div className="app">
+      {screen === 'menu' && (
+        <Menu onStartGame={handleStartGame} onOpenSkins={handleOpenSkins} />
+      )}
+      {screen === 'game' && (
+        <Game levelId={currentLevel} onBack={handleBackToMenu} />
+      )}
+      {screen === 'skins' && (
+        <SkinSelector onBack={handleBackToMenu} />
+      )}
+    </div>
+  );
+}
+
+export default App;

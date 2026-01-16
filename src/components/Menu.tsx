@@ -12,11 +12,14 @@ import {
   isGuest,
 } from '../utils/authService';
 import type { AuthUser } from '../utils/authService';
+import type { CheatState } from '../types/cheats';
+import { defaultCheatState } from '../types/cheats';
 import AuthModal from './AuthModal';
+import AdminPanel from './AdminPanel';
 import './Menu.css';
 
 interface MenuProps {
-  onStartGame: (levelId: number) => void;
+  onStartGame: (levelId: number, cheats: CheatState) => void;
   onOpenSkins: () => void;
 }
 
@@ -27,6 +30,11 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
   const [isHovering, setIsHovering] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
+  
+  // Admin panel state
+  const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const userIsAdmin = isAdmin();
   
   // Subscribe to auth state changes
   useEffect(() => {
@@ -56,8 +64,17 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
 
   const handleStartGame = (levelId: number) => {
     if (isLevelUnlocked(levelId)) {
-      onStartGame(levelId);
+      onStartGame(levelId, cheats);
     }
+  };
+  
+  // Cheat handlers
+  const handleToggleCheat = (cheat: keyof CheatState) => {
+    setCheats(prev => ({ ...prev, [cheat]: !prev[cheat] }));
+  };
+  
+  const handleResetCheats = () => {
+    setCheats(defaultCheatState);
   };
   
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -154,6 +171,17 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
           </button>
         </div>
       </div>
+      
+      {/* Admin Panel - only for admins */}
+      {userIsAdmin && (
+        <AdminPanel
+          cheats={cheats}
+          onToggleCheat={handleToggleCheat}
+          onReset={handleResetCheats}
+          isVisible={showAdminPanel}
+          onToggleVisibility={() => setShowAdminPanel(!showAdminPanel)}
+        />
+      )}
       
       {/* Auth Modal */}
       {showAuthModal && (

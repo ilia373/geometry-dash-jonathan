@@ -4,11 +4,11 @@ import type { GameConfig, Level, Obstacle } from '../types/game';
 export const GAME_CONFIG: GameConfig = {
   canvasWidth: 1280,
   canvasHeight: 720,
-  gravity: 0.6,
+  gravity: 1.2,
   jumpForce: -14,
-  playerSpeed: 4,
+  playerSpeed: 12,
   groundHeight: 100,
-  playerSize: 50,
+  playerSize: 40,
 };
 
 // Helper function to create obstacles at specific positions

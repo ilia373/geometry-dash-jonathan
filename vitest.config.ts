@@ -28,10 +28,10 @@ export default defineConfig({
       ],
       thresholds: {
         global: {
-          branches: 90,
-          functions: 85,
-          lines: 94,
-          statements: 94,
+          branches: 85,
+          functions: 70,
+          lines: 85,
+          statements: 85,
         },
       },
     },

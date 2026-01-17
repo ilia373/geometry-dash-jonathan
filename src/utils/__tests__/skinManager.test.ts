@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   SKIN_PRICE,
   getSkinPrice,
@@ -8,12 +8,27 @@ import {
   getSelectedSkinId,
   getSelectedSkin,
   setSelectedSkin,
+  resetSkinCache,
 } from '../skinManager';
 import { SKINS } from '../../types/skins';
+
+// Mock authService
+vi.mock('../authService', () => ({
+  getCurrentUser: vi.fn(() => null),
+  isGuest: vi.fn(() => true),
+}));
+
+// Mock firestoreService
+vi.mock('../firestoreService', () => ({
+  saveUserData: vi.fn(() => Promise.resolve()),
+  loadUserData: vi.fn(() => Promise.resolve(null)),
+}));
 
 describe('skinManager', () => {
   beforeEach(() => {
     localStorage.clear();
+    resetSkinCache();
+    vi.clearAllMocks();
   });
 
   describe('SKIN_PRICE', () => {
@@ -44,16 +59,19 @@ describe('skinManager', () => {
     });
 
     it('should include default skins even when localStorage has other skins', () => {
-      localStorage.setItem('geometry-dash-unlocked-skins', JSON.stringify([7, 8]));
+      // Use the new storage key and format (skin names as strings)
+      localStorage.setItem('geometry-dash-owned-skins', JSON.stringify(['usa', 'uk']));
+      resetSkinCache(); // Re-initialize cache after setting localStorage
       const unlocked = getUnlockedSkinIds();
-      expect(unlocked).toContain(1);
-      expect(unlocked).toContain(6);
-      expect(unlocked).toContain(7);
-      expect(unlocked).toContain(8);
+      expect(unlocked).toContain(1); // default
+      expect(unlocked).toContain(6); // default
+      expect(unlocked).toContain(7); // usa
+      expect(unlocked).toContain(8); // uk
     });
 
     it('should return default skins on invalid JSON', () => {
-      localStorage.setItem('geometry-dash-unlocked-skins', 'invalid');
+      localStorage.setItem('geometry-dash-owned-skins', 'invalid');
+      resetSkinCache();
       const unlocked = getUnlockedSkinIds();
       expect(unlocked).toEqual([1, 2, 3, 4, 5, 6]);
     });
@@ -71,29 +89,32 @@ describe('skinManager', () => {
       expect(isSkinUnlocked(50)).toBe(false);
     });
 
-    it('should return true for unlocked skins', () => {
-      unlockSkin(10);
+    it('should return true for unlocked skins', async () => {
+      await unlockSkin(10);
       expect(isSkinUnlocked(10)).toBe(true);
     });
   });
 
   describe('unlockSkin', () => {
-    it('should unlock a skin', () => {
-      unlockSkin(15);
+    it('should unlock a skin', async () => {
+      await unlockSkin(15);
       expect(isSkinUnlocked(15)).toBe(true);
     });
 
-    it('should not duplicate unlocked skins', () => {
-      unlockSkin(20);
-      unlockSkin(20);
+    it('should not duplicate unlocked skins', async () => {
+      await unlockSkin(20);
+      await unlockSkin(20);
       const unlocked = getUnlockedSkinIds();
       expect(unlocked.filter(id => id === 20).length).toBe(1);
     });
 
-    it('should persist unlocked skins', () => {
-      unlockSkin(25);
-      const saved = localStorage.getItem('geometry-dash-unlocked-skins');
-      expect(JSON.parse(saved!)).toContain(25);
+    it('should persist unlocked skins', async () => {
+      await unlockSkin(25);
+      const saved = localStorage.getItem('geometry-dash-owned-skins');
+      expect(saved).not.toBeNull();
+      // Now stores skin names, not IDs
+      const parsed = JSON.parse(saved!);
+      expect(parsed).toContain('hot-pink');
     });
   });
 
@@ -125,8 +146,8 @@ describe('skinManager', () => {
       expect(skin.name).toBe('Original');
     });
 
-    it('should return correct skin object for selected skin', () => {
-      setSelectedSkin(3);
+    it('should return correct skin object for selected skin', async () => {
+      await setSelectedSkin(3);
       const skin = getSelectedSkin();
       expect(skin.id).toBe(3);
       expect(skin.name).toBe('Neon Blue');
@@ -134,26 +155,26 @@ describe('skinManager', () => {
   });
 
   describe('setSelectedSkin', () => {
-    it('should set selected skin', () => {
-      setSelectedSkin(4);
+    it('should set selected skin', async () => {
+      await setSelectedSkin(4);
       expect(getSelectedSkinId()).toBe(4);
     });
 
-    it('should not set invalid skin ID (0)', () => {
-      setSelectedSkin(4);
-      setSelectedSkin(0);
+    it('should not set invalid skin ID (0)', async () => {
+      await setSelectedSkin(4);
+      await setSelectedSkin(0);
       expect(getSelectedSkinId()).toBe(4);
     });
 
-    it('should not set invalid skin ID (negative)', () => {
-      setSelectedSkin(4);
-      setSelectedSkin(-5);
+    it('should not set invalid skin ID (negative)', async () => {
+      await setSelectedSkin(4);
+      await setSelectedSkin(-5);
       expect(getSelectedSkinId()).toBe(4);
     });
 
-    it('should not set skin ID exceeding SKINS length', () => {
-      setSelectedSkin(4);
-      setSelectedSkin(9999);
+    it('should not set skin ID exceeding SKINS length', async () => {
+      await setSelectedSkin(4);
+      await setSelectedSkin(9999);
       expect(getSelectedSkinId()).toBe(4);
     });
   });

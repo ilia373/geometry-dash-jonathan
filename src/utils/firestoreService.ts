@@ -9,6 +9,9 @@ import {
 import type { Unsubscribe } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getCurrentUser, isGuest, onAuthChange } from './authService';
+import { setCoins } from './walletManager';
+import { setCompletedLevels } from './progressManager';
+import { setOwnedSkins, setSelectedSkinCache } from './skinManager';
 
 // User data structure stored in Firestore
 export interface UserData {
@@ -229,6 +232,16 @@ export const syncLocalToCloud = async (): Promise<void> => {
   }
 
   await saveUserData(mergedData);
+  
+  // Update wallet cache with merged coins
+  setCoins(mergedData.coins);
+  
+  // Update progress cache with merged completed levels
+  setCompletedLevels(mergedData.completedLevels);
+  
+  // Update skin cache with merged skins
+  setOwnedSkins(mergedData.ownedSkins);
+  setSelectedSkinCache(mergedData.selectedSkin);
 };
 
 // Initialize Firestore sync on auth changes

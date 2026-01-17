@@ -32,26 +32,27 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onBack }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSelectSkin = (skinId: number) => {
+  const handleSelectSkin = async (skinId: number) => {
     // Only allow selecting unlocked skins
     if (!isSkinUnlocked(skinId)) return;
     
     setSelectedSkinId(skinId);
-    setSelectedSkin(skinId);
+    await setSelectedSkin(skinId);
   };
 
-  const handleBuySkin = (skinId: number, event: React.MouseEvent) => {
+  const handleBuySkin = async (skinId: number, event: React.MouseEvent) => {
     event.stopPropagation();
     
     const price = getSkinPrice(skinId);
     if (coins >= price && !isSkinUnlocked(skinId)) {
-      if (spendCoins(price)) {
-        unlockSkin(skinId);
+      const success = await spendCoins(price);
+      if (success) {
+        await unlockSkin(skinId);
         setCoins(getTotalCoins());
         setUnlockedSkins(prev => [...prev, skinId]);
         // Auto-select the newly purchased skin
         setSelectedSkinId(skinId);
-        setSelectedSkin(skinId);
+        await setSelectedSkin(skinId);
       }
     }
   };

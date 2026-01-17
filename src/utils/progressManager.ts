@@ -1,40 +1,52 @@
 // Progress Manager for tracking level completion
+// Uses Firestore for authenticated users (with built-in offline support)
+// Uses localStorage only for guests
+import { saveUserData, loadUserData } from './firestoreService';
+import { getCurrentUser, isGuest } from './authService';
 
-const STORAGE_KEY = 'geometry-dash-progress';
+const STORAGE_KEY = 'geometry-dash-completed-levels';
 
-interface ProgressData {
-  completedLevels: number[];
-}
+// In-memory cache for current session
+let cachedCompletedLevels: number[] = [];
+let cacheInitialized: boolean = false;
 
-const getDefaultProgress = (): ProgressData => ({
-  completedLevels: [],
-});
-
-export const loadProgress = (): ProgressData => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      return JSON.parse(saved);
+// Load progress from appropriate storage
+export const syncProgressFromCloud = async (): Promise<void> => {
+  const user = getCurrentUser();
+  
+  if (!user || isGuest()) {
+    // Guest: load from localStorage
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
+    } catch {
+      cachedCompletedLevels = [];
     }
-  } catch (error) {
-    console.error('Failed to load progress:', error);
+  } else {
+    // Authenticated: load from Firestore (has built-in offline support)
+    try {
+      const userData = await loadUserData();
+      cachedCompletedLevels = userData?.completedLevels ?? [];
+    } catch (error) {
+      console.error('Failed to load progress:', error);
+      cachedCompletedLevels = [];
+    }
   }
-  return getDefaultProgress();
+  cacheInitialized = true;
 };
 
-export const saveProgress = (progress: ProgressData): void => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  } catch (error) {
-    console.error('Failed to save progress:', error);
-  }
-};
-
-export const markLevelComplete = (levelId: number): void => {
-  const progress = loadProgress();
-  if (!progress.completedLevels.includes(levelId)) {
-    progress.completedLevels.push(levelId);
-    saveProgress(progress);
+export const markLevelComplete = async (levelId: number): Promise<void> => {
+  if (!cacheInitialized) await syncProgressFromCloud();
+  
+  if (!cachedCompletedLevels.includes(levelId)) {
+    cachedCompletedLevels.push(levelId);
+    
+    const user = getCurrentUser();
+    if (!user || isGuest()) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedCompletedLevels));
+    } else {
+      await saveUserData({ completedLevels: cachedCompletedLevels });
+    }
   }
 };
 
@@ -42,16 +54,66 @@ export const isLevelUnlocked = (levelId: number): boolean => {
   // Level 1 is always unlocked
   if (levelId === 1) return true;
   
+  if (!cacheInitialized) {
+    // Sync read for guests from localStorage
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
+    } catch {
+      cachedCompletedLevels = [];
+    }
+    cacheInitialized = true;
+  }
   // Other levels require the previous level to be completed
-  const progress = loadProgress();
-  return progress.completedLevels.includes(levelId - 1);
+  return cachedCompletedLevels.includes(levelId - 1);
 };
 
 export const isLevelCompleted = (levelId: number): boolean => {
-  const progress = loadProgress();
-  return progress.completedLevels.includes(levelId);
+  if (!cacheInitialized) {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
+    } catch {
+      cachedCompletedLevels = [];
+    }
+    cacheInitialized = true;
+  }
+  return cachedCompletedLevels.includes(levelId);
 };
 
-export const resetProgress = (): void => {
-  saveProgress(getDefaultProgress());
+export const getCompletedLevels = (): number[] => {
+  if (!cacheInitialized) {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
+    } catch {
+      cachedCompletedLevels = [];
+    }
+    cacheInitialized = true;
+  }
+  return [...cachedCompletedLevels];
+};
+
+// Used by firestoreService during sync/merge
+export const setCompletedLevels = (levels: number[]): void => {
+  cachedCompletedLevels = levels;
+  cacheInitialized = true;
+};
+
+export const resetProgress = async (): Promise<void> => {
+  cachedCompletedLevels = [];
+  cacheInitialized = true;
+  
+  const user = getCurrentUser();
+  if (!user || isGuest()) {
+    localStorage.setItem(STORAGE_KEY, '[]');
+  } else {
+    await saveUserData({ completedLevels: [] });
+  }
+};
+
+// Reset cache (for testing)
+export const resetProgressCache = (): void => {
+  cachedCompletedLevels = [];
+  cacheInitialized = false;
 };

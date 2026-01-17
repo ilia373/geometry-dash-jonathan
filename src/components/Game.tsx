@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import type { Player, Particle, GameState, GameStats } from '../types/game';
 import type { CheatState } from '../types/cheats';
-import { defaultCheatState } from '../types/cheats';
 import { GAME_CONFIG, getCurrentLevel } from '../constants/gameConfig';
 import {
   createPlayer,
@@ -26,16 +25,15 @@ import {
 import { soundManager } from '../utils/soundManager';
 import { markLevelComplete } from '../utils/progressManager';
 import { addCoins, getTotalCoins } from '../utils/walletManager';
-import { isAdmin } from '../utils/authService';
-import AdminPanel from './AdminPanel';
 import './Game.css';
 
 interface GameProps {
   levelId: number;
   onBack: () => void;
+  cheats: CheatState;
 }
 
-const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
+const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameLoopRef = useRef<number>(0);
   const timeRef = useRef<number>(0);
@@ -50,10 +48,8 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
     coinsCollected: 0,
   });
   
-  // Admin panel state
-  const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const cheatsRef = useRef<CheatState>(defaultCheatState);
+  // Admin panel state - now received as props
+  const cheatsRef = useRef<CheatState>(cheats);
   
   // Track collected coin indices for current run
   const collectedCoinsRef = useRef<Set<number>>(new Set());
@@ -73,6 +69,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
   // Clone level to avoid mutating original level data
   const levelRef = useRef(JSON.parse(JSON.stringify(getCurrentLevel(levelId))));
   const level = levelRef.current;
+  
+  // Keep cheatsRef in sync with props
+  useEffect(() => {
+    cheatsRef.current = cheats;
+  }, [cheats]);
   
   // Reset all coins' collected state
   const resetCoins = useCallback(() => {
@@ -360,25 +361,6 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
     };
   }, [gameState, handleJump, resetGame, onBack]);
   
-  // Cheat handlers
-  const handleToggleCheat = useCallback((cheat: keyof CheatState) => {
-    setCheats(prev => {
-      const newCheats = { ...prev, [cheat]: !prev[cheat] };
-      cheatsRef.current = newCheats;
-      return newCheats;
-    });
-  }, []);
-  
-  const handleResetCheats = useCallback(() => {
-    setCheats(defaultCheatState);
-    cheatsRef.current = defaultCheatState;
-    // Reset player size
-    playerRef.current.width = GAME_CONFIG.playerSize;
-    playerRef.current.height = GAME_CONFIG.playerSize;
-  }, []);
-  
-  const userIsAdmin = isAdmin();
-  
   return (
     <div className="game-container">
       <div className="top-buttons">
@@ -389,17 +371,6 @@ const Game: React.FC<GameProps> = ({ levelId, onBack }) => {
           {isMuted ? '🔇' : '🔊'}
         </button>
       </div>
-      
-      {/* Admin Panel - only for InfinityCats */}
-      {userIsAdmin && (
-        <AdminPanel
-          cheats={cheats}
-          onToggleCheat={handleToggleCheat}
-          onReset={handleResetCheats}
-          isVisible={showAdminPanel}
-          onToggleVisibility={() => setShowAdminPanel(!showAdminPanel)}
-        />
-      )}
       
       <canvas
         ref={canvasRef}

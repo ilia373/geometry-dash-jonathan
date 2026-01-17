@@ -1,4 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock Firebase config to prevent auth/invalid-api-key error in CI
+vi.mock('../../config/firebase', () => ({
+  auth: {},
+  db: {},
+}));
+
 import {
   createPlayer,
   updatePlayerPhysics,

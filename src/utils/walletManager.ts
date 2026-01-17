@@ -1,55 +1,105 @@
 // Wallet Manager for tracking coins
+// Uses Firestore for authenticated users (with built-in offline support)
+// Uses localStorage only for guests
+import { saveUserData, loadUserData } from './firestoreService';
+import { getCurrentUser, isGuest } from './authService';
 
-const STORAGE_KEY = 'geometry-dash-wallet';
+const STORAGE_KEY = 'geometry-dash-coins';
 
-interface WalletData {
-  totalCoins: number;
-}
+// In-memory cache for current session
+let cachedCoins: number = 0;
+let cacheInitialized: boolean = false;
 
-const getDefaultWallet = (): WalletData => ({
-  totalCoins: 0,
-});
-
-export const loadWallet = (): WalletData => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      return JSON.parse(saved);
+// Load coins from appropriate storage
+export const syncWalletFromCloud = async (): Promise<void> => {
+  const user = getCurrentUser();
+  
+  if (!user || isGuest()) {
+    // Guest: load from localStorage
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedCoins = saved ? parseInt(saved, 10) : 0;
+    } catch {
+      cachedCoins = 0;
     }
-  } catch (error) {
-    console.error('Failed to load wallet:', error);
+  } else {
+    // Authenticated: load from Firestore (has built-in offline support)
+    try {
+      const userData = await loadUserData();
+      cachedCoins = userData?.coins ?? 0;
+    } catch (error) {
+      console.error('Failed to load coins:', error);
+      cachedCoins = 0;
+    }
   }
-  return getDefaultWallet();
+  cacheInitialized = true;
 };
 
-export const saveWallet = (wallet: WalletData): void => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(wallet));
-  } catch (error) {
-    console.error('Failed to save wallet:', error);
+export const addCoins = async (amount: number): Promise<void> => {
+  if (!cacheInitialized) await syncWalletFromCloud();
+  cachedCoins += amount;
+  
+  const user = getCurrentUser();
+  if (!user || isGuest()) {
+    // Guest: save to localStorage
+    localStorage.setItem(STORAGE_KEY, cachedCoins.toString());
+  } else {
+    // Authenticated: save to Firestore (offline writes are queued automatically)
+    await saveUserData({ coins: cachedCoins });
   }
-};
-
-export const addCoins = (amount: number): void => {
-  const wallet = loadWallet();
-  wallet.totalCoins += amount;
-  saveWallet(wallet);
 };
 
 export const getTotalCoins = (): number => {
-  return loadWallet().totalCoins;
+  if (!cacheInitialized) {
+    // Sync read for guests from localStorage
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedCoins = saved ? parseInt(saved, 10) : 0;
+    } catch {
+      cachedCoins = 0;
+    }
+    cacheInitialized = true;
+  }
+  return cachedCoins;
 };
 
-export const spendCoins = (amount: number): boolean => {
-  const wallet = loadWallet();
-  if (wallet.totalCoins >= amount) {
-    wallet.totalCoins -= amount;
-    saveWallet(wallet);
+export const spendCoins = async (amount: number): Promise<boolean> => {
+  if (!cacheInitialized) await syncWalletFromCloud();
+  
+  if (cachedCoins >= amount) {
+    cachedCoins -= amount;
+    
+    const user = getCurrentUser();
+    if (!user || isGuest()) {
+      localStorage.setItem(STORAGE_KEY, cachedCoins.toString());
+    } else {
+      await saveUserData({ coins: cachedCoins });
+    }
     return true;
   }
   return false;
 };
 
-export const resetWallet = (): void => {
-  saveWallet(getDefaultWallet());
+// Used by firestoreService during sync/merge
+export const setCoins = (amount: number): void => {
+  cachedCoins = amount;
+  cacheInitialized = true;
+};
+
+export const resetWallet = async (): Promise<void> => {
+  cachedCoins = 0;
+  cacheInitialized = true;
+  
+  const user = getCurrentUser();
+  if (!user || isGuest()) {
+    localStorage.setItem(STORAGE_KEY, '0');
+  } else {
+    await saveUserData({ coins: 0 });
+  }
+};
+
+// Reset cache (for testing)
+export const resetWalletCache = (): void => {
+  cachedCoins = 0;
+  cacheInitialized = false;
 };

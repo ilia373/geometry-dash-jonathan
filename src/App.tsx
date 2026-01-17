@@ -5,6 +5,8 @@ import SkinSelector from './components/SkinSelector';
 import { initializeAuth } from './utils/authService';
 import { initializeFirestoreSync } from './utils/firestoreService';
 import { initAnalytics } from './config/firebase';
+import type { CheatState } from './types/cheats';
+import { defaultCheatState } from './types/cheats';
 import './App.css';
 
 type Screen = 'menu' | 'game' | 'skins';
@@ -12,6 +14,7 @@ type Screen = 'menu' | 'game' | 'skins';
 function App() {
   const [screen, setScreen] = useState<Screen>('menu');
   const [currentLevel, setCurrentLevel] = useState<number>(1);
+  const [currentCheats, setCurrentCheats] = useState<CheatState>(defaultCheatState);
 
   // Initialize Firebase auth, Firestore sync, and Analytics
   useEffect(() => {
@@ -22,8 +25,9 @@ function App() {
     });
   }, []);
 
-  const handleStartGame = (levelId: number) => {
+  const handleStartGame = (levelId: number, cheats: CheatState) => {
     setCurrentLevel(levelId);
+    setCurrentCheats(cheats);
     setScreen('game');
   };
 
@@ -41,7 +45,7 @@ function App() {
         <Menu onStartGame={handleStartGame} onOpenSkins={handleOpenSkins} />
       )}
       {screen === 'game' && (
-        <Game levelId={currentLevel} onBack={handleBackToMenu} />
+        <Game levelId={currentLevel} onBack={handleBackToMenu} cheats={currentCheats} />
       )}
       {screen === 'skins' && (
         <SkinSelector onBack={handleBackToMenu} />

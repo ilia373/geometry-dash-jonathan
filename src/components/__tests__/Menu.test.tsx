@@ -38,10 +38,12 @@ vi.mock('../../utils/authService', () => ({
 vi.mock('../../utils/progressManager', () => ({
   isLevelUnlocked: vi.fn((levelId: number) => levelId <= 2),
   isLevelCompleted: vi.fn((levelId: number) => levelId === 1),
+  syncProgressFromCloud: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../../utils/walletManager', () => ({
   getTotalCoins: vi.fn(() => 500),
+  syncWalletFromCloud: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../../utils/skinManager', () => ({
@@ -50,6 +52,7 @@ vi.mock('../../utils/skinManager', () => ({
     name: 'Original',
     colors: { primary: '#00ff88', secondary: '#00cc66', accent: '#009944', glow: '#00ff88' },
   })),
+  syncSkinsFromCloud: vi.fn(() => Promise.resolve()),
 }));
 
 describe('Menu Component', () => {
@@ -177,7 +180,14 @@ describe('Menu Component', () => {
 
     it('should show admin crown', () => {
       render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
-      expect(screen.getByText('👑')).toBeInTheDocument();
+      const crowns = screen.getAllByText('👑');
+      expect(crowns.length).toBeGreaterThan(0);
+    });
+    
+    it('should show admin panel toggle button', () => {
+      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      const adminToggle = document.querySelector('.admin-toggle');
+      expect(adminToggle).toBeInTheDocument();
     });
   });
 
@@ -260,7 +270,7 @@ describe('Menu Component', () => {
       const level1Card = screen.getByText('Stereo Madness').closest('.level-card');
       if (level1Card) {
         fireEvent.doubleClick(level1Card);
-        expect(mockOnStartGame).toHaveBeenCalledWith(1);
+        expect(mockOnStartGame).toHaveBeenCalledWith(1, expect.any(Object));
       }
     });
   });

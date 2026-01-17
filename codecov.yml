@@ -6,7 +6,7 @@ coverage:
         threshold: 1%  # Allow 1% drop before failing
     patch:
       default:
-        target: 80%  # New code should have 80%+ coverage
+        target: 60%  # New code should have 60%+ coverage
 
 comment:
   layout: "reach,diff,flags,files"

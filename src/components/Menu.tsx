@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { LEVELS } from '../constants/gameConfig';
-import { isLevelUnlocked, isLevelCompleted } from '../utils/progressManager';
-import { getTotalCoins } from '../utils/walletManager';
-import { getSelectedSkin } from '../utils/skinManager';
+import { isLevelUnlocked, isLevelCompleted, syncProgressFromCloud } from '../utils/progressManager';
+import { getTotalCoins, syncWalletFromCloud } from '../utils/walletManager';
+import { getSelectedSkin, syncSkinsFromCloud } from '../utils/skinManager';
 import {
   getCurrentUser,
   onAuthChange,
@@ -12,21 +12,43 @@ import {
   isGuest,
 } from '../utils/authService';
 import type { AuthUser } from '../utils/authService';
+import type { CheatState } from '../types/cheats';
+import { defaultCheatState } from '../types/cheats';
 import AuthModal from './AuthModal';
+import AdminPanel from './AdminPanel';
 import './Menu.css';
 
 interface MenuProps {
-  onStartGame: (levelId: number) => void;
+  onStartGame: (levelId: number, cheats: CheatState) => void;
   onOpenSkins: () => void;
 }
 
 const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
-  const totalCoins = getTotalCoins();
+  const [coins, setCoins] = useState<number>(getTotalCoins());
   const currentSkin = getSelectedSkin();
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [isHovering, setIsHovering] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
+  const [, setRefreshKey] = useState<number>(0);
+  
+  // Admin panel state
+  const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const userIsAdmin = isAdmin();
+  
+  // Sync wallet and progress from cloud on auth change
+  useEffect(() => {
+    const syncData = async () => {
+      await syncWalletFromCloud();
+      await syncProgressFromCloud();
+      await syncSkinsFromCloud();
+      setCoins(getTotalCoins());
+      // Force re-render to update level states
+      setRefreshKey(prev => prev + 1);
+    };
+    syncData();
+  }, [user]);
   
   // Subscribe to auth state changes
   useEffect(() => {
@@ -56,8 +78,17 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
 
   const handleStartGame = (levelId: number) => {
     if (isLevelUnlocked(levelId)) {
-      onStartGame(levelId);
+      onStartGame(levelId, cheats);
     }
+  };
+  
+  // Cheat handlers
+  const handleToggleCheat = (cheat: keyof CheatState) => {
+    setCheats(prev => ({ ...prev, [cheat]: !prev[cheat] }));
+  };
+  
+  const handleResetCheats = () => {
+    setCheats(defaultCheatState);
   };
   
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -119,7 +150,7 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
           <div className="coin-icon">
             <span>★</span>
           </div>
-          <span className="coin-amount">{totalCoins.toLocaleString()}</span>
+          <span className="coin-amount">{coins.toLocaleString()}</span>
         </div>
         
         <div className="top-bar-right">
@@ -154,6 +185,17 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
           </button>
         </div>
       </div>
+      
+      {/* Admin Panel - only for admins */}
+      {userIsAdmin && (
+        <AdminPanel
+          cheats={cheats}
+          onToggleCheat={handleToggleCheat}
+          onReset={handleResetCheats}
+          isVisible={showAdminPanel}
+          onToggleVisibility={() => setShowAdminPanel(!showAdminPanel)}
+        />
+      )}
       
       {/* Auth Modal */}
       {showAuthModal && (

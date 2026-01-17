@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { LEVELS } from '../constants/gameConfig';
-import { isLevelUnlocked, isLevelCompleted } from '../utils/progressManager';
+import { isLevelUnlocked, isLevelCompleted, syncProgressFromCloud } from '../utils/progressManager';
 import { getTotalCoins, syncWalletFromCloud } from '../utils/walletManager';
-import { getSelectedSkin } from '../utils/skinManager';
+import { getSelectedSkin, syncSkinsFromCloud } from '../utils/skinManager';
 import {
   getCurrentUser,
   onAuthChange,
@@ -30,19 +30,24 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
   const [isHovering, setIsHovering] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
+  const [, setRefreshKey] = useState<number>(0);
   
   // Admin panel state
   const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const userIsAdmin = isAdmin();
   
-  // Sync wallet from cloud on auth change
+  // Sync wallet and progress from cloud on auth change
   useEffect(() => {
-    const syncWallet = async () => {
+    const syncData = async () => {
       await syncWalletFromCloud();
+      await syncProgressFromCloud();
+      await syncSkinsFromCloud();
       setCoins(getTotalCoins());
+      // Force re-render to update level states
+      setRefreshKey(prev => prev + 1);
     };
-    syncWallet();
+    syncData();
   }, [user]);
   
   // Subscribe to auth state changes

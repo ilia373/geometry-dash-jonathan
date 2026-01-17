@@ -24,13 +24,13 @@ import {
   spendCoins,
   resetWallet,
   setCoins,
+  resetWalletCache,
 } from '../walletManager';
 
 describe('walletManager', () => {
   beforeEach(() => {
     localStorage.clear();
-    // Reset the wallet cache by setting coins to 0
-    setCoins(0);
+    resetWalletCache();
   });
 
   describe('getTotalCoins', () => {

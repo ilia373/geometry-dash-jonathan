@@ -4,9 +4,9 @@ import type { GameConfig, Level, Obstacle } from '../types/game';
 export const GAME_CONFIG: GameConfig = {
   canvasWidth: 1280,
   canvasHeight: 720,
-  gravity: 1.2,
+  gravity: 0.8,
   jumpForce: -14,
-  playerSpeed: 12,
+  playerSpeed: 4,
   groundHeight: 100,
   playerSize: 40,
 };

@@ -38,6 +38,7 @@ vi.mock('../../utils/authService', () => ({
 vi.mock('../../utils/progressManager', () => ({
   isLevelUnlocked: vi.fn((levelId: number) => levelId <= 2),
   isLevelCompleted: vi.fn((levelId: number) => levelId === 1),
+  syncProgressFromCloud: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../../utils/walletManager', () => ({
@@ -51,6 +52,7 @@ vi.mock('../../utils/skinManager', () => ({
     name: 'Original',
     colors: { primary: '#00ff88', secondary: '#00cc66', accent: '#009944', glow: '#00ff88' },
   })),
+  syncSkinsFromCloud: vi.fn(() => Promise.resolve()),
 }));
 
 describe('Menu Component', () => {

@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import type { Player, Particle, GameState, GameStats } from '../types/game';
+import type { Player, Particle, GameState, GameStats, Quant, DroppedCoin } from '../types/game';
 import type { CheatState } from '../types/cheats';
-import { GAME_CONFIG, getCurrentLevel } from '../constants/gameConfig';
+import { GAME_CONFIG, getCurrentLevel, resetQuantIdCounter } from '../constants/gameConfig';
 import {
   createPlayer,
   updatePlayerPhysics,
@@ -11,6 +11,12 @@ import {
   createDeathParticles,
   updateParticles,
   createTrailParticle,
+  updateAllQuants,
+  checkAllQuantCollisions,
+  createQuantDeathParticles,
+  createDroppedCoins,
+  updateDroppedCoins,
+  checkDroppedCoinCollision,
 } from '../utils/gamePhysics';
 import {
   drawBackground,
@@ -21,6 +27,8 @@ import {
   drawProgressBar,
   drawAttempts,
   drawCoins,
+  drawQuants,
+  drawDroppedCoins,
 } from '../utils/gameRenderer';
 import { soundManager } from '../utils/soundManager';
 import { markLevelComplete } from '../utils/progressManager';
@@ -66,9 +74,19 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
   const jumpOrbActiveRef = useRef<boolean>(false);
   const clickedRef = useRef<boolean>(false);
   
+  // Quant-related refs
+  const quantsRef = useRef<Quant[]>([]);
+  const droppedCoinsRef = useRef<DroppedCoin[]>([]);
+  
   // Clone level to avoid mutating original level data
   const levelRef = useRef(JSON.parse(JSON.stringify(getCurrentLevel(levelId))));
   const level = levelRef.current;
+  
+  // Initialize quants from level data
+  useEffect(() => {
+    resetQuantIdCounter();
+    quantsRef.current = JSON.parse(JSON.stringify(level.quants || []));
+  }, [level]);
   
   // Keep cheatsRef in sync with props
   useEffect(() => {
@@ -116,6 +134,10 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
     collectedCoinsRef.current = new Set();
     progressRef.current = 0;
     coinsCollectedRef.current = 0;
+    // Reset quants
+    resetQuantIdCounter();
+    quantsRef.current = JSON.parse(JSON.stringify(level.quants || []));
+    droppedCoinsRef.current = [];
     resetCoins();
     setGameState('playing');
     setStats(prev => ({
@@ -125,7 +147,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       coinsCollected: 0,
     }));
     soundManager.playBackgroundMusic();
-  }, [resetCoins]);
+  }, [resetCoins, level]);
 
   // Toggle mute
   const toggleMute = useCallback(() => {
@@ -184,6 +206,73 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
         // Auto jump cheat
         if (activeCheat.autoJump && isOnGround(playerRef.current, GAME_CONFIG)) {
           playerRef.current = jump(playerRef.current, GAME_CONFIG);
+        }
+        
+        // Update quants
+        quantsRef.current = updateAllQuants(
+          quantsRef.current,
+          cameraXRef.current
+        );
+        
+        // Update dropped coins with magnet effect toward player
+        droppedCoinsRef.current = updateDroppedCoins(
+          droppedCoinsRef.current,
+          playerRef.current.x,
+          playerRef.current.y,
+          playerRef.current.width,
+          playerRef.current.height
+        );
+        
+        // Check dropped coin collection
+        for (const coin of droppedCoinsRef.current) {
+          if (!coin.collected && checkDroppedCoinCollision(playerRef.current, coin)) {
+            coin.collected = true;
+            coinsCollectedRef.current += 1;
+            soundManager.playSound('coin');
+          }
+        }
+        
+        // Check quant collisions
+        if (!activeCheat.invincible && !activeCheat.ghostMode) {
+          const quantCollisions = checkAllQuantCollisions(
+            playerRef.current,
+            quantsRef.current,
+            cameraXRef.current
+          );
+          
+          for (const collision of quantCollisions) {
+            if (collision.type === 'stomp' && collision.quant) {
+              // Player stomped on quant - kill the quant
+              collision.quant.isDead = true;
+              
+              // Create death particles for quant
+              particlesRef.current = [
+                ...particlesRef.current,
+                ...createQuantDeathParticles(collision.quant, cameraXRef.current),
+              ];
+              
+              // Drop coins from quant
+              droppedCoinsRef.current = [
+                ...droppedCoinsRef.current,
+                ...createDroppedCoins(collision.quant, cameraXRef.current),
+              ];
+              
+              // Bounce player up after stomp
+              playerRef.current = jump(playerRef.current, GAME_CONFIG, GAME_CONFIG.jumpForce * 0.7);
+              soundManager.playSound('coin'); // Reuse coin sound for stomp feedback
+              
+            } else if (collision.type === 'death') {
+              // Player died from quant collision
+              particlesRef.current = [
+                ...particlesRef.current,
+                ...createDeathParticles(playerRef.current),
+              ];
+              playerRef.current.isDead = true;
+              setGameState('dead');
+              soundManager.playSound('fail');
+              break;
+            }
+          }
         }
         
         // Check collisions
@@ -278,6 +367,12 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       
       // Draw obstacles
       drawObstacles(ctx, level.obstacles, cameraXRef.current, GAME_CONFIG.canvasWidth, timeRef.current);
+      
+      // Draw quants
+      drawQuants(ctx, quantsRef.current, cameraXRef.current, GAME_CONFIG.canvasWidth, timeRef.current);
+      
+      // Draw dropped coins
+      drawDroppedCoins(ctx, droppedCoinsRef.current, timeRef.current);
       
       // Draw particles
       drawParticles(ctx, particlesRef.current);

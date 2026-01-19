@@ -1,4 +1,4 @@
-import type { GameConfig, Level, Obstacle } from '../types/game';
+import type { GameConfig, Level, Obstacle, Quant, QuantType } from '../types/game';
 
 // Game configuration constants
 export const GAME_CONFIG: GameConfig = {
@@ -6,10 +6,64 @@ export const GAME_CONFIG: GameConfig = {
   canvasHeight: 720,
   gravity: 0.8,
   jumpForce: -14,
-  playerSpeed: 4,
+  playerSpeed: 3,
   groundHeight: 100,
   playerSize: 40,
 };
+
+// Quant configuration
+export const QUANT_CONFIG = {
+  size: 35,
+  moveSpeed: 2,        // Speed for moving quants (towards geo)
+  jumpForce: -10,      // Jump force for jumping quants
+  jumpInterval: 90,    // Frames between jumps for jumping quants
+  minCoinDrop: 3,      // Minimum coins dropped when killed (more satisfying!)
+  maxCoinDrop: 7,      // Maximum coins dropped when killed
+  colors: {
+    static: '#8B00FF',   // Purple for static quants
+    moving: '#FF4500',   // Orange-red for moving quants
+    jumping: '#00CED1',  // Cyan for jumping quants
+  },
+};
+
+// Helper to generate unique quant IDs
+let quantIdCounter = 0;
+export const getNextQuantId = () => ++quantIdCounter;
+export const resetQuantIdCounter = () => { quantIdCounter = 0; };
+
+// Helper function to create quants at specific positions
+const createQuant = (
+  x: number,
+  type: QuantType,
+  y?: number
+): Quant => {
+  const coinDrop = Math.floor(
+    Math.random() * (QUANT_CONFIG.maxCoinDrop - QUANT_CONFIG.minCoinDrop + 1)
+  ) + QUANT_CONFIG.minCoinDrop;
+  
+  const groundY = GAME_CONFIG.canvasHeight - GAME_CONFIG.groundHeight - QUANT_CONFIG.size;
+  const posY = y ?? groundY;
+  
+  return {
+    x,
+    y: posY,
+    width: QUANT_CONFIG.size,
+    height: QUANT_CONFIG.size,
+    type,
+    id: getNextQuantId(),
+    vx: type === 'moving' ? -QUANT_CONFIG.moveSpeed : 0,
+    vy: 0,
+    baseY: posY,
+    color: QUANT_CONFIG.colors[type],
+    isDead: false,
+    coinDrop,
+  };
+};
+
+// Convenient quant creation helpers
+const createStaticQuant = (x: number, y?: number): Quant => createQuant(x, 'static', y);
+const createMovingQuant = (x: number, y?: number): Quant => createQuant(x, 'moving', y);
+const createJumpingQuant = (x: number, y?: number): Quant => createQuant(x, 'jumping', y);
 
 // Helper function to create obstacles at specific positions
 const createSpike = (x: number, y?: number): Obstacle => ({
@@ -87,6 +141,11 @@ export const LEVELS: Level[] = [
       createCoin(4550),
       createSpike(4700),
     ],
+    quants: [
+      // Just 2 easy quants far from obstacles
+      createStaticQuant(1150),     // Big safe zone
+      createStaticQuant(2550),     // Another safe zone
+    ],
   },
   {
     id: 2,
@@ -140,6 +199,12 @@ export const LEVELS: Level[] = [
       createSpike(5500),
       createCoin(5650),
       createSpike(5800),
+    ],
+    quants: [
+      // 3 quants with lots of space
+      createStaticQuant(1250),     // Big clear zone
+      createStaticQuant(2950),     // Safe area
+      createMovingQuant(4650),     // Clear zone near end
     ],
   },
   {
@@ -198,6 +263,13 @@ export const LEVELS: Level[] = [
       createCoin(6350),
       createSpike(6500),
       createSpike(6850),
+    ],
+    quants: [
+      // 4 quants with safe spacing
+      createStaticQuant(1250),     // Big clear zone
+      createStaticQuant(2350),     // Safe area
+      createJumpingQuant(3950),    // Clear zone
+      createMovingQuant(5300),     // Safe zone near end
     ],
   },
   {
@@ -267,6 +339,13 @@ export const LEVELS: Level[] = [
       createCoin(7000),
       createSpike(7100),
       createSpike(7300),
+    ],
+    quants: [
+      // 4 quants with very safe spacing
+      createStaticQuant(1550),     // Big clear zone
+      createJumpingQuant(2550),    // Safe area
+      createStaticQuant(4350),     // Clear zone
+      createMovingQuant(6050),     // Safe zone near end
     ],
   },
   {
@@ -347,6 +426,14 @@ export const LEVELS: Level[] = [
       createSpike(7450),
       createCoin(7600),
       createSpike(7700),
+    ],
+    quants: [
+      // 5 quants with generous spacing
+      createStaticQuant(1550),     // Big clear zone
+      createJumpingQuant(2950),    // Safe area
+      createStaticQuant(4150),     // Clear zone
+      createMovingQuant(5800),     // Safe area
+      createStaticQuant(7300),     // Near end clear zone
     ],
   },
   {
@@ -435,6 +522,14 @@ export const LEVELS: Level[] = [
       createSpike(7950),
       createCoin(8100),
       createSpike(8200),
+    ],
+    quants: [
+      // 5 quants with very generous spacing
+      createStaticQuant(1250),     // Big clear zone
+      createJumpingQuant(2500),    // Safe area
+      createStaticQuant(4250),     // Clear zone
+      createMovingQuant(5900),     // Safe area
+      createJumpingQuant(7300),    // Near end clear zone
     ],
   },
 ];

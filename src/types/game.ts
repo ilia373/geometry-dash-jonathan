@@ -34,6 +34,7 @@ export interface Level {
   id: number;
   name: string;
   obstacles: Obstacle[];
+  quants: Quant[];       // Quant enemies in this level
   groundColor: string;
   backgroundColor: string;
   length: number;
@@ -67,4 +68,27 @@ export interface GameStats {
   progress: number;
   bestProgress: number;
   coinsCollected: number;
+}
+
+// Quant (enemy) types
+export type QuantType = 'static' | 'moving' | 'jumping';
+
+export interface Quant extends Position, Dimensions {
+  type: QuantType;
+  id: number;
+  vx: number;           // horizontal velocity (for moving quants)
+  vy: number;           // vertical velocity (for jumping quants)
+  baseY: number;        // original Y position (for jumping quants)
+  color: string;        // quant color
+  isDead: boolean;      // whether this quant has been eliminated
+  coinDrop: number;     // number of coins to drop when killed
+}
+
+// Dropped coin from killed quants
+export interface DroppedCoin extends Position {
+  id: number;
+  vx: number;
+  vy: number;
+  collected: boolean;
+  life: number;         // time before it disappears
 }

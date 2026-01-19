@@ -1,4 +1,4 @@
-import type { Player, Obstacle, Particle, GameConfig, Level } from '../types/game';
+import type { Player, Obstacle, Particle, GameConfig, Level, Quant, DroppedCoin } from '../types/game';
 import { getSelectedSkin } from './skinManager';
 
 // Draw the background with gradient and stars
@@ -456,4 +456,276 @@ export const drawCoins = (
   ctx.shadowBlur = 5;
   ctx.fillText(`★ ${coins}`, width - 15, 25);
   ctx.restore();
+};
+
+// ==================== QUANT RENDERING ====================
+
+// Draw a single quant
+const drawQuant = (
+  ctx: CanvasRenderingContext2D,
+  quant: Quant,
+  screenX: number,
+  time: number
+) => {
+  if (quant.isDead) return;
+  
+  ctx.save();
+  
+  const centerX = screenX + quant.width / 2;
+  const centerY = quant.y + quant.height / 2;
+  
+  // Pulsing effect
+  const pulse = Math.sin(time * 0.1) * 2;
+  
+  // Glow
+  ctx.shadowColor = quant.color;
+  ctx.shadowBlur = 15 + pulse;
+  
+  // Body gradient
+  const gradient = ctx.createRadialGradient(
+    centerX, centerY, 0,
+    centerX, centerY, quant.width / 2
+  );
+  
+  // Different appearance based on type
+  switch (quant.type) {
+    case 'static':
+      // Purple static quant - square-ish with spikes
+      gradient.addColorStop(0, '#bf00ff');
+      gradient.addColorStop(0.7, quant.color);
+      gradient.addColorStop(1, '#4b0082');
+      ctx.fillStyle = gradient;
+      
+      // Draw body
+      ctx.fillRect(screenX, quant.y, quant.width, quant.height);
+      
+      // Draw small spikes on top
+      ctx.fillStyle = '#9932CC';
+      const spikeWidth = quant.width / 5;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(screenX + spikeWidth * (i + 0.5) + spikeWidth / 2, quant.y);
+        ctx.lineTo(screenX + spikeWidth * (i + 1) + spikeWidth / 2, quant.y - 8);
+        ctx.lineTo(screenX + spikeWidth * (i + 1.5) + spikeWidth / 2, quant.y);
+        ctx.fill();
+      }
+      break;
+      
+    case 'moving':
+      // Orange-red moving quant - angular, aggressive look
+      gradient.addColorStop(0, '#ff6347');
+      gradient.addColorStop(0.7, quant.color);
+      gradient.addColorStop(1, '#8b0000');
+      ctx.fillStyle = gradient;
+      
+      // Draw angular body
+      ctx.beginPath();
+      ctx.moveTo(screenX + quant.width * 0.2, quant.y);
+      ctx.lineTo(screenX + quant.width, quant.y + quant.height * 0.2);
+      ctx.lineTo(screenX + quant.width, quant.y + quant.height * 0.8);
+      ctx.lineTo(screenX + quant.width * 0.2, quant.y + quant.height);
+      ctx.lineTo(screenX, quant.y + quant.height * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      break;
+      
+    case 'jumping':
+      // Cyan jumping quant - bouncy circular look
+      gradient.addColorStop(0, '#00ffff');
+      gradient.addColorStop(0.7, quant.color);
+      gradient.addColorStop(1, '#008b8b');
+      ctx.fillStyle = gradient;
+      
+      // Draw rounded body
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, quant.width / 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Spring lines at bottom when on ground
+      if (quant.vy === 0) {
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 8, quant.y + quant.height);
+        ctx.lineTo(centerX - 4, quant.y + quant.height + 5);
+        ctx.lineTo(centerX, quant.y + quant.height);
+        ctx.lineTo(centerX + 4, quant.y + quant.height + 5);
+        ctx.lineTo(centerX + 8, quant.y + quant.height);
+        ctx.stroke();
+      }
+      break;
+  }
+  
+  // Draw angry eyes for all quants
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ffffff';
+  
+  // Left eye
+  ctx.beginPath();
+  ctx.ellipse(centerX - 6, centerY - 3, 5, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Right eye
+  ctx.beginPath();
+  ctx.ellipse(centerX + 6, centerY - 3, 5, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Angry pupils (looking towards player - left)
+  ctx.fillStyle = '#ff0000';
+  ctx.beginPath();
+  ctx.arc(centerX - 8, centerY - 2, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(centerX + 4, centerY - 2, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Angry eyebrows
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(centerX - 12, centerY - 10);
+  ctx.lineTo(centerX - 3, centerY - 6);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(centerX + 3, centerY - 6);
+  ctx.lineTo(centerX + 12, centerY - 10);
+  ctx.stroke();
+  
+  // Outline
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.lineWidth = 1;
+  if (quant.type === 'jumping') {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, quant.width / 2, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (quant.type === 'static') {
+    ctx.strokeRect(screenX, quant.y, quant.width, quant.height);
+  }
+  
+  ctx.restore();
+};
+
+// Draw all quants
+export const drawQuants = (
+  ctx: CanvasRenderingContext2D,
+  quants: Quant[],
+  cameraX: number,
+  canvasWidth: number,
+  time: number
+) => {
+  for (const quant of quants) {
+    const screenX = quant.x - cameraX;
+    
+    // Only draw if on screen
+    if (screenX > -quant.width && screenX < canvasWidth + quant.width) {
+      drawQuant(ctx, quant, screenX, time);
+    }
+  }
+};
+
+// Draw a dropped coin with spread and magnet effects
+const drawDroppedCoin = (
+  ctx: CanvasRenderingContext2D,
+  coin: DroppedCoin,
+  time: number
+) => {
+  if (coin.collected) return;
+  
+  ctx.save();
+  
+  const radius = 12;
+  const pulse = Math.sin(time * 0.3 + coin.id) * 2;
+  
+  // Calculate age and phase
+  const age = 360 - coin.life;
+  const spreadDuration = 60;
+  const isSpreading = age < spreadDuration;
+  const isMagnetized = !isSpreading;
+  
+  // Fading effect when about to disappear
+  const fadeStart = 60;
+  if (coin.life < fadeStart) {
+    ctx.globalAlpha = coin.life / fadeStart;
+  }
+  
+  // Draw trail when magnetized (flying toward player)
+  if (isMagnetized) {
+    const speed = Math.sqrt(coin.vx * coin.vx + coin.vy * coin.vy);
+    const trailLength = Math.min(5, Math.floor(speed / 3));
+    
+    for (let i = 1; i <= trailLength; i++) {
+      const trailAlpha = 0.4 / i;
+      ctx.globalAlpha = trailAlpha * (coin.life < fadeStart ? coin.life / fadeStart : 1);
+      ctx.fillStyle = '#ffd700';
+      ctx.shadowColor = '#ffff00';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(
+        coin.x - coin.vx * i * 1.5,
+        coin.y - coin.vy * i * 1.5,
+        radius - i * 1.5,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+    ctx.globalAlpha = coin.life < fadeStart ? coin.life / fadeStart : 1;
+  }
+  
+  // Sparkle effect during spread phase
+  if (isSpreading && age % 4 < 2) {
+    ctx.fillStyle = 'rgba(255, 255, 200, 0.8)';
+    ctx.shadowColor = '#ffffff';
+    ctx.shadowBlur = 15;
+    const sparkleSize = 3 + Math.random() * 3;
+    ctx.beginPath();
+    ctx.arc(
+      coin.x + (Math.random() - 0.5) * 15,
+      coin.y + (Math.random() - 0.5) * 15,
+      sparkleSize,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+  }
+  
+  // Glow - brighter when magnetized
+  ctx.shadowColor = isMagnetized ? '#ffff00' : '#ffd700';
+  ctx.shadowBlur = isMagnetized ? 25 + pulse : 12 + pulse;
+  
+  // Coin gradient
+  const gradient = ctx.createRadialGradient(
+    coin.x - radius * 0.3, coin.y - radius * 0.3, 0,
+    coin.x, coin.y, radius
+  );
+  gradient.addColorStop(0, '#fff9c4');
+  gradient.addColorStop(0.4, '#ffd700');
+  gradient.addColorStop(1, '#b8860b');
+  ctx.fillStyle = gradient;
+  
+  // Draw coin
+  ctx.beginPath();
+  ctx.arc(coin.x, coin.y, radius + pulse * 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Star symbol
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#b8860b';
+  ctx.font = `bold ${radius}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('★', coin.x, coin.y + 1);
+  
+  ctx.restore();
+};
+
+// Draw all dropped coins
+export const drawDroppedCoins = (
+  ctx: CanvasRenderingContext2D,
+  coins: DroppedCoin[],
+  time: number
+) => {
+  for (const coin of coins) {
+    drawDroppedCoin(ctx, coin, time);
+  }
 };

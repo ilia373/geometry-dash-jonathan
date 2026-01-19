@@ -184,6 +184,39 @@ VITE_FIREBASE_APP_ID=your-app-id
 VITE_FIREBASE_MEASUREMENT_ID=your-measurement-id
 ```
 
+### Firebase Emulators (Local Development)
+
+To run Firebase services locally (Auth, Firestore) without affecting production:
+
+#### Prerequisites
+1. **Java 21+** - Required for Firebase Emulators
+   ```bash
+   # macOS
+   brew install openjdk@21
+   sudo ln -sfn $(brew --prefix)/opt/openjdk@21/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk
+   
+   # Verify installation
+   java --version
+   ```
+
+2. **Firebase CLI**
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   ```
+
+#### Start Emulators
+```bash
+firebase emulators:start
+```
+
+This starts:
+- **Auth Emulator** on `http://localhost:9099`
+- **Firestore Emulator** on `http://localhost:8080`
+- **Emulator UI** on `http://localhost:4000`
+
+The app automatically connects to emulators in development mode (`npm run dev`).
+
 ### Running Tests
 
 ```bash

@@ -307,7 +307,7 @@ export const checkQuantCollision = (
   
   const quantScreenX = quant.x - cameraX;
   
-  // Player hitbox (forgiving)
+  // Player hitbox
   const playerHitbox = {
     x: player.x + 8,
     y: player.y + 8,
@@ -315,7 +315,7 @@ export const checkQuantCollision = (
     height: player.height - 16,
   };
   
-  // Quant hitbox (smaller for easier stomping)
+  // Quant hitbox
   const quantHitbox = {
     x: quantScreenX + 5,
     y: quant.y + 5,
@@ -334,32 +334,33 @@ export const checkQuantCollision = (
     return { type: null, quant: null };
   }
   
-  // Determine if it's a stomp (player landing on top of quant)
-  // Simple and generous check:
-  // 1. Player's bottom half overlaps with quant's top half = stomp
-  // 2. Player must be falling (vy >= 0)
+  // CHECK: Jumping on TOP of the quant kills it
+  // Requirements for a successful kill:
+  // 1. Player must be moving downward (vy > 0) - falling from a jump
+  // 2. Player must be above the quant (coming from above)
   
   const playerBottom = player.y + player.height;
-  const playerMidY = player.y + player.height / 2;
-  const quantMidY = quant.y + quant.height / 2;
+  const playerCenterY = player.y + player.height / 2;
+  const quantTop = quant.y;
+  const quantCenterY = quant.y + quant.height / 2;
   
-  // Player is falling (or at apex of jump)
-  const playerFalling = player.vy >= 0;
+  // Player must be falling DOWN
+  const playerFallingDown = player.vy > 0;
   
-  // Player is mostly above the quant (player's middle is above quant's middle)
-  const playerAboveQuant = playerMidY <= quantMidY;
+  // Player's center is above quant's center (coming from above)
+  const comingFromAbove = playerCenterY < quantCenterY;
   
-  // Extra generous: if player bottom is in upper 70% of quant, count as stomp
-  const playerBottomInStompZone = playerBottom <= quant.y + quant.height * 0.7;
+  // Player's bottom is hitting the upper half of the quant
+  const hittingTopHalf = playerBottom < quantCenterY + 10;
   
-  // It's a stomp if player is falling AND (above quant center OR in stomp zone)
-  const isStomping = playerFalling && (playerAboveQuant || playerBottomInStompZone);
+  // It's a kill if player is falling down AND coming from above AND hitting top area
+  const isJumpingOnTop = playerFallingDown && comingFromAbove && hittingTopHalf;
   
-  if (isStomping) {
+  if (isJumpingOnTop) {
     return { type: 'stomp', quant };
   }
   
-  // Side or bottom collision = death
+  // Any other collision = death (side hit, bottom hit, walking into it)
   return { type: 'death', quant };
 };
 

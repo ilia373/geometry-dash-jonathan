@@ -1,4 +1,4 @@
-import type { GameConfig, Level, Obstacle } from '../types/game';
+import type { GameConfig, Level, Obstacle, Quant, QuantType } from '../types/game';
 
 // Game configuration constants
 export const GAME_CONFIG: GameConfig = {
@@ -6,10 +6,64 @@ export const GAME_CONFIG: GameConfig = {
   canvasHeight: 720,
   gravity: 0.8,
   jumpForce: -14,
-  playerSpeed: 4,
+  playerSpeed: 3,
   groundHeight: 100,
   playerSize: 40,
 };
+
+// Quant configuration
+export const QUANT_CONFIG = {
+  size: 35,
+  moveSpeed: 2,        // Speed for moving quants (towards geo)
+  jumpForce: -10,      // Jump force for jumping quants
+  jumpInterval: 90,    // Frames between jumps for jumping quants
+  minCoinDrop: 3,      // Minimum coins dropped when killed (more satisfying!)
+  maxCoinDrop: 7,      // Maximum coins dropped when killed
+  colors: {
+    static: '#8B00FF',   // Purple for static quants
+    moving: '#FF4500',   // Orange-red for moving quants
+    jumping: '#00CED1',  // Cyan for jumping quants
+  },
+};
+
+// Helper to generate unique quant IDs
+let quantIdCounter = 0;
+export const getNextQuantId = () => ++quantIdCounter;
+export const resetQuantIdCounter = () => { quantIdCounter = 0; };
+
+// Helper function to create quants at specific positions
+const createQuant = (
+  x: number,
+  type: QuantType,
+  y?: number
+): Quant => {
+  const coinDrop = Math.floor(
+    Math.random() * (QUANT_CONFIG.maxCoinDrop - QUANT_CONFIG.minCoinDrop + 1)
+  ) + QUANT_CONFIG.minCoinDrop;
+  
+  const groundY = GAME_CONFIG.canvasHeight - GAME_CONFIG.groundHeight - QUANT_CONFIG.size;
+  const posY = y ?? groundY;
+  
+  return {
+    x,
+    y: posY,
+    width: QUANT_CONFIG.size,
+    height: QUANT_CONFIG.size,
+    type,
+    id: getNextQuantId(),
+    vx: type === 'moving' ? -QUANT_CONFIG.moveSpeed : 0,
+    vy: 0,
+    baseY: posY,
+    color: QUANT_CONFIG.colors[type],
+    isDead: false,
+    coinDrop,
+  };
+};
+
+// Convenient quant creation helpers
+const createStaticQuant = (x: number, y?: number): Quant => createQuant(x, 'static', y);
+const createMovingQuant = (x: number, y?: number): Quant => createQuant(x, 'moving', y);
+const createJumpingQuant = (x: number, y?: number): Quant => createQuant(x, 'jumping', y);
 
 // Helper function to create obstacles at specific positions
 const createSpike = (x: number, y?: number): Obstacle => ({
@@ -57,35 +111,38 @@ export const LEVELS: Level[] = [
       // Opening section - very easy single jumps with lots of space
       createCoin(500),
       createSpike(700),
-      createCoin(850),
-      createSpike(1000),
-      createSpike(1300),
+      createCoin(900),
+      createSpike(1100),
+      createSpike(1400),
       
       // First platform - easy landing
-      createCoin(1550),
-      createSpike(1850),
+      createCoin(1650),
+      createSpike(1950),
       
       // Simple jump pad
-      createCoin(2000),
-      createJumpPad(2100),
-      createSpike(2400),
+      createCoin(2150),
+      createJumpPad(2350),
+      createSpike(2650),
       
       // Easy platforms
-      createCoin(2650),
+      createCoin(2900),
       createSpike(3200),
       
       // Single spikes with good spacing
-      createCoin(3350),
-      createSpike(3500),
-      createSpike(3800),
-      createCoin(3950),
-      createSpike(4100),
+      createCoin(3450),
+      createSpike(3650),
+      createSpike(3950),
+      createCoin(4150),
+      createSpike(4350),
       
       // Final section - just two jumps
-      createCoin(4250),
-      createSpike(4400),
       createCoin(4550),
-      createSpike(4700),
+      createSpike(4750),
+    ],
+    quants: [
+      // Just 2 easy quants far from obstacles
+      createStaticQuant(1250),     // Big safe zone
+      createStaticQuant(2800),     // Another safe zone
     ],
   },
   {
@@ -97,49 +154,51 @@ export const LEVELS: Level[] = [
     obstacles: [
       // Intro - gentle start
       createCoin(300),
-      createSpike(400),
-      createCoin(550),
-      createSpike(700),
-      createSpike(1150),
+      createSpike(500),
+      createCoin(700),
+      createSpike(900),
+      createSpike(1200),
       
       // Platform section - easy jumps
-      createCoin(1350),
-      createCoin(1600),
-      createSpike(1900),
+      createCoin(1450),
+      createCoin(1700),
+      createSpike(2000),
       
       // Jump pad intro
-      createCoin(2050),
-      createJumpPad(2150),
-      createSpike(2450),
-      createCoin(2600),
-      createSpike(2750),
+      createCoin(2200),
+      createJumpPad(2400),
+      createSpike(2700),
+      createCoin(2900),
+      createSpike(3100),
       
       // Platform with jump orb
-      createCoin(2900),
-      createJumpOrb(3200, GAME_CONFIG.canvasHeight - 200),
-      createSpike(3450),
+      createCoin(3300),
+      createJumpOrb(3500, GAME_CONFIG.canvasHeight - 200),
+      createSpike(3800),
       
       // Simple block obstacles
-      createCoin(3600),
-      createSpike(3900),
-      
-      // Double spike with spacing
-      createCoin(4050),
+      createCoin(4000),
       createSpike(4200),
-      createSpike(4250),
+      
+      // Single spike - no doubles
+      createCoin(4400),
+      createSpike(4600),
       
       // Jump pad to platform
-      createCoin(4450),
-      createJumpPad(4500),
-      createSpike(4900),
+      createCoin(4850),
+      createJumpPad(5000),
+      createSpike(5300),
       
       // Final section - spaced spikes
-      createCoin(5050),
-      createSpike(5200),
-      createCoin(5350),
-      createSpike(5500),
-      createCoin(5650),
-      createSpike(5800),
+      createCoin(5500),
+      createSpike(5700),
+      createCoin(5850),
+    ],
+    quants: [
+      // 3 quants with lots of space
+      createStaticQuant(1300),     // Big clear zone
+      createStaticQuant(3200),     // Safe area
+      createMovingQuant(4750),     // Clear zone near end
     ],
   },
   {
@@ -151,53 +210,57 @@ export const LEVELS: Level[] = [
     obstacles: [
       // Intro section - spaced single jumps
       createCoin(300),
-      createSpike(400),
-      createCoin(550),
-      createSpike(700),
-      createCoin(850),
-      createSpike(1000),
-      createSpike(1500),
+      createSpike(500),
+      createCoin(700),
+      createSpike(900),
+      createCoin(1100),
+      createSpike(1300),
+      createSpike(1600),
       
       // First platform section
-      createCoin(1750),
-      createSpike(2050),
-      createCoin(2250),
-      createSpike(2550),
+      createCoin(1850),
+      createSpike(2100),
+      createCoin(2350),
+      createSpike(2600),
       
       // Jump pad section
-      createCoin(2700),
-      createJumpPad(2800),
-      createCoin(2900),
-      createSpike(3200),
+      createCoin(2850),
+      createJumpPad(3050),
+      createCoin(3200),
+      createSpike(3450),
       
       // Jump orb section
-      createJumpOrb(3450, GAME_CONFIG.canvasHeight - 150),
-      createCoin(3550),
-      createSpike(3700),
-      createCoin(3850),
-      createSpike(4000),
+      createJumpOrb(3700, GAME_CONFIG.canvasHeight - 150),
+      createCoin(3900),
+      createSpike(4100),
+      createCoin(4300),
+      createSpike(4500),
       
       // Block section
-      createCoin(4150),
-      createSpike(4450),
+      createCoin(4700),
+      createSpike(4950),
       
       // Platform parkour - easier spacing
-      createCoin(4650),
-      createCoin(4900),
       createCoin(5150),
-      createSpike(5450),
+      createCoin(5400),
+      createCoin(5650),
+      createSpike(5900),
       
       // Jump pad combo
-      createCoin(5600),
-      createJumpPad(5700),
-      createSpike(6000),
+      createCoin(6100),
+      createJumpPad(6300),
+      createSpike(6600),
       
       // Final section - well-spaced
-      createCoin(6100),
-      createSpike(6250),
-      createCoin(6350),
-      createSpike(6500),
-      createSpike(6850),
+      createCoin(6750),
+      createSpike(6900),
+    ],
+    quants: [
+      // 4 quants with safe spacing
+      createStaticQuant(1450),     // Big clear zone
+      createStaticQuant(2700),     // Safe area
+      createJumpingQuant(4650),    // Clear zone
+      createMovingQuant(6000),     // Safe zone near end
     ],
   },
   {
@@ -209,64 +272,60 @@ export const LEVELS: Level[] = [
     obstacles: [
       // Intro - moderate difficulty
       createCoin(300),
-      createSpike(400),
-      createCoin(550),
-      createSpike(650),
-      createCoin(800),
+      createSpike(500),
+      createCoin(700),
       createSpike(900),
+      createCoin(1100),
+      createSpike(1300),
       
       // Block jumps
-      createCoin(1150),
-      createSpike(1350),
+      createCoin(1550),
       createSpike(1750),
+      createSpike(2050),
       
       // Platform section
-      createCoin(1950),
-      createCoin(2150),
-      createSpike(2400),
-      createSpike(2450),
+      createCoin(2250),
+      createCoin(2500),
+      createSpike(2750),
       
       // Jump pad sequence
-      createCoin(2600),
-      createJumpPad(2700),
-      createSpike(2950),
-      createCoin(3050),
+      createCoin(2950),
       createJumpPad(3150),
-      createCoin(3250),
-      createSpike(3500),
-      
-      // Mixed obstacles
+      createSpike(3450),
       createCoin(3650),
-      createSpike(3900),
-      createJumpOrb(4100, GAME_CONFIG.canvasHeight - 150),
-      createCoin(4200),
+      createJumpPad(3850),
+      createCoin(4050),
       createSpike(4300),
       
-      // Platform parkour
+      // Mixed obstacles
       createCoin(4500),
-      createCoin(4700),
-      createCoin(4900),
-      createSpike(5150),
+      createSpike(4700),
+      createJumpOrb(4950, GAME_CONFIG.canvasHeight - 150),
+      createCoin(5150),
+      createSpike(5350),
       
-      // Double spikes
-      createCoin(5300),
-      createSpike(5400),
-      createSpike(5450),
-      createCoin(5600),
-      createSpike(5700),
-      createSpike(5750),
+      // Platform parkour
+      createCoin(5550),
+      createCoin(5800),
+      createCoin(6050),
+      createSpike(6300),
+      
+      // Spaced spikes
+      createCoin(6500),
+      createSpike(6700),
+      createCoin(6900),
+      createSpike(7100),
       
       // Final run
-      createCoin(5900),
-      createJumpPad(6000),
-      createCoin(6150),
-      createSpike(6250),
-      createCoin(6400),
-      createSpike(6500),
-      createSpike(6850),
-      createCoin(7000),
-      createSpike(7100),
-      createSpike(7300),
+      createCoin(7300),
+      createSpike(7500),
+    ],
+    quants: [
+      // 4 quants with very safe spacing
+      createStaticQuant(1900),     // Big clear zone
+      createJumpingQuant(3000),    // Safe area
+      createStaticQuant(5450),     // Clear zone
+      createMovingQuant(6150),     // Safe zone near end
     ],
   },
   {
@@ -278,75 +337,63 @@ export const LEVELS: Level[] = [
     obstacles: [
       // Opening
       createCoin(300),
-      createSpike(400),
-      createCoin(500),
-      createSpike(600),
-      createCoin(800),
-      createSpike(1000),
+      createSpike(500),
+      createCoin(700),
+      createSpike(900),
       createCoin(1100),
-      createSpike(1200),
+      createSpike(1300),
+      createCoin(1500),
+      createSpike(1700),
       
       // Platform intro
-      createCoin(1400),
-      createSpike(1650),
-      createCoin(1800),
-      createSpike(2050),
+      createCoin(1950),
+      createSpike(2150),
+      createCoin(2350),
+      createSpike(2550),
       
       // Jump pad combo
-      createCoin(2200),
-      createJumpPad(2300),
-      createCoin(2400),
-      createJumpOrb(2600, GAME_CONFIG.canvasHeight - 200),
-      createCoin(2700),
-      createSpike(2800),
-      createSpike(2850),
+      createCoin(2750),
+      createJumpPad(2950),
+      createCoin(3150),
+      createJumpOrb(3400, GAME_CONFIG.canvasHeight - 200),
+      createCoin(3600),
+      createSpike(3800),
       
       // Block maze
-      createCoin(3000),
-      createSpike(3300),
+      createCoin(4050),
+      createSpike(4250),
       
-      // Triple spikes
-      createCoin(3450),
-      createSpike(3550),
-      createSpike(3600),
-      createSpike(3650),
+      // Single spike obstacles
+      createCoin(4500),
+      createSpike(4700),
       
       // Platform section
-      createCoin(3850),
-      createCoin(4050),
-      createCoin(4250),
-      createSpike(4500),
+      createCoin(4950),
+      createCoin(5200),
+      createCoin(5450),
+      createSpike(5700),
       
       // Jump orb chain
-      createCoin(4650),
-      createJumpOrb(4750, GAME_CONFIG.canvasHeight - 140),
-      createCoin(4850),
-      createSpike(4950),
-      createJumpOrb(5150, GAME_CONFIG.canvasHeight - 160),
-      createCoin(5250),
-      createSpike(5350),
-      
-      // Intense section
-      createCoin(5500),
-      createSpike(5600),
-      createSpike(5650),
-      createCoin(5750),
-      createJumpPad(5850),
-      createCoin(6000),
-      createSpike(6100),
-      createSpike(6150),
+      createCoin(5900),
+      createJumpOrb(6100, GAME_CONFIG.canvasHeight - 140),
+      createCoin(6300),
+      createSpike(6500),
+      createJumpOrb(6750, GAME_CONFIG.canvasHeight - 160),
+      createCoin(6950),
+      createSpike(7150),
       
       // Final stretch
-      createCoin(6300),
-      createCoin(6350),
-      createSpike(6600),
-      createCoin(6750),
-      createSpike(6850),
-      createCoin(7000),
-      createSpike(7100),
-      createSpike(7450),
-      createCoin(7600),
-      createSpike(7700),
+      createCoin(7350),
+      createSpike(7550),
+      createCoin(7750),
+    ],
+    quants: [
+      // 5 quants with generous spacing
+      createStaticQuant(1800),     // Big clear zone
+      createJumpingQuant(3250),    // Safe area
+      createStaticQuant(4800),     // Clear zone
+      createMovingQuant(6650),     // Safe area
+      createStaticQuant(7450),     // Near end clear zone
     ],
   },
   {
@@ -356,85 +403,67 @@ export const LEVELS: Level[] = [
     backgroundColor: '#2a1a10',
     length: 8500,
     obstacles: [
-      // Fast intro
+      // Intro
       createCoin(250),
-      createSpike(350),
-      createCoin(450),
-      createSpike(550),
+      createSpike(450),
       createCoin(650),
-      createSpike(750),
-      createCoin(950),
-      createSpike(1150),
+      createSpike(850),
+      createCoin(1050),
+      createSpike(1250),
+      createCoin(1450),
+      createSpike(1650),
       
       // Block sequence
-      createCoin(1300),
-      createSpike(1600),
-      createCoin(1700),
-      createSpike(1950),
+      createCoin(1900),
+      createSpike(2100),
+      createCoin(2300),
+      createSpike(2500),
       
       // Platform climb
-      createCoin(2100),
-      createCoin(2350),
-      createCoin(2550),
-      createSpike(2800),
-      createSpike(2850),
+      createCoin(2750),
+      createCoin(3000),
+      createCoin(3250),
+      createSpike(3500),
       
       // Jump pad sequence
-      createCoin(3000),
-      createJumpPad(3100),
-      createCoin(3250),
-      createSpike(3350),
-      createCoin(3450),
-      createJumpPad(3550),
-      createCoin(3650),
-      createJumpOrb(3850, GAME_CONFIG.canvasHeight - 230),
-      createCoin(3950),
-      createSpike(4050),
+      createCoin(3750),
+      createJumpPad(3950),
+      createCoin(4150),
+      createSpike(4350),
+      createCoin(4600),
+      createJumpPad(4800),
+      createCoin(5000),
+      createJumpOrb(5250, GAME_CONFIG.canvasHeight - 230),
+      createCoin(5450),
+      createSpike(5650),
       
       // Mixed obstacles
-      createCoin(4200),
-      createSpike(4300),
-      createCoin(4450),
-      createSpike(4650),
-      createSpike(4700),
+      createCoin(5900),
+      createSpike(6100),
+      createCoin(6350),
+      createSpike(6550),
       
-      // Triple spike challenge
-      createCoin(4850),
-      createSpike(4950),
-      createSpike(5000),
-      createSpike(5050),
+      // Single spike challenge
+      createCoin(6800),
+      createSpike(7000),
       
       // Platform recovery
-      createCoin(5200),
-      createCoin(5250),
-      createSpike(5500),
-      
-      // Jump orb section
-      createCoin(5650),
-      createJumpOrb(5750, GAME_CONFIG.canvasHeight - 150),
-      createCoin(5850),
-      createSpike(5950),
-      createCoin(6050),
-      createJumpOrb(6150, GAME_CONFIG.canvasHeight - 170),
-      createCoin(6250),
-      createSpike(6350),
+      createCoin(7200),
+      createCoin(7450),
+      createSpike(7700),
       
       // Final challenge
-      createCoin(6500),
-      createSpike(6600),
-      createSpike(6650),
-      createCoin(6750),
-      createJumpPad(6850),
-      createCoin(7000),
-      createSpike(7100),
-      createCoin(7400),
-      createSpike(7500),
-      createCoin(7600),
-      createSpike(7700),
-      createCoin(7850),
-      createSpike(7950),
-      createCoin(8100),
-      createSpike(8200),
+      createCoin(7950),
+      createSpike(8150),
+      createCoin(8350),
+    ],
+    quants: [
+      // 5 quants with very generous spacing
+      createStaticQuant(1750),     // Big clear zone
+      createJumpingQuant(2900),    // Safe area
+      createStaticQuant(4500),     // Clear zone
+      createMovingQuant(6700),     // Safe area
+      createJumpingQuant(8000),    // Near end clear zone
     ],
   },
 ];

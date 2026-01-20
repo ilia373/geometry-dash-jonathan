@@ -21,11 +21,16 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Connect to emulators in development
-if (import.meta.env.DEV) {
+// Connect to emulators only when explicitly enabled via VITE_USE_EMULATORS=true
+// Use `npm run dev:emulators` to start with emulators, or `npm run dev` for production Firebase
+const useEmulators = import.meta.env.VITE_USE_EMULATORS === 'true';
+
+if (useEmulators) {
   connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, 'localhost', 8080);
   console.log('🔧 Using Firebase Emulators');
+} else if (import.meta.env.DEV) {
+  console.log('🌐 Using Production Firebase (no emulators)');
 }
 
 // Initialize Analytics (only in browser, not during SSR/tests)

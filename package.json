@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:emulators": "concurrently --kill-others \"firebase emulators:start\" \"vite\"",
+    "dev:emulators": "concurrently --kill-others \"firebase emulators:start\" \"VITE_USE_EMULATORS=true vite\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -489,7 +489,7 @@ const drawQuant = (
   
   // Different appearance based on type
   switch (quant.type) {
-    case 'static':
+    case 'static': {
       // Purple static quant - square-ish with spikes
       gradient.addColorStop(0, '#bf00ff');
       gradient.addColorStop(0.7, quant.color);
@@ -510,6 +510,7 @@ const drawQuant = (
         ctx.fill();
       }
       break;
+    }
       
     case 'moving':
       // Orange-red moving quant - angular, aggressive look

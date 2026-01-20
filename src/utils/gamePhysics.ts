@@ -341,7 +341,6 @@ export const checkQuantCollision = (
   
   const playerBottom = player.y + player.height;
   const playerCenterY = player.y + player.height / 2;
-  const quantTop = quant.y;
   const quantCenterY = quant.y + quant.height / 2;
   
   // Player must be falling DOWN

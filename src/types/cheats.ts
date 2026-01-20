@@ -1,6 +1,6 @@
 // Cheat/Admin state management
 export interface CheatState {
-  infiniteCoins: boolean;   // Unlimited coins - every frame adds coins
+  infiniteCoins: boolean;   // Unlimited coins - adds coins every second
   float: boolean;           // Float mode - no gravity
   speedBoost: boolean;      // 2x speed
   slowMotion: boolean;      // 0.5x speed

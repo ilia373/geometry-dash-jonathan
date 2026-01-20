@@ -197,7 +197,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
         );
         
         // Infinite coins cheat - add coins every second (60 frames)
-        if (activeCheat.infiniteCoins && timeRef.current % 60 === 0) {
+        if (activeCheat.infiniteCoins && timeRef.current > 0 && timeRef.current % 60 === 0) {
           coinsCollectedRef.current += 10;
         }
         
@@ -236,7 +236,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
                     vx: 0,
                     vy: 0,
                     collected: false,
-                    life: 120, // Short life, will be collected quickly
+                    life: 120, // Safety timeout: auto-despawn if not collected within ~2 seconds
                   });
                 }
               }
@@ -264,7 +264,9 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
         for (const coin of droppedCoinsRef.current) {
           if (!coin.collected && checkDroppedCoinCollision(playerRef.current, coin)) {
             coin.collected = true;
-            coinsCollectedRef.current += 1;
+            // Apply 10x multiplier if cheat is active (works for both quant drops and magnetized ground coins)
+            const coinValue = activeCheat.tenXCoins ? 10 : 1;
+            coinsCollectedRef.current += coinValue;
             soundManager.playSound('coin');
           }
         }

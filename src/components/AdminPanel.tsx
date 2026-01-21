@@ -9,6 +9,7 @@ interface AdminPanelProps {
   onReset: () => void;
   isVisible: boolean;
   onToggleVisibility: () => void;
+  onOpenFortuneWheel?: () => void;
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -17,6 +18,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   onReset,
   isVisible,
   onToggleVisibility,
+  onOpenFortuneWheel,
 }) => {
   const cheatKeys = Object.keys(defaultCheatState) as (keyof CheatState)[];
   const activeCount = cheatKeys.filter(key => cheats[key]).length;
@@ -61,9 +63,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             })}
           </div>
           
-          <button className="reset-button" onClick={onReset}>
-            🔄 Reset All Cheats
-          </button>
+          <div className="admin-actions">
+            <button className="reset-button" onClick={onReset}>
+              🔄 Reset All Cheats
+            </button>
+            
+            {onOpenFortuneWheel && (
+              <button className="fortune-wheel-button" onClick={onOpenFortuneWheel}>
+                🎰 Fortune Wheel (∞ Spins)
+              </button>
+            )}
+          </div>
         </div>
       )}
     </>

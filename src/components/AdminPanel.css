@@ -158,6 +158,12 @@
   color: #000;
 }
 
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .reset-button {
   width: 100%;
   padding: 12px;
@@ -174,6 +180,30 @@
 .reset-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 20px rgba(255, 51, 102, 0.4);
+}
+
+.fortune-wheel-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  border: none;
+  border-radius: 10px;
+  color: #1a1a2e;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: pulse-fortune 2s infinite;
+}
+
+.fortune-wheel-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes pulse-fortune {
+  0%, 100% { box-shadow: 0 0 0 rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
 }
 
 /* Mobile responsive */

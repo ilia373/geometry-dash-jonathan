@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { LEVELS } from '../constants/gameConfig';
 import { isLevelUnlocked, isLevelCompleted, syncProgressFromCloud } from '../utils/progressManager';
 import { getTotalCoins, syncWalletFromCloud } from '../utils/walletManager';
@@ -16,6 +16,13 @@ import type { CheatState } from '../types/cheats';
 import { defaultCheatState } from '../types/cheats';
 import AuthModal from './AuthModal';
 import AdminPanel from './AdminPanel';
+import FortuneWheel from './FortuneWheel';
+import { 
+  shouldShowWheel, 
+  initializeWheelForNewUser, 
+  getLastWheelTime,
+  WHEEL_COOLDOWN_MS 
+} from '../utils/fortuneWheelManager';
 import './Menu.css';
 
 interface MenuProps {
@@ -37,6 +44,10 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const userIsAdmin = isAdmin();
   
+  // Fortune Wheel state
+  const [showFortuneWheel, setShowFortuneWheel] = useState(false);
+  const [unlimitedSpins, setUnlimitedSpins] = useState(false);
+  
   // Sync wallet and progress from cloud on auth change
   useEffect(() => {
     const syncData = async () => {
@@ -56,6 +67,42 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
       setUser(authUser);
     });
     return unsubscribe;
+  }, []);
+  
+  // Fortune Wheel check - show every 10 hours
+  useEffect(() => {
+    initializeWheelForNewUser();
+    
+    // Check if wheel should be shown on mount
+    const lastWheelTime = getLastWheelTime();
+    const now = Date.now();
+    
+    if (now - lastWheelTime >= WHEEL_COOLDOWN_MS || shouldShowWheel()) {
+      // Small delay to let the menu render first
+      const timer = setTimeout(() => {
+        setShowFortuneWheel(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  
+  // Handle coins update from Fortune Wheel
+  const handleCoinsUpdate = useCallback(() => {
+    setCoins(getTotalCoins());
+  }, []);
+  
+  // Handle opening Fortune Wheel from Admin Panel (with unlimited spins)
+  const handleOpenFortuneWheelAdmin = useCallback(() => {
+    setUnlimitedSpins(true);
+    setShowFortuneWheel(true);
+  }, []);
+  
+  // Handle closing Fortune Wheel
+  const handleCloseFortuneWheel = useCallback(() => {
+    setShowFortuneWheel(false);
+    setUnlimitedSpins(false);
+    // Refresh coins in case they changed
+    setCoins(getTotalCoins());
   }, []);
   
   const handleLogout = async () => {
@@ -194,8 +241,17 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
           onReset={handleResetCheats}
           isVisible={showAdminPanel}
           onToggleVisibility={() => setShowAdminPanel(!showAdminPanel)}
+          onOpenFortuneWheel={handleOpenFortuneWheelAdmin}
         />
       )}
+      
+      {/* Fortune Wheel Modal */}
+      <FortuneWheel
+        isOpen={showFortuneWheel}
+        onClose={handleCloseFortuneWheel}
+        onCoinsUpdate={handleCoinsUpdate}
+        unlimitedSpins={unlimitedSpins}
+      />
       
       {/* Auth Modal */}
       {showAuthModal && (

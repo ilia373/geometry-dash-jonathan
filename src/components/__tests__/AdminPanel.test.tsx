@@ -46,33 +46,33 @@ describe('AdminPanel', () => {
 
   it('should render all cheat buttons', () => {
     render(<AdminPanel {...defaultProps} />);
-    expect(screen.getByText('Infinity Health')).toBeInTheDocument();
+    expect(screen.getByText('Infinite Coins')).toBeInTheDocument();
     expect(screen.getByText('Float Mode')).toBeInTheDocument();
     expect(screen.getByText('Speed Boost')).toBeInTheDocument();
     expect(screen.getByText('Slow Motion')).toBeInTheDocument();
-    expect(screen.getByText('Auto Jump')).toBeInTheDocument();
-    expect(screen.getByText('Big Player')).toBeInTheDocument();
-    expect(screen.getByText('Small Player')).toBeInTheDocument();
+    expect(screen.getByText('Auto Quant Kill')).toBeInTheDocument();
+    expect(screen.getByText('10x Coins')).toBeInTheDocument();
+    expect(screen.getByText('Super Magnet')).toBeInTheDocument();
     expect(screen.getByText('Ghost Mode')).toBeInTheDocument();
   });
 
   it('should call onToggleCheat when cheat button clicked', () => {
     render(<AdminPanel {...defaultProps} />);
-    const invincibleButton = screen.getByText('Infinity Health').closest('button');
-    fireEvent.click(invincibleButton!);
-    expect(mockOnToggleCheat).toHaveBeenCalledWith('invincible');
+    const infiniteCoinsButton = screen.getByText('Infinite Coins').closest('button');
+    fireEvent.click(infiniteCoinsButton!);
+    expect(mockOnToggleCheat).toHaveBeenCalledWith('infiniteCoins');
   });
 
   it('should show active state for enabled cheats', () => {
-    const cheatsWithInvincible: CheatState = {
+    const cheatsWithInfiniteCoins: CheatState = {
       ...defaultCheatState,
-      invincible: true,
+      infiniteCoins: true,
     };
-    render(<AdminPanel {...defaultProps} cheats={cheatsWithInvincible} />);
+    render(<AdminPanel {...defaultProps} cheats={cheatsWithInfiniteCoins} />);
     
-    // Find the ON status for invincible
-    const invincibleButton = screen.getByText('Infinity Health').closest('button');
-    expect(invincibleButton).toHaveClass('active');
+    // Find the ON status for infiniteCoins
+    const infiniteCoinsButton = screen.getByText('Infinite Coins').closest('button');
+    expect(infiniteCoinsButton).toHaveClass('active');
   });
 
   it('should render reset button', () => {
@@ -90,7 +90,7 @@ describe('AdminPanel', () => {
   it('should show active count when cheats are enabled', () => {
     const cheatsWithTwo: CheatState = {
       ...defaultCheatState,
-      invincible: true,
+      infiniteCoins: true,
       float: true,
     };
     render(<AdminPanel {...defaultProps} cheats={cheatsWithTwo} isVisible={false} />);

@@ -190,22 +190,15 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
           playerRef.current.y = GAME_CONFIG.canvasHeight - GAME_CONFIG.groundHeight - GAME_CONFIG.playerSize - 50;
         }
         
-        // Apply size cheats
-        let sizeMultiplier = 1;
-        if (activeCheat.bigPlayer) sizeMultiplier = 2;
-        if (activeCheat.smallPlayer) sizeMultiplier = 0.5;
-        playerRef.current.width = GAME_CONFIG.playerSize * sizeMultiplier;
-        playerRef.current.height = GAME_CONFIG.playerSize * sizeMultiplier;
-        
         // Update player physics
         playerRef.current = updatePlayerPhysics(
           playerRef.current,
           GAME_CONFIG
         );
         
-        // Auto jump cheat
-        if (activeCheat.autoJump && isOnGround(playerRef.current, GAME_CONFIG)) {
-          playerRef.current = jump(playerRef.current, GAME_CONFIG);
+        // Infinite coins cheat - add coins every second (60 frames)
+        if (activeCheat.infiniteCoins && timeRef.current > 0 && timeRef.current % 60 === 0) {
+          coinsCollectedRef.current += 10;
         }
         
         // Update quants
@@ -223,55 +216,102 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
           playerRef.current.height
         );
         
-        // Check dropped coin collection
+        // Super magnet cheat - convert ground coins to flying coins and pull them
+        if (activeCheat.magnetPower) {
+          // Convert ground coins on screen into dropped coins (so they fly toward player)
+          for (let i = 0; i < level.obstacles.length; i++) {
+            const obstacle = level.obstacles[i];
+            if (obstacle.type === 'coin' && !obstacle.collected) {
+              const obsX = obstacle.x - cameraXRef.current;
+              // Only affect coins that are on screen
+              if (obsX > 0 && obsX < GAME_CONFIG.canvasWidth) {
+                if (!collectedCoinsRef.current.has(i)) {
+                  collectedCoinsRef.current.add(i);
+                  obstacle.collected = true;
+                  // Spawn a dropped coin at the ground coin's position that will fly to player
+                  droppedCoinsRef.current.push({
+                    id: Date.now() + i,
+                    x: obsX,
+                    y: obstacle.y,
+                    vx: 0,
+                    vy: 0,
+                    collected: false,
+                    life: 120, // Safety timeout: auto-despawn if not collected within ~2 seconds
+                  });
+                }
+              }
+            }
+          }
+          
+          // Make all dropped coins fly directly toward player (super fast magnet)
+          for (const coin of droppedCoinsRef.current) {
+            if (!coin.collected) {
+              const dx = playerRef.current.x + playerRef.current.width / 2 - coin.x;
+              const dy = playerRef.current.y + playerRef.current.height / 2 - coin.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              // Move coin toward player at high speed
+              const speed = 20;
+              if (distance > 5) {
+                coin.x += (dx / distance) * speed;
+                coin.y += (dy / distance) * speed;
+              }
+            }
+          }
+        }
+        
+        // Check dropped coin collection (normal - without magnet)
         for (const coin of droppedCoinsRef.current) {
           if (!coin.collected && checkDroppedCoinCollision(playerRef.current, coin)) {
             coin.collected = true;
-            coinsCollectedRef.current += 1;
+            // Apply 10x multiplier if cheat is active (works for both quant drops and magnetized ground coins)
+            const coinValue = activeCheat.tenXCoins ? 10 : 1;
+            coinsCollectedRef.current += coinValue;
             soundManager.playSound('coin');
           }
         }
         
         // Check quant collisions
-        if (!activeCheat.invincible && !activeCheat.ghostMode) {
-          const quantCollisions = checkAllQuantCollisions(
-            playerRef.current,
-            quantsRef.current,
-            cameraXRef.current
-          );
+        const quantCollisions = checkAllQuantCollisions(
+          playerRef.current,
+          quantsRef.current,
+          cameraXRef.current
+        );
+        
+        for (const collision of quantCollisions) {
+          // Auto Quant Killer: any touch kills the quant
+          const isKill = activeCheat.autoQuantKiller || collision.type === 'stomp';
           
-          for (const collision of quantCollisions) {
-            if (collision.type === 'stomp' && collision.quant) {
-              // Player stomped on quant - kill the quant
-              collision.quant.isDead = true;
-              
-              // Create death particles for quant
-              particlesRef.current = [
-                ...particlesRef.current,
-                ...createQuantDeathParticles(collision.quant, cameraXRef.current),
-              ];
-              
-              // Drop coins from quant
-              droppedCoinsRef.current = [
-                ...droppedCoinsRef.current,
-                ...createDroppedCoins(collision.quant, cameraXRef.current),
-              ];
-              
-              // Bounce player up after stomp
-              playerRef.current = jump(playerRef.current, GAME_CONFIG, GAME_CONFIG.jumpForce * 0.7);
-              soundManager.playSound('coin'); // Reuse coin sound for stomp feedback
-              
-            } else if (collision.type === 'death') {
-              // Player died from quant collision
-              particlesRef.current = [
-                ...particlesRef.current,
-                ...createDeathParticles(playerRef.current),
-              ];
-              playerRef.current.isDead = true;
-              setGameState('dead');
-              soundManager.playSound('fail');
-              break;
-            }
+          if (isKill && collision.quant) {
+            // Player killed the quant
+            collision.quant.isDead = true;
+            
+            // Create death particles for quant
+            particlesRef.current = [
+              ...particlesRef.current,
+              ...createQuantDeathParticles(collision.quant, cameraXRef.current),
+            ];
+            
+            // Drop coins from quant
+            droppedCoinsRef.current = [
+              ...droppedCoinsRef.current,
+              ...createDroppedCoins(collision.quant, cameraXRef.current),
+            ];
+            
+            // Bounce player up after kill
+            playerRef.current = jump(playerRef.current, GAME_CONFIG, GAME_CONFIG.jumpForce * 0.7);
+            soundManager.playSound('coin'); // Reuse coin sound for kill feedback
+            
+          } else if (collision.type === 'death' && !activeCheat.ghostMode) {
+            // Player died from quant collision (only if not ghost mode)
+            particlesRef.current = [
+              ...particlesRef.current,
+              ...createDeathParticles(playerRef.current),
+            ];
+            playerRef.current.isDead = true;
+            setGameState('dead');
+            soundManager.playSound('fail');
+            break;
           }
         }
         
@@ -288,8 +328,8 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
         for (const collision of collisions) {
           switch (collision.type) {
             case 'death':
-              // Skip death if invincible or ghost mode
-              if (activeCheat.invincible || activeCheat.ghostMode) {
+              // Skip death if ghost mode is enabled
+              if (activeCheat.ghostMode) {
                 break;
               }
               // Player died - no coins saved
@@ -302,18 +342,20 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
               soundManager.playSound('fail');
               break;
               
-            case 'coin':
-              // Collect coin
+            case 'coin': {
+              // Collect coin - apply 10x multiplier if cheat is active
               if (collision.obstacle) {
                 const coinIndex = level.obstacles.indexOf(collision.obstacle);
                 if (!collectedCoinsRef.current.has(coinIndex)) {
                   collectedCoinsRef.current.add(coinIndex);
                   collision.obstacle.collected = true;
-                  coinsCollectedRef.current += 1;
+                  const coinValue = activeCheat.tenXCoins ? 10 : 1;
+                  coinsCollectedRef.current += coinValue;
                   soundManager.playSound('coin');
                 }
               }
               break;
+            }
               
             case 'jump-pad':
               // Bounce on jump pad

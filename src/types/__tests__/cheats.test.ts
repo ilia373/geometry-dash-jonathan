@@ -4,13 +4,13 @@ import { defaultCheatState, cheatDescriptions } from '../../types/cheats';
 describe('cheats', () => {
   describe('defaultCheatState', () => {
     it('should have all cheats disabled by default', () => {
-      expect(defaultCheatState.invincible).toBe(false);
+      expect(defaultCheatState.infiniteCoins).toBe(false);
       expect(defaultCheatState.float).toBe(false);
       expect(defaultCheatState.speedBoost).toBe(false);
       expect(defaultCheatState.slowMotion).toBe(false);
-      expect(defaultCheatState.autoJump).toBe(false);
-      expect(defaultCheatState.bigPlayer).toBe(false);
-      expect(defaultCheatState.smallPlayer).toBe(false);
+      expect(defaultCheatState.autoQuantKiller).toBe(false);
+      expect(defaultCheatState.tenXCoins).toBe(false);
+      expect(defaultCheatState.magnetPower).toBe(false);
       expect(defaultCheatState.ghostMode).toBe(false);
     });
 
@@ -38,8 +38,8 @@ describe('cheats', () => {
     });
 
     it('should have correct descriptions', () => {
-      expect(cheatDescriptions.invincible.name).toBe('Infinity Health');
-      expect(cheatDescriptions.invincible.emoji).toBe('💖');
+      expect(cheatDescriptions.infiniteCoins.name).toBe('Infinite Coins');
+      expect(cheatDescriptions.infiniteCoins.emoji).toBe('💰');
       
       expect(cheatDescriptions.float.name).toBe('Float Mode');
       expect(cheatDescriptions.float.emoji).toBe('🎈');
@@ -50,14 +50,14 @@ describe('cheats', () => {
       expect(cheatDescriptions.slowMotion.name).toBe('Slow Motion');
       expect(cheatDescriptions.slowMotion.emoji).toBe('🐌');
       
-      expect(cheatDescriptions.autoJump.name).toBe('Auto Jump');
-      expect(cheatDescriptions.autoJump.emoji).toBe('🤖');
+      expect(cheatDescriptions.autoQuantKiller.name).toBe('Auto Quant Kill');
+      expect(cheatDescriptions.autoQuantKiller.emoji).toBe('☠️');
       
-      expect(cheatDescriptions.bigPlayer.name).toBe('Big Player');
-      expect(cheatDescriptions.bigPlayer.emoji).toBe('🦣');
+      expect(cheatDescriptions.tenXCoins.name).toBe('10x Coins');
+      expect(cheatDescriptions.tenXCoins.emoji).toBe('🌟');
       
-      expect(cheatDescriptions.smallPlayer.name).toBe('Small Player');
-      expect(cheatDescriptions.smallPlayer.emoji).toBe('🐜');
+      expect(cheatDescriptions.magnetPower.name).toBe('Super Magnet');
+      expect(cheatDescriptions.magnetPower.emoji).toBe('🧲');
       
       expect(cheatDescriptions.ghostMode.name).toBe('Ghost Mode');
       expect(cheatDescriptions.ghostMode.emoji).toBe('👻');

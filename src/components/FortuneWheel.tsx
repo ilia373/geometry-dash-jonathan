@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { SKINS } from '../types/skins';
 import { addCoins } from '../utils/walletManager';
-import { unlockSkin, getUnlockedSkinIds } from '../utils/skinManager';
+import { unlockSkin, getUnlockedSkinIds, syncSkinsFromCloud } from '../utils/skinManager';
 import { soundManager } from '../utils/soundManager';
 import {
   WHEEL_PORTIONS,
@@ -20,7 +20,11 @@ interface FortuneWheelProps {
 }
 
 // Get a random skin that isn't rainbow (id 98) and isn't already unlocked
-const getRandomFreeSkin = (): { id: number; name: string } | null => {
+// Now async to ensure skin cache is synced from cloud for authenticated users
+const getRandomFreeSkin = async (): Promise<{ id: number; name: string } | null> => {
+  // Ensure skin cache is synced from cloud before checking available skins
+  await syncSkinsFromCloud();
+  
   const unlockedIds = getUnlockedSkinIds();
   // Filter out rainbow (id 98) and already unlocked skins
   const availableSkins = SKINS.filter(
@@ -67,19 +71,29 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({
     // Calculate which portion index the result is
     const portionIndex = WHEEL_PORTIONS.findIndex(p => p.id === winningPortion.id);
     
-    // Each portion takes 45 degrees (360/8)
-    // The pointer is at the top, so we need to calculate where to stop
-    const portionAngle = 360 / 8;
-    const targetAngle = portionIndex * portionAngle + portionAngle / 2;
+    // Each portion takes (360 / number of portions) degrees
+    const portionAngle = 360 / WHEEL_PORTIONS.length;
     
-    // Spin multiple full rotations plus the target angle
-    // We want the pointer to land on the winning portion
-    // Pointer is at top (0 degrees), wheel rotates clockwise
-    // So we need to rotate (360 - targetAngle) to bring that portion to top
-    const fullRotations = 5 + Math.floor(Math.random() * 3); // 5-7 full rotations
-    const finalAngle = fullRotations * 360 + (360 - targetAngle);
+    // Calculate the angle where the center of the winning portion is located
+    // Portions are laid out starting from 0° (top-right), going clockwise
+    const portionCenterAngle = portionIndex * portionAngle + portionAngle / 2;
     
-    const newRotation = currentRotationRef.current + finalAngle;
+    // The pointer is at the top (0°/360°). To align a portion's center with the pointer,
+    // we need to rotate the wheel so that portion moves to the top.
+    // Since CSS rotation is clockwise, we rotate by (360 - portionCenterAngle) to bring
+    // that portion to the top position.
+    const targetRotation = 360 - portionCenterAngle;
+    
+    // Calculate how many full rotations we've already done
+    const currentFullRotations = Math.floor(currentRotationRef.current / 360);
+    
+    // Add 5-7 more full rotations for visual effect
+    const additionalRotations = 5 + Math.floor(Math.random() * 3);
+    const totalFullRotations = currentFullRotations + additionalRotations + 1;
+    
+    // Final rotation: full rotations + target angle to land on winning portion
+    const newRotation = totalFullRotations * 360 + targetRotation;
+    
     currentRotationRef.current = newRotation;
     setRotation(newRotation);
 
@@ -97,7 +111,7 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({
         }
         onCoinsUpdate();
       } else if (winningPortion.reward.type === 'skin') {
-        skinResult = getRandomFreeSkin();
+        skinResult = await getRandomFreeSkin();
         if (skinResult) {
           await unlockSkin(skinResult.id);
           soundManager.playSound('success');
@@ -151,7 +165,7 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({
             style={{ transform: `rotate(${rotation}deg)` }}
           >
             {WHEEL_PORTIONS.map((portion, index) => {
-              const angle = (360 / 8) * index;
+              const angle = (360 / WHEEL_PORTIONS.length) * index;
               const displayLabel = portion.reward.type === 'coins' 
                 ? `${portion.reward.amount}` 
                 : 'FREE';

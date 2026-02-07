@@ -44,9 +44,11 @@ vi.mock('../../utils/walletManager', () => ({
 // Mock skinManager
 const mockUnlockSkin = vi.fn(() => Promise.resolve());
 const mockGetUnlockedSkinIds = vi.fn(() => [1, 2]);
+const mockSyncSkinsFromCloud = vi.fn(() => Promise.resolve());
 vi.mock('../../utils/skinManager', () => ({
   unlockSkin: (id: number) => mockUnlockSkin(id),
   getUnlockedSkinIds: () => mockGetUnlockedSkinIds(),
+  syncSkinsFromCloud: () => mockSyncSkinsFromCloud(),
 }));
 
 // Mock soundManager

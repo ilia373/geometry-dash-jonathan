@@ -1,0 +1,472 @@
+
+> geometry-dash-jonathan@0.0.0 test:run
+> vitest run
+
+
+ RUN  v3.2.4 /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan
+
+(node:39425) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39432) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39424) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39428) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39430) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39429) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39431) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39426) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39427) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stderr | src/utils/__tests__/authService.test.ts > authService > isAdmin (claim-based) > should default isAdmin to false if getIdTokenResult fails
+Error getting ID token claims: Error: Token error
+    at [90m/Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39msrc/utils/__tests__/authService.test.ts:110:53
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithEmail > should throw user-friendly error on invalid email
+Sign in error: { code: [32m'auth/invalid-email'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithEmail > should throw user-friendly error on user not found
+Sign in error: { code: [32m'auth/user-not-found'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithEmail > should throw user-friendly error on wrong password
+Sign in error: { code: [32m'auth/wrong-password'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithEmail > should throw user-friendly error on invalid credential
+Sign in error: { code: [32m'auth/invalid-credential'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithEmail > should throw user-friendly error on user disabled
+Sign in error: { code: [32m'auth/user-disabled'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithEmail > should throw generic error on unknown error code
+Sign in error: { code: [32m'auth/unknown'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signUpWithEmail > should throw error on email already in use
+Sign up error: { code: [32m'auth/email-already-in-use'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signUpWithEmail > should throw error on weak password
+Sign up error: { code: [32m'auth/weak-password'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithGoogle > should throw error on popup closed
+Google sign in error: { code: [32m'auth/popup-closed-by-user'[39m }
+
+stderr | src/utils/__tests__/authService.test.ts > authService > signInWithGoogle > should throw error on popup blocked
+Google sign in error: { code: [32m'auth/popup-blocked'[39m }
+
+ ✓ src/utils/__tests__/authService.test.ts (36 tests) 20ms
+ ✓ src/types/__tests__/skins.test.ts (29 tests) 23ms
+stderr | src/utils/__tests__/firestoreService.test.ts > firestoreService > loadUserData (authenticated) > should fallback to local data on Firestore error
+Error loading user data: Error: Network error
+    at [90m/Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39msrc/utils/__tests__/firestoreService.test.ts:133:36
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | src/utils/__tests__/firestoreService.test.ts > firestoreService > saveUserData (authenticated) > should fallback to localStorage if all Firestore operations fail
+Error saving user data: Error: Network error
+    at [90m/Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39msrc/utils/__tests__/firestoreService.test.ts:191:36
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+ ✓ src/utils/__tests__/gamePhysics.test.ts (62 tests) 9ms
+ ✓ src/utils/__tests__/firestoreService.test.ts (25 tests) 10ms
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should render menu container
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should display coin count
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/__tests__/AdminPanel.test.tsx (11 tests) 149ms
+ ✓ src/components/__tests__/AuthModal.test.tsx (21 tests) 236ms
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should render skins button
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should call onOpenSkins when skins button is clicked
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should render level cards
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should render play button
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should call onStartGame when play button is clicked
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/SkinSelector.test.tsx > SkinSelector Component > should render skin selector container
+In HTML, <button> cannot be a descendant of <button>.
+This will cause a hydration error.
+
+  <SkinSelector onBack={function spy}>
+    <div className="skin-selec...">
+      <div>
+      <div>
+      <div>
+      <div className="skins-grid">
+>       <button
+>         className="skin-card selected locked"
+>         onClick={function onClick}
+>         style={{borderColor:"#00ff88",boxShadow:"0 0 15px #..."}}
+>       >
+          <div>
+          <span>
+>         <button className={"buy-button "} onClick={function onClick} disabled={false}>
+        ...
+
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should display controls section
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should show difficulty bar
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should render animated background elements
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > should render hero cube
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/__tests__/FortuneWheel.test.tsx (25 tests) 493ms
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when user is logged in > should display user name
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when user is logged in > should display logout button
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when user is admin > should show admin crown
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when user is admin > should show admin panel toggle button
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when user is guest > should show guest icon
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when user is guest > should display Guest as user name
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when no user is logged in > should display login button
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > when no user is logged in > should open auth modal when login is clicked
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > keyboard navigation > should handle arrow right for level selection
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > keyboard navigation > should handle enter/space to start game
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > level selection > should allow clicking on unlocked levels
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > level selection > should allow double-click to start level
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > hero cube interaction > should add hovering class on mouse enter
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/__tests__/Menu.test.tsx > Menu Component > hero cube interaction > should remove hovering class on mouse leave
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Menu inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/__tests__/Menu.test.tsx (26 tests) 676ms
+(node:39480) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39478) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39477) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39479) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39485) ExperimentalWarning: CommonJS module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/jsdom/lib/jsdom/browser/parser/html.js is loading ES Module /Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/node_modules/parse5/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ src/types/__tests__/cheats.test.ts (5 tests) 3ms
+ ✓ src/utils/__tests__/progressManager.test.ts (12 tests) 4ms
+ ✓ src/utils/__tests__/skinManager.test.ts (22 tests) 6ms
+ ✓ src/utils/__tests__/fortuneWheelManager.test.ts (20 tests) 6ms
+ ✓ src/utils/__tests__/walletManager.test.ts (11 tests) 4ms
+ ✓ src/components/__tests__/SkinSelector.test.tsx (16 tests) 2340ms
+   ✓ SkinSelector Component > should render skin selector container  355ms
+   ✓ SkinSelector Component > should render back button  885ms
+   ✓ SkinSelector Component > should call onBack when back button is clicked  517ms
+
+ Test Files  14 passed (14)
+      Tests  321 passed (321)
+   Start at  13:55:58
+   Duration  4.61s (transform 894ms, setup 1.72s, collect 2.26s, tests 3.98s, environment 16.78s, prepare 2.98s)
+

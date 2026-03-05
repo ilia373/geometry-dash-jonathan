@@ -97,8 +97,12 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({
     currentRotationRef.current = newRotation;
     setRotation(newRotation);
 
+    // Play spin sound
+    const spinSound = soundManager.playSound('spinning-wheel');
+
     // Wait for spin animation
     setTimeout(async () => {
+      soundManager.stopSound(spinSound);
       let skinResult: { id: number; name: string } | null = null;
       
       // Apply reward

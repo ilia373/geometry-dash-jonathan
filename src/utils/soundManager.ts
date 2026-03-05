@@ -13,6 +13,7 @@ class SoundManager {
     this.loadSound('fail', '/sounds/fail.mp3');
     this.loadSound('success', '/sounds/success.mp3');
     this.loadSound('coin', '/sounds/coin.mp3');
+    this.loadSound('spinning-wheel', '/sounds/spinning-wheel.mp3');
     this.loadBackgroundMusic('/sounds/background.mp3');
   }
 
@@ -30,17 +31,23 @@ class SoundManager {
     this.backgroundMusic.preload = 'auto';
   }
 
-  playSound(name: string): void {
-    if (this.isMuted) return;
+  playSound(name: string): HTMLAudioElement | null {
+    if (this.isMuted) return null;
     
     const sound = this.sounds.get(name);
     if (sound) {
-      // Clone the audio to allow overlapping sounds
       const clone = sound.cloneNode() as HTMLAudioElement;
       clone.volume = this.sfxVolume;
-      clone.play().catch(() => {
-        // Ignore autoplay errors
-      });
+      clone.play().catch(() => {});
+      return clone;
+    }
+    return null;
+  }
+
+  stopSound(audio: HTMLAudioElement | null): void {
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
     }
   }
 

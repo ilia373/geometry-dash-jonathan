@@ -52,10 +52,12 @@ vi.mock('../../utils/skinManager', () => ({
 }));
 
 // Mock soundManager
-const mockPlaySound = vi.fn();
+const mockPlaySound = vi.fn(() => null);
+const mockStopSound = vi.fn();
 vi.mock('../../utils/soundManager', () => ({
   soundManager: {
     playSound: (sound: string) => mockPlaySound(sound),
+    stopSound: (audio: HTMLAudioElement | null) => mockStopSound(audio),
   },
 }));
 

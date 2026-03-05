@@ -20,8 +20,6 @@ import FortuneWheel from './FortuneWheel';
 import { 
   shouldShowWheel, 
   initializeWheelForNewUser, 
-  getLastWheelTime,
-  WHEEL_COOLDOWN_MS 
 } from '../utils/fortuneWheelManager';
 import './Menu.css';
 
@@ -73,11 +71,7 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
   useEffect(() => {
     initializeWheelForNewUser();
     
-    // Check if wheel should be shown on mount
-    const lastWheelTime = getLastWheelTime();
-    const now = Date.now();
-    
-    if (now - lastWheelTime >= WHEEL_COOLDOWN_MS || shouldShowWheel()) {
+    if (shouldShowWheel()) {
       // Small delay to let the menu render first
       const timer = setTimeout(() => {
         setShowFortuneWheel(true);

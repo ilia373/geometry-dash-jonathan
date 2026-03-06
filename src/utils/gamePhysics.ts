@@ -281,12 +281,33 @@ export const updateQuantPhysics = (
   };
 };
 
+// Apply weapon damage to a quant
+export const applyDamageToQuant = (quant: Quant, damage: number): void => {
+  quant.hp -= damage;
+  quant.flashTimer = 6; // ~100ms flash at 60fps
+  if (quant.hp <= 0) {
+    quant.hp = 0; // clamp, don't go negative
+    quant.isDead = true;
+  }
+};
+
+// Decrement flash timer (called each frame)
+export const updateQuantFlash = (quant: Quant): void => {
+  if (quant.flashTimer > 0) {
+    quant.flashTimer--;
+  }
+};
+
 // Update all quants
 export const updateAllQuants = (
   quants: Quant[],
   cameraX: number
 ): Quant[] => {
-  return quants.map(q => updateQuantPhysics(q, cameraX));
+  return quants.map(q => {
+    const updated = updateQuantPhysics(q, cameraX);
+    updateQuantFlash(updated);
+    return updated;
+  });
 };
 
 // Collision result for quant interactions

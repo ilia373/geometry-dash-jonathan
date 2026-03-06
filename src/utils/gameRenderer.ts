@@ -751,8 +751,7 @@ export const drawDroppedCoins = (
 export const drawProjectiles = (
   ctx: CanvasRenderingContext2D,
   projectiles: Projectile[],
-  cameraX: number,
-  _time: number
+  cameraX: number
 ): void => {
   for (const projectile of projectiles) {
     const screenX = projectile.x - cameraX;

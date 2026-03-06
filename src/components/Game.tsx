@@ -475,7 +475,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       drawQuants(ctx, quantsRef.current, cameraXRef.current, GAME_CONFIG.canvasWidth, timeRef.current);
       
       // Draw projectiles
-      drawProjectiles(ctx, projectilesRef.current, cameraXRef.current, timeRef.current);
+      drawProjectiles(ctx, projectilesRef.current, cameraXRef.current);
       
       // Draw dropped coins
       drawDroppedCoins(ctx, droppedCoinsRef.current, timeRef.current);

@@ -25,10 +25,10 @@ import './Menu.css';
 
 interface MenuProps {
   onStartGame: (levelId: number, cheats: CheatState) => void;
-  onOpenSkins: () => void;
+  onOpenShop: () => void;
 }
 
-const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
+const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenShop }) => {
   const [coins, setCoins] = useState<number>(getTotalCoins());
   const currentSkin = getSelectedSkin();
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
@@ -219,7 +219,7 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenSkins }) => {
             </button>
           )}
           
-          <button className="skins-button" onClick={onOpenSkins}>
+          <button className="skins-button" onClick={onOpenShop}>
             <span className="btn-icon">🎨</span>
             <span className="btn-text">Skins</span>
             <div className="btn-shine" />

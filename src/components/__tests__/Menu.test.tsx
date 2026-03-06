@@ -57,77 +57,77 @@ vi.mock('../../utils/skinManager', () => ({
 
 describe('Menu Component', () => {
   const mockOnStartGame = vi.fn();
-  const mockOnOpenSkins = vi.fn();
+  const mockOnOpenShop = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should render menu container', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     const heroTitle = document.querySelector('.hero-title');
     expect(heroTitle).toBeInTheDocument();
   });
 
   it('should display coin count', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     expect(screen.getByText('500')).toBeInTheDocument();
   });
 
   it('should render skins button', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     const skinsButton = screen.getByRole('button', { name: /skins/i });
     expect(skinsButton).toBeInTheDocument();
   });
 
-  it('should call onOpenSkins when skins button is clicked', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+  it('should call onOpenShop when skins button is clicked', () => {
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     const skinsButton = screen.getByRole('button', { name: /skins/i });
     fireEvent.click(skinsButton);
-    expect(mockOnOpenSkins).toHaveBeenCalledTimes(1);
+    expect(mockOnOpenShop).toHaveBeenCalledTimes(1);
   });
 
   it('should render level cards', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     // Check for level names in the carousel
     expect(screen.getByText('Stereo Madness')).toBeInTheDocument();
   });
 
   it('should render play button', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     const playButton = screen.getByText(/play/i);
     expect(playButton).toBeInTheDocument();
   });
 
   it('should call onStartGame when play button is clicked', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     const playButton = screen.getByText(/play/i);
     fireEvent.click(playButton);
     expect(mockOnStartGame).toHaveBeenCalled();
   });
 
   it('should display controls section', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     expect(screen.getByText(/space/i)).toBeInTheDocument();
     const jumpElements = screen.getAllByText(/jump/i);
     expect(jumpElements.length).toBeGreaterThan(0);
   });
 
   it('should show difficulty bar', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     // Should have difficulty indicator elements
     const difficultyBars = document.querySelectorAll('.difficulty-bar');
     expect(difficultyBars.length).toBeGreaterThan(0);
   });
 
   it('should render animated background elements', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     const animatedBg = document.querySelector('.animated-bg');
     expect(animatedBg).toBeInTheDocument();
   });
 
   it('should render hero cube', () => {
-    render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+    render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
     const heroCube = document.querySelector('.hero-cube');
     expect(heroCube).toBeInTheDocument();
   });
@@ -145,18 +145,18 @@ describe('Menu Component', () => {
     });
 
     it('should display user name', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       expect(screen.getByText('TestUser')).toBeInTheDocument();
     });
 
     it('should display logout button', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const logoutButton = screen.getByRole('button', { name: /logout/i });
       expect(logoutButton).toBeInTheDocument();
     });
 
     it('should call logOut when logout button is clicked', async () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const logoutButton = screen.getByRole('button', { name: /logout/i });
       fireEvent.click(logoutButton);
       await waitFor(() => {
@@ -179,13 +179,13 @@ describe('Menu Component', () => {
     });
 
     it('should show admin crown', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const crowns = screen.getAllByText('👑');
       expect(crowns.length).toBeGreaterThan(0);
     });
     
     it('should show admin panel toggle button', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const adminToggle = document.querySelector('.admin-toggle');
       expect(adminToggle).toBeInTheDocument();
     });
@@ -205,12 +205,12 @@ describe('Menu Component', () => {
     });
 
     it('should show guest icon', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       expect(screen.getByText('👤')).toBeInTheDocument();
     });
 
     it('should display Guest as user name', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       expect(screen.getByText('Guest')).toBeInTheDocument();
     });
   });
@@ -224,13 +224,13 @@ describe('Menu Component', () => {
     });
 
     it('should display login button', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const loginButton = screen.getByRole('button', { name: /login/i });
       expect(loginButton).toBeInTheDocument();
     });
 
     it('should open auth modal when login is clicked', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const loginButton = screen.getByRole('button', { name: /login/i });
       fireEvent.click(loginButton);
       
@@ -241,7 +241,7 @@ describe('Menu Component', () => {
 
   describe('keyboard navigation', () => {
     it('should handle arrow right for level selection', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       fireEvent.keyDown(window, { code: 'ArrowRight' });
       // Level 2 should now be selected (since it's unlocked)
       const selectedCard = document.querySelector('.level-card.selected');
@@ -249,7 +249,7 @@ describe('Menu Component', () => {
     });
 
     it('should handle enter/space to start game', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       fireEvent.keyDown(window, { code: 'Enter' });
       expect(mockOnStartGame).toHaveBeenCalled();
     });
@@ -257,7 +257,7 @@ describe('Menu Component', () => {
 
   describe('level selection', () => {
     it('should allow clicking on unlocked levels', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const level2Card = screen.getByText('Back on Track').closest('.level-card');
       if (level2Card) {
         fireEvent.click(level2Card);
@@ -266,7 +266,7 @@ describe('Menu Component', () => {
     });
 
     it('should allow double-click to start level', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const level1Card = screen.getByText('Stereo Madness').closest('.level-card');
       if (level1Card) {
         fireEvent.doubleClick(level1Card);
@@ -277,7 +277,7 @@ describe('Menu Component', () => {
 
   describe('hero cube interaction', () => {
     it('should add hovering class on mouse enter', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const heroCube = document.querySelector('.hero-cube');
       if (heroCube) {
         fireEvent.mouseEnter(heroCube);
@@ -286,7 +286,7 @@ describe('Menu Component', () => {
     });
 
     it('should remove hovering class on mouse leave', () => {
-      render(<Menu onStartGame={mockOnStartGame} onOpenSkins={mockOnOpenSkins} />);
+      render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
       const heroCube = document.querySelector('.hero-cube');
       if (heroCube) {
         fireEvent.mouseEnter(heroCube);

@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import Menu from './components/Menu';
 import Game from './components/Game';
-import SkinSelector from './components/SkinSelector';
+import Shop from './components/Shop';
 import { initializeAuth } from './utils/authService';
 import { initializeFirestoreSync } from './utils/firestoreService';
+import { syncWeaponsFromCloud } from './utils/weaponManager';
 import { initAnalytics } from './config/firebase';
 import type { CheatState } from './types/cheats';
 import { defaultCheatState } from './types/cheats';
 import './App.css';
 
-type Screen = 'menu' | 'game' | 'skins';
+type Screen = 'menu' | 'game' | 'shop';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('menu');
@@ -20,6 +21,7 @@ function App() {
   useEffect(() => {
     initializeAuth();
     initializeFirestoreSync();
+    syncWeaponsFromCloud().catch(() => {});
     initAnalytics().catch((error) => {
       console.error('Failed to initialize analytics', error);
     });
@@ -35,20 +37,20 @@ function App() {
     setScreen('menu');
   };
 
-  const handleOpenSkins = () => {
-    setScreen('skins');
+  const handleOpenShop = () => {
+    setScreen('shop');
   };
 
   return (
     <div className="app">
       {screen === 'menu' && (
-        <Menu onStartGame={handleStartGame} onOpenSkins={handleOpenSkins} />
+        <Menu onStartGame={handleStartGame} onOpenShop={handleOpenShop} />
       )}
       {screen === 'game' && (
         <Game levelId={currentLevel} onBack={handleBackToMenu} cheats={currentCheats} />
       )}
-      {screen === 'skins' && (
-        <SkinSelector onBack={handleBackToMenu} />
+      {screen === 'shop' && (
+        <Shop onBack={handleBackToMenu} />
       )}
     </div>
   );

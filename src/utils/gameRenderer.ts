@@ -1,4 +1,4 @@
-import type { Player, Obstacle, Particle, GameConfig, Level, Quant, DroppedCoin } from '../types/game';
+import type { Player, Obstacle, Particle, GameConfig, Level, Quant, DroppedCoin, Projectile } from '../types/game';
 import type { Weapon } from '../types/weapons';
 import { getSelectedSkin } from './skinManager';
 
@@ -744,6 +744,28 @@ export const drawDroppedCoins = (
 ) => {
   for (const coin of coins) {
     drawDroppedCoin(ctx, coin, time);
+  }
+};
+
+// Draw all projectiles
+export const drawProjectiles = (
+  ctx: CanvasRenderingContext2D,
+  projectiles: Projectile[],
+  cameraX: number,
+  _time: number
+): void => {
+  for (const projectile of projectiles) {
+    const screenX = projectile.x - cameraX;
+    
+    // Only draw if on screen
+    if (screenX < -projectile.width || screenX > 1300) {
+      continue;
+    }
+    
+    ctx.save();
+    ctx.fillStyle = projectile.color;
+    ctx.fillRect(screenX, projectile.y, projectile.width, projectile.height);
+    ctx.restore();
   }
 };
 

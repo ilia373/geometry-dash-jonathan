@@ -26,6 +26,16 @@ export const QUANT_CONFIG = {
   },
 };
 
+// Quant HP configuration - determines health scaling across levels
+export const QUANT_HP_CONFIG = {
+  baseHp: {
+    static: 20,
+    moving: 40,
+    jumping: 60,
+  },
+  levelMultipliers: [1.0, 1.5, 2.0], // index 0=level1, 1=level2, 2=level3
+};
+
 // Helper to generate unique quant IDs
 let quantIdCounter = 0;
 export const getNextQuantId = () => ++quantIdCounter;
@@ -35,7 +45,8 @@ export const resetQuantIdCounter = () => { quantIdCounter = 0; };
 const createQuant = (
   x: number,
   type: QuantType,
-  y?: number
+  y?: number,
+  levelIndex: number = 0
 ): Quant => {
   const coinDrop = Math.floor(
     Math.random() * (QUANT_CONFIG.maxCoinDrop - QUANT_CONFIG.minCoinDrop + 1)
@@ -43,6 +54,10 @@ const createQuant = (
   
   const groundY = GAME_CONFIG.canvasHeight - GAME_CONFIG.groundHeight - QUANT_CONFIG.size;
   const posY = y ?? groundY;
+  
+  const maxHp = Math.round(
+    QUANT_HP_CONFIG.baseHp[type] * QUANT_HP_CONFIG.levelMultipliers[levelIndex]
+  );
   
   return {
     x,
@@ -57,13 +72,16 @@ const createQuant = (
     color: QUANT_CONFIG.colors[type],
     isDead: false,
     coinDrop,
+    hp: maxHp,
+    maxHp,
+    flashTimer: 0,
   };
 };
 
 // Convenient quant creation helpers
-const createStaticQuant = (x: number, y?: number): Quant => createQuant(x, 'static', y);
-const createMovingQuant = (x: number, y?: number): Quant => createQuant(x, 'moving', y);
-const createJumpingQuant = (x: number, y?: number): Quant => createQuant(x, 'jumping', y);
+const createStaticQuant = (x: number, y?: number, levelIndex: number = 0): Quant => createQuant(x, 'static', y, levelIndex);
+const createMovingQuant = (x: number, y?: number, levelIndex: number = 0): Quant => createQuant(x, 'moving', y, levelIndex);
+const createJumpingQuant = (x: number, y?: number, levelIndex: number = 0): Quant => createQuant(x, 'jumping', y, levelIndex);
 
 // Helper function to create obstacles at specific positions
 const createSpike = (x: number, y?: number): Obstacle => ({

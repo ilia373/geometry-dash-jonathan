@@ -219,9 +219,9 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenShop }) => {
             </button>
           )}
           
-          <button className="skins-button" onClick={onOpenShop}>
-            <span className="btn-icon">🎨</span>
-            <span className="btn-text">Skins</span>
+          <button className="shop-button" onClick={onOpenShop}>
+            <span className="btn-icon">🛒</span>
+            <span className="btn-text">Shop</span>
             <div className="btn-shine" />
           </button>
         </div>

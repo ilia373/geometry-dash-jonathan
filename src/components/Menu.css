@@ -229,7 +229,7 @@
   white-space: nowrap;
 }
 
-.skins-button,
+.shop-button,
 .login-button,
 .logout-button {
   position: relative;
@@ -260,7 +260,7 @@
   padding: 10px 20px;
 }
 
-.skins-button:hover,
+.shop-button:hover,
 .login-button:hover,
 .logout-button:hover {
   transform: translateY(-2px) scale(1.02);
@@ -876,7 +876,7 @@
   
   .login-button,
   .logout-button,
-  .skins-button {
+  .shop-button {
     padding: 10px 20px;
     font-size: 0.9rem;
   }

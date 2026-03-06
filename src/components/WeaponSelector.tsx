@@ -23,17 +23,18 @@ const WeaponSelector: React.FC<WeaponSelectorProps> = ({ onBack }) => {
     if (coins < weapon.price) return;
     const success = await spendCoins(weapon.price);
     if (success) {
-      await unlockWeapon(weapon.id);
-      await setSelectedWeapon(weapon.id);
-      setOwnedIds(getOwnedWeaponIds());
+      setOwnedIds(prev => [...prev, weapon.id]);
       setSelectedId(weapon.id);
       setCoins(getTotalCoins());
+      // Fire-and-forget Firestore writes
+      unlockWeapon(weapon.id);
+      setSelectedWeapon(weapon.id);
     }
   };
 
-  const handleEquip = async (weaponId: number) => {
-    await setSelectedWeapon(weaponId);
+  const handleEquip = (weaponId: number) => {
     setSelectedId(weaponId);
+    setSelectedWeapon(weaponId); // fire-and-forget
   };
 
   const categoryColors: Record<string, string> = {

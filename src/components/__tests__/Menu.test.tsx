@@ -74,15 +74,15 @@ describe('Menu Component', () => {
     expect(screen.getByText('500')).toBeInTheDocument();
   });
 
-  it('should render skins button', () => {
+  it('should render shop button', () => {
     render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
-    const skinsButton = screen.getByRole('button', { name: /skins/i });
+    const skinsButton = screen.getByRole('button', { name: /shop/i });
     expect(skinsButton).toBeInTheDocument();
   });
 
-  it('should call onOpenShop when skins button is clicked', () => {
+  it('should call onOpenShop when shop button is clicked', () => {
     render(<Menu onStartGame={mockOnStartGame} onOpenShop={mockOnOpenShop} />);
-    const skinsButton = screen.getByRole('button', { name: /skins/i });
+    const skinsButton = screen.getByRole('button', { name: /shop/i });
     fireEvent.click(skinsButton);
     expect(mockOnOpenShop).toHaveBeenCalledTimes(1);
   });

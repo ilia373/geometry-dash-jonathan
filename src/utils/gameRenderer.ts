@@ -1,4 +1,5 @@
 import type { Player, Obstacle, Particle, GameConfig, Level, Quant, DroppedCoin } from '../types/game';
+import type { Weapon } from '../types/weapons';
 import { getSelectedSkin } from './skinManager';
 
 // Draw the background with gradient and stars
@@ -554,10 +555,25 @@ const drawQuant = (
         ctx.lineTo(centerX + 8, quant.y + quant.height);
         ctx.stroke();
       }
-      break;
-  }
-  
-  // Draw angry eyes for all quants
+       break;
+   }
+   
+   // Flash overlay when quant takes damage
+   if (quant.flashTimer && quant.flashTimer > 0) {
+     ctx.save();
+     ctx.shadowBlur = 0;
+     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+     if (quant.type === 'jumping') {
+       ctx.beginPath();
+       ctx.arc(centerX, centerY, quant.width / 2, 0, Math.PI * 2);
+       ctx.fill();
+     } else {
+       ctx.fillRect(screenX, quant.y, quant.width, quant.height);
+     }
+     ctx.restore();
+   }
+   
+   // Draw angry eyes for all quants
   ctx.shadowBlur = 0;
   ctx.fillStyle = '#ffffff';
   
@@ -729,4 +745,59 @@ export const drawDroppedCoins = (
   for (const coin of coins) {
     drawDroppedCoin(ctx, coin, time);
   }
+};
+
+// Draw weapon HUD in bottom-left corner
+export const drawWeaponHUD = (
+  ctx: CanvasRenderingContext2D,
+  weapon: Weapon | null,
+  _canvasWidth: number,
+  canvasHeight: number
+): void => {
+  if (!weapon) return;
+
+  const x = 15;
+  const y = canvasHeight - 70;
+  const size = 48;
+  const radius = 8;
+
+  const categoryColors: Record<string, string> = {
+    ballistic: '#FFD700',
+    fire: '#FF4500',
+    laser: '#00FFFF',
+    explosive: '#FF6600',
+  };
+  const borderColor = categoryColors[weapon.category] ?? '#ffffff';
+
+  ctx.save();
+
+  // Background panel
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  ctx.beginPath();
+  ctx.roundRect(x, y, size, size, radius);
+  ctx.fill();
+
+  // Colored border
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = borderColor;
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.roundRect(x, y, size, size, radius);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Weapon emoji
+  ctx.font = '22px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(weapon.emoji, x + size / 2, y + size / 2 - 4);
+
+  // Weapon name (truncated)
+  ctx.font = '7px sans-serif';
+  ctx.fillStyle = '#ffffff';
+  const name = weapon.name.length > 10 ? weapon.name.slice(0, 10) + '…' : weapon.name;
+  ctx.fillText(name, x + size / 2, y + size - 8);
+
+  ctx.restore();
 };

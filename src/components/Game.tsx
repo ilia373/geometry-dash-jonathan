@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import type { Player, Particle, GameState, GameStats, Quant, DroppedCoin } from '../types/game';
+import type { Player, Particle, GameState, GameStats, Quant, DroppedCoin, Projectile } from '../types/game';
 import type { CheatState } from '../types/cheats';
 import { GAME_CONFIG, getCurrentLevel, resetQuantIdCounter } from '../constants/gameConfig';
 import {
@@ -17,6 +17,7 @@ import {
   createDroppedCoins,
   updateDroppedCoins,
   checkDroppedCoinCollision,
+  applyDamageToQuant,
 } from '../utils/gamePhysics';
 import {
   drawBackground,
@@ -29,10 +30,14 @@ import {
   drawCoins,
   drawQuants,
   drawDroppedCoins,
+  drawProjectiles,
+  drawWeaponHUD,
 } from '../utils/gameRenderer';
 import { soundManager } from '../utils/soundManager';
 import { markLevelComplete } from '../utils/progressManager';
 import { addCoins, getTotalCoins } from '../utils/walletManager';
+import { createProjectile, updateProjectiles, checkAllProjectileCollisions } from '../utils/projectilePhysics';
+import { getSelectedWeapon } from '../utils/weaponManager';
 import './Game.css';
 
 interface GameProps {
@@ -74,9 +79,15 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
   const jumpOrbActiveRef = useRef<boolean>(false);
   const clickedRef = useRef<boolean>(false);
   
-  // Quant-related refs
-  const quantsRef = useRef<Quant[]>([]);
-  const droppedCoinsRef = useRef<DroppedCoin[]>([]);
+   // Quant-related refs
+   const quantsRef = useRef<Quant[]>([]);
+   const droppedCoinsRef = useRef<DroppedCoin[]>([]);
+   
+   // Weapon/projectile refs
+   const projectilesRef = useRef<Projectile[]>([]);
+   const weaponCooldownRef = useRef<number>(0);
+   const projectileIdCounterRef = useRef<number>(0);
+   const MAX_PROJECTILES = 50;
   
   // Clone level to avoid mutating original level data
   const levelRef = useRef(JSON.parse(JSON.stringify(getCurrentLevel(levelId))));
@@ -135,10 +146,12 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
     progressRef.current = 0;
     coinsCollectedRef.current = 0;
     // Reset quants
-    resetQuantIdCounter();
-    quantsRef.current = JSON.parse(JSON.stringify(level.quants || []));
-    droppedCoinsRef.current = [];
-    resetCoins();
+     resetQuantIdCounter();
+     quantsRef.current = JSON.parse(JSON.stringify(level.quants || []));
+     droppedCoinsRef.current = [];
+     projectilesRef.current = [];
+     weaponCooldownRef.current = 0;
+     resetCoins();
     setGameState('playing');
     setStats(prev => ({
       ...prev,
@@ -201,13 +214,60 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
           coinsCollectedRef.current += 10;
         }
         
-        // Update quants
-        quantsRef.current = updateAllQuants(
-          quantsRef.current,
-          cameraXRef.current
-        );
-        
-        // Update dropped coins with magnet effect toward player
+         // Update quants
+         quantsRef.current = updateAllQuants(
+           quantsRef.current,
+           cameraXRef.current
+         );
+         
+         // Auto-fire weapon
+         const currentWeapon = getSelectedWeapon();
+         if (currentWeapon && projectilesRef.current.length < MAX_PROJECTILES) {
+           if (weaponCooldownRef.current <= 0) {
+             projectilesRef.current.push(
+               createProjectile(
+                 playerRef.current,
+                 currentWeapon,
+                 cameraXRef.current,
+                 projectileIdCounterRef.current++
+               )
+             );
+             weaponCooldownRef.current = currentWeapon.cooldown;
+           } else {
+             weaponCooldownRef.current--;
+           }
+         }
+         
+         // Update projectiles
+         projectilesRef.current = updateProjectiles(projectilesRef.current);
+         
+         // Check projectile-quant collisions
+         const hitResults = checkAllProjectileCollisions(
+           projectilesRef.current,
+           quantsRef.current,
+           cameraXRef.current
+         );
+         for (const hit of hitResults) {
+           const quant = quantsRef.current.find(q => q.id === hit.quantId);
+           if (quant) {
+             applyDamageToQuant(quant, hit.damage);
+             if (quant.isDead) {
+               particlesRef.current = [
+                 ...particlesRef.current,
+                 ...createQuantDeathParticles(quant, cameraXRef.current),
+               ];
+               droppedCoinsRef.current = [
+                 ...droppedCoinsRef.current,
+                 ...createDroppedCoins(quant, cameraXRef.current),
+               ];
+               soundManager.playSound('coin');
+             }
+           }
+         }
+         // Remove consumed projectiles
+         projectilesRef.current = projectilesRef.current.filter(p => p.life > 0);
+         
+         // Update dropped coins with magnet effect toward player
         droppedCoinsRef.current = updateDroppedCoins(
           droppedCoinsRef.current,
           playerRef.current.x,
@@ -386,10 +446,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             coinsCollected: coinsCollectedRef.current,
             progress: 1,
           }));
-          setGameState('won');
-          soundManager.playSound('success');
-          soundManager.stopBackgroundMusic();
-          markLevelComplete(levelId);
+           setGameState('won');
+           soundManager.playSound('success');
+           soundManager.stopBackgroundMusic();
+           projectilesRef.current = [];
+           markLevelComplete(levelId);
           // Add collected coins to wallet using ref value
           addCoins(coinsCollectedRef.current);
         }
@@ -413,6 +474,9 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       // Draw quants
       drawQuants(ctx, quantsRef.current, cameraXRef.current, GAME_CONFIG.canvasWidth, timeRef.current);
       
+      // Draw projectiles
+      drawProjectiles(ctx, projectilesRef.current, cameraXRef.current);
+      
       // Draw dropped coins
       drawDroppedCoins(ctx, droppedCoinsRef.current, timeRef.current);
       
@@ -428,6 +492,9 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       drawProgressBar(ctx, progressRef.current, GAME_CONFIG.canvasWidth);
       drawAttempts(ctx, stats.attempts);
       drawCoins(ctx, coinsCollectedRef.current, GAME_CONFIG.canvasWidth);
+      
+      // Draw weapon HUD
+      drawWeaponHUD(ctx, getSelectedWeapon(), GAME_CONFIG.canvasWidth, GAME_CONFIG.canvasHeight);
       
       // Jump orb indicator
       if (jumpOrbActiveRef.current) {

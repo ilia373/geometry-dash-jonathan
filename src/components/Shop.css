@@ -1,0 +1,207 @@
+.shop-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+  z-index: 100;
+  color: white;
+}
+
+/* ========================================
+   SHOP HEADER
+   ======================================== */
+.shop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+/* ========================================
+   BACK BUTTON
+   ======================================== */
+.shop-back-btn {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.shop-back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateX(-2px);
+}
+
+/* ========================================
+   TAB SWITCHER
+   ======================================== */
+.shop-tab-switcher {
+  position: relative;
+  display: flex;
+  gap: 6px;
+}
+
+.shop-tab {
+  position: relative;
+  z-index: 1;
+  padding: 12px 32px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.shop-tab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 204, 102, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.shop-tab:hover:not(.active) {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.shop-tab:hover:not(.active)::before {
+  opacity: 0.5;
+}
+
+.shop-tab.active {
+  color: #000;
+  border-color: #00ff88;
+  background: linear-gradient(135deg, #00ff88 0%, #00cc66 50%, #00aa55 100%);
+  box-shadow:
+    0 0 20px rgba(0, 255, 136, 0.4),
+    0 0 40px rgba(0, 255, 136, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.shop-tab.active::before {
+  opacity: 0;
+}
+
+/* Shine animation on active tab */
+.shop-tab.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: skewX(-20deg);
+  animation: tabShine 3s ease-in-out infinite;
+}
+
+@keyframes tabShine {
+  0%, 100% { left: -100%; }
+  50% { left: 150%; }
+}
+
+.shop-tab-indicator {
+  display: none;
+}
+
+/* ========================================
+   COINS DISPLAY
+   ======================================== */
+.shop-coins {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  padding: 10px 18px;
+  border-radius: 50px;
+  white-space: nowrap;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.shop-coin-icon {
+  font-size: 1.15rem;
+  animation: shopCoinPulse 2s ease-in-out infinite;
+}
+
+@keyframes shopCoinPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.shop-coin-amount {
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 15px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  letter-spacing: 0.03em;
+}
+
+/* ========================================
+   SHOP CONTENT
+   ======================================== */
+.shop-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+  .shop-header {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .shop-back-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .shop-tab {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .shop-coins {
+    padding: 8px 12px;
+  }
+
+  .shop-coin-amount {
+    font-size: 13px;
+  }
+}

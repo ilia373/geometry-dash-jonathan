@@ -1,5 +1,7 @@
 // Game Types for Geometry Dash Clone
 
+import type { WeaponCategory } from './weapons';
+
 export interface Position {
   x: number;
   y: number;
@@ -82,6 +84,10 @@ export interface Quant extends Position, Dimensions {
   color: string;        // quant color
   isDead: boolean;      // whether this quant has been eliminated
   coinDrop: number;     // number of coins to drop when killed
+  // HP system fields (added for weapons combat)
+  hp: number;           // current health points
+  maxHp: number;        // maximum health points
+  flashTimer: number;   // flash animation timer when taking damage
 }
 
 // Dropped coin from killed quants
@@ -91,4 +97,18 @@ export interface DroppedCoin extends Position {
   vy: number;
   collected: boolean;
   life: number;         // time before it disappears
+}
+
+// Projectile fired by weapons
+export interface Projectile {
+  id: number;
+  x: number;            // world-space X position
+  y: number;            // world-space Y position
+  vx: number;           // horizontal velocity (projectileSpeed from weapon)
+  width: number;
+  height: number;
+  damage: number;       // from weapon stats
+  life: number;         // frames remaining (TTL, 300 = ~5 seconds at 60fps)
+  category: WeaponCategory;  // determines visual style
+  color: string;        // projectile color from weapon
 }

@@ -20,6 +20,8 @@ export interface UserData {
   bestProgress: Record<number, number>;
   selectedSkin: string;
   ownedSkins: string[];
+  selectedWeapon?: string;
+  ownedWeapons?: string[];
   lastUpdated: number;
 }
 
@@ -30,6 +32,8 @@ const defaultUserData: UserData = {
   bestProgress: {},
   selectedSkin: 'default',
   ownedSkins: ['default'],
+  selectedWeapon: '',
+  ownedWeapons: [],
   lastUpdated: Date.now(),
 };
 
@@ -40,6 +44,8 @@ const LOCAL_KEYS = {
   bestProgress: 'geometry-dash-best-progress',
   selectedSkin: 'geometry-dash-selected-skin',
   ownedSkins: 'geometry-dash-owned-skins',
+  selectedWeapon: 'geometry-dash-selected-weapon',
+  ownedWeapons: 'geometry-dash-owned-weapons',
 };
 
 // Active listener unsubscribe function
@@ -62,7 +68,17 @@ export const loadUserData = async (): Promise<UserData | null> => {
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      return docSnap.data() as UserData;
+      const data = docSnap.data() as Partial<UserData>;
+      return {
+        coins: data.coins ?? 0,
+        completedLevels: data.completedLevels ?? [],
+        bestProgress: data.bestProgress ?? {},
+        selectedSkin: data.selectedSkin ?? 'default',
+        ownedSkins: data.ownedSkins ?? ['default'],
+        selectedWeapon: data.selectedWeapon ?? '',
+        ownedWeapons: data.ownedWeapons ?? [],
+        lastUpdated: data.lastUpdated ?? Date.now(),
+      };
     } else {
       // Create new user document with local data (migration)
       const localData = loadLocalData();
@@ -159,6 +175,10 @@ const loadLocalData = (): UserData => {
       ownedSkins: JSON.parse(
         localStorage.getItem(LOCAL_KEYS.ownedSkins) || '["default"]'
       ),
+      selectedWeapon: localStorage.getItem(LOCAL_KEYS.selectedWeapon) || '',
+      ownedWeapons: JSON.parse(
+        localStorage.getItem(LOCAL_KEYS.ownedWeapons) || '[]'
+      ),
       lastUpdated: Date.now(),
     };
   } catch {
@@ -190,6 +210,12 @@ const saveLocalData = (data: Partial<UserData>): void => {
     if (data.ownedSkins !== undefined) {
       localStorage.setItem(LOCAL_KEYS.ownedSkins, JSON.stringify(data.ownedSkins));
     }
+    if (data.selectedWeapon !== undefined) {
+      localStorage.setItem(LOCAL_KEYS.selectedWeapon, data.selectedWeapon);
+    }
+    if (data.ownedWeapons !== undefined) {
+      localStorage.setItem(LOCAL_KEYS.ownedWeapons, JSON.stringify(data.ownedWeapons));
+    }
   } catch (error) {
     console.error('Error saving to localStorage:', error);
   }
@@ -219,6 +245,10 @@ export const syncLocalToCloud = async (): Promise<void> => {
     selectedSkin: cloudData.selectedSkin || localData.selectedSkin,
     ownedSkins: [
       ...new Set([...localData.ownedSkins, ...cloudData.ownedSkins]),
+    ],
+    selectedWeapon: cloudData.selectedWeapon || localData.selectedWeapon,
+    ownedWeapons: [
+      ...new Set([...(localData.ownedWeapons ?? []), ...(cloudData.ownedWeapons ?? [])]),
     ],
     lastUpdated: Date.now(),
   };

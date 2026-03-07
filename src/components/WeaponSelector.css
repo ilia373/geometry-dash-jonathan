@@ -1,0 +1,190 @@
+.weapon-selector-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+.category-filters {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.category-btn {
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.category-btn.active {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+.weapons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  align-content: start;
+  gap: 1rem;
+  padding: 1rem 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.weapon-card {
+  background: rgba(30, 30, 50, 0.8);
+  border: 3px solid transparent;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.weapon-card:hover {
+  background: rgba(50, 50, 80, 0.8);
+  transform: translateY(-3px);
+}
+
+.weapon-card.owned {
+  border-color: rgba(0, 255, 136, 0.3);
+}
+
+.weapon-card.selected {
+  border-color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.weapon-emoji {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+}
+
+.weapon-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.category-badge {
+  font-size: 0.6rem;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #000;
+  text-transform: uppercase;
+}
+
+.weapon-damage {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-buy,
+.btn-equip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #00ff88, #00cc6f);
+  color: #000;
+  transition: all 0.2s ease;
+  margin-top: 0.25rem;
+}
+
+.btn-buy:hover:not(:disabled),
+.btn-equip:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+.btn-buy.btn-disabled {
+  background: linear-gradient(135deg, #666, #444);
+  color: #999;
+  cursor: not-allowed;
+}
+
+.btn-buy.btn-disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-equipped {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #00ff88;
+  padding: 0.35rem 0;
+}
+
+/* Scrollbar Styling */
+.weapons-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.weapons-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.weapons-grid::-webkit-scrollbar-thumb {
+  background: #00ff88;
+  border-radius: 4px;
+}
+
+.weapons-grid::-webkit-scrollbar-thumb:hover {
+  background: #00cc66;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .weapons-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .weapon-emoji {
+    width: 45px;
+    height: 45px;
+    font-size: 1.4rem;
+  }
+
+  .weapon-card {
+    padding: 0.75rem;
+  }
+}

@@ -7,9 +7,10 @@ import './WeaponSelector.css';
 
 interface WeaponSelectorProps {
   onBack: () => void;
+  onCoinsChange?: () => void;
 }
 
-const WeaponSelector: React.FC<WeaponSelectorProps> = ({ onBack }) => {
+const WeaponSelector: React.FC<WeaponSelectorProps> = ({ onCoinsChange }) => {
   const [selectedId, setSelectedId] = useState<number | null>(getSelectedWeaponId());
   const [activeCategory, setActiveCategory] = useState<WeaponCategory | 'all'>('all');
   const [coins, setCoins] = useState<number>(getTotalCoins());
@@ -29,6 +30,7 @@ const WeaponSelector: React.FC<WeaponSelectorProps> = ({ onBack }) => {
       // Fire-and-forget Firestore writes
       unlockWeapon(weapon.id);
       setSelectedWeapon(weapon.id);
+      onCoinsChange?.();
     }
   };
 
@@ -46,12 +48,6 @@ const WeaponSelector: React.FC<WeaponSelectorProps> = ({ onBack }) => {
 
   return (
     <div className="weapon-selector-container">
-      <div className="weapon-selector-header">
-        <button className="back-btn" onClick={onBack}>←</button>
-        <h1>🔫 Weapons</h1>
-        <div className="coins-display">🪙 {coins}</div>
-      </div>
-
       <div className="category-filters">
         <button
           className={`category-btn ${activeCategory === 'all' ? 'active' : ''}`}

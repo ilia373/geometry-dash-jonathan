@@ -50,9 +50,9 @@ describe('Shop Component', () => {
     expect(skinTab).toHaveClass('active');
   });
 
-  it('renders SkinSelector by default (shows Skin Shop heading)', () => {
+  it('renders SkinSelector by default', () => {
     render(<Shop onBack={mockOnBack} />);
-    expect(screen.getByText('🎨 Skin Shop')).toBeInTheDocument();
+    expect(document.querySelector('.skin-selector-container')).toBeInTheDocument();
   });
 
   it('switches to WeaponSelector when Weapons tab is clicked', () => {
@@ -86,7 +86,7 @@ describe('Shop Component', () => {
     render(<Shop onBack={mockOnBack} />);
     const weaponsTab = screen.getByRole('button', { name: /🔫 Weapons/i });
     fireEvent.click(weaponsTab);
-    const coinsDisplay = document.querySelector('.coins-display');
+    const coinsDisplay = document.querySelector('.shop-coin-amount');
     expect(coinsDisplay?.textContent).toContain('500');
   });
 
@@ -99,7 +99,7 @@ describe('Shop Component', () => {
     expect(document.querySelector('.weapon-selector-container')).toBeInTheDocument();
 
     fireEvent.click(skinTab);
-    expect(screen.getByText('🎨 Skin Shop')).toBeInTheDocument();
+    expect(document.querySelector('.skin-selector-container')).toBeInTheDocument();
     expect(skinTab).toHaveClass('active');
   });
 });

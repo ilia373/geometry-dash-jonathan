@@ -1,9 +1,10 @@
 {
-  "active_plan": "/Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/.sisyphus/plans/fortune-wheel-sound.md",
-  "started_at": "2026-02-20T11:49:37.724Z",
+  "active_plan": "/Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan/.sisyphus/plans/weapons-bugfixes.md",
+  "started_at": "2026-03-06T09:54:29.071Z",
   "session_ids": [
-    "ses_38525ce12ffeqIBMQOfMeF55lh"
+    "ses_340684f9dffeR1iL6w08ceaEpe"
   ],
-  "plan_name": "fortune-wheel-sound",
-  "agent": "atlas"
+  "plan_name": "weapons-bugfixes",
+  "agent": "atlas",
+  "worktree_path": "/Users/iliaa/Desktop/repos/poc/geometry-dash-jonathan"
 }

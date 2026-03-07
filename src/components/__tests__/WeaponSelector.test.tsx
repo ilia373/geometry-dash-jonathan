@@ -28,22 +28,6 @@ describe('WeaponSelector Component', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('renders the back button with ← text', () => {
-    render(<WeaponSelector onBack={mockOnBack} />);
-    expect(screen.getByText('←')).toBeInTheDocument();
-  });
-
-  it('calls onBack when back button is clicked', () => {
-    render(<WeaponSelector onBack={mockOnBack} />);
-    fireEvent.click(screen.getByText('←'));
-    expect(mockOnBack).toHaveBeenCalledTimes(1);
-  });
-
-  it('displays coin balance', () => {
-    render(<WeaponSelector onBack={mockOnBack} />);
-    expect(screen.getByText('🪙 500')).toBeInTheDocument();
-  });
-
   it('renders All category filter button', () => {
     render(<WeaponSelector onBack={mockOnBack} />);
     expect(screen.getByText('🌟 All')).toBeInTheDocument();

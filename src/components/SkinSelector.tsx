@@ -6,9 +6,10 @@ import './SkinSelector.css';
 
 interface SkinSelectorProps {
   onBack: () => void;
+  onCoinsChange?: () => void;
 }
 
-const SkinSelector: React.FC<SkinSelectorProps> = ({ onBack }) => {
+const SkinSelector: React.FC<SkinSelectorProps> = ({ onCoinsChange }) => {
   const [selectedSkinId, setSelectedSkinId] = useState<number>(getSelectedSkinId());
   const [activeCategory, setActiveCategory] = useState<SkinCategory | 'all'>('all');
   const [previewRotation, setPreviewRotation] = useState<number>(0);
@@ -53,6 +54,7 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onBack }) => {
         // Auto-select the newly purchased skin
         setSelectedSkinId(skinId);
         await setSelectedSkin(skinId);
+        onCoinsChange?.();
       }
     }
   };
@@ -62,26 +64,9 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onBack }) => {
     : SKINS.filter(skin => skin.category === activeCategory);
 
   const currentSkin = getSkinById(selectedSkinId);
-  const unlockedCount = unlockedSkins.length;
-  const totalCount = SKINS.length;
 
   return (
     <div className="skin-selector-container">
-      {/* Header */}
-      <div className="skin-selector-header">
-        <button className="back-button" onClick={onBack}>
-          ← Back
-        </button>
-        <h1>🎨 Skin Shop</h1>
-        <div className="header-stats">
-          <div className="coin-balance">
-            <span className="coin-icon">🪙</span>
-            <span className="coin-amount">{coins}</span>
-          </div>
-          <div className="skin-count">{unlockedCount}/{totalCount} Unlocked</div>
-        </div>
-      </div>
-
       {/* Preview Section */}
       <div className="skin-preview-section">
         <div className="preview-cube-container">
@@ -157,7 +142,7 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onBack }) => {
               </div>
               <span className="skin-name">{skin.name}</span>
               {selectedSkinId === skin.id && isUnlocked && <span className="equipped-badge">✓</span>}
-              {!isUnlocked && (
+              {!isUnlocked && ( 
                 <button 
                   className={`buy-button ${canAfford ? '' : 'disabled'}`}
                   onClick={(e) => handleBuySkin(skin.id, e)}

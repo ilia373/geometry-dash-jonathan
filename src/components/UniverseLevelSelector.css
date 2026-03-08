@@ -1,0 +1,270 @@
+.universe-level-selector {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--universe-bg, #0a1f14);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.universe-bg-overlay {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--universe-primary, #00ff88) 15%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, color-mix(in srgb, var(--universe-secondary, #00cc66) 10%, transparent) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.universe-top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  z-index: 100;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+  backdrop-filter: blur(4px);
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.05em;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--universe-primary, #00ff88);
+  color: var(--universe-primary, #00ff88);
+  transform: translateX(-2px);
+}
+
+.universe-main-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 6rem;
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 2rem 3rem;
+}
+
+.universe-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.universe-emoji-large {
+  font-size: 4rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 20px var(--universe-glow, #00ff88));
+  animation: emojiPulse 3s ease-in-out infinite;
+}
+
+@keyframes emojiPulse {
+  0%, 100% { filter: drop-shadow(0 0 20px var(--universe-glow, #00ff88)); }
+  50% { filter: drop-shadow(0 0 40px var(--universe-glow, #00ff88)); }
+}
+
+.universe-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  margin: 0;
+  color: var(--universe-primary, #00ff88);
+  text-shadow:
+    0 0 20px var(--universe-glow, #00ff88),
+    0 0 40px color-mix(in srgb, var(--universe-glow, #00ff88) 50%, transparent);
+  letter-spacing: 0.05em;
+}
+
+.universe-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+
+.planet-level-cards {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.planet-card {
+  position: relative;
+  width: 185px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  text-align: left;
+}
+
+.planet-card:hover:not(:disabled) {
+  transform: translateY(-6px) scale(1.02);
+  border-color: color-mix(in srgb, var(--universe-primary, #00ff88) 60%, transparent);
+}
+
+.planet-card.selected {
+  border-color: var(--universe-primary, #00ff88);
+  box-shadow:
+    0 0 0 1px var(--universe-primary, #00ff88),
+    0 20px 40px color-mix(in srgb, var(--universe-glow, #00ff88) 15%, transparent);
+}
+
+.planet-card.locked {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.planet-card-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--universe-primary, #00ff88);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.planet-card:hover:not(:disabled) .planet-card-glow {
+  height: 5px;
+  opacity: 1;
+  box-shadow: 0 0 15px var(--universe-glow, #00ff88);
+}
+
+.planet-card-content {
+  position: relative;
+  z-index: 2;
+}
+
+.planet-name {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--universe-primary, #00ff88);
+  margin-bottom: 2px;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--universe-glow, #00ff88) 50%, transparent);
+}
+
+.level-name-sub {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+.selection-ring {
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--universe-primary, #00ff88);
+  border-radius: 18px;
+  animation: selectionRingPulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes selectionRingPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.02); }
+}
+
+.universe-play-button {
+  position: relative;
+  padding: 1.25rem 4rem;
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  margin-top: 0.5rem;
+}
+
+.universe-play-button .play-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    var(--universe-primary, #00ff88) 0%,
+    var(--universe-secondary, #00cc66) 50%,
+    color-mix(in srgb, var(--universe-secondary, #00cc66) 80%, #000) 100%
+  );
+  border-radius: 60px;
+  transition: all 0.3s ease;
+}
+
+.universe-play-button:hover:not(:disabled) .play-bg {
+  transform: scale(1.02);
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--universe-glow, #00ff88) 40%, transparent);
+}
+
+.universe-play-button.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.universe-play-button.disabled .play-bg {
+  background: linear-gradient(135deg, #444 0%, #333 100%);
+}
+
+@media (max-width: 768px) {
+  .universe-title {
+    font-size: 2rem;
+  }
+
+  .planet-level-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .planet-card {
+    width: 90%;
+    max-width: 300px;
+  }
+
+  .universe-top-bar {
+    padding: 1rem;
+  }
+
+  .back-button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+}

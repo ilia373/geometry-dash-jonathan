@@ -64,7 +64,6 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
       setRefreshKey(prev => prev + 1);
     };
     syncData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

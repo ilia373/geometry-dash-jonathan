@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { LEVELS } from '../constants/gameConfig';
 import { getUniverseById } from '../constants/universeConfig';
 import { isLevelUnlocked, isLevelCompleted } from '../utils/progressManager';
@@ -76,9 +76,9 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
     }
   };
 
-  const handleAuthSuccess = useCallback(() => {
+  const handleAuthSuccess = () => {
     setShowAuthModal(false);
-  }, []);
+  };
 
   if (!universe) {
     return null;

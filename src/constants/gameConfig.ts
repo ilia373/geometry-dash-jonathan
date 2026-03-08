@@ -122,6 +122,7 @@ export const LEVELS: Level[] = [
   {
     id: 1,
     name: 'Stereo Madness',
+    planetName: 'Mercury',
     groundColor: '#1a1a2e',
     backgroundColor: '#0f0f1a',
     length: 5000,
@@ -166,6 +167,7 @@ export const LEVELS: Level[] = [
   {
     id: 2,
     name: 'Back on Track',
+    planetName: 'Venus',
     groundColor: '#2d132c',
     backgroundColor: '#1a0a1a',
     length: 6000,
@@ -222,6 +224,7 @@ export const LEVELS: Level[] = [
   {
     id: 3,
     name: 'Polargeist',
+    planetName: 'Earth',
     groundColor: '#0d3b66',
     backgroundColor: '#051a33',
     length: 7000,
@@ -284,6 +287,7 @@ export const LEVELS: Level[] = [
   {
     id: 4,
     name: 'Dry Out',
+    planetName: 'Mars',
     groundColor: '#4a1942',
     backgroundColor: '#2a0a22',
     length: 7500,
@@ -349,6 +353,7 @@ export const LEVELS: Level[] = [
   {
     id: 5,
     name: 'Base After Base',
+    planetName: 'Jupiter',
     groundColor: '#1a4d2e',
     backgroundColor: '#0a2a1a',
     length: 8000,
@@ -417,6 +422,7 @@ export const LEVELS: Level[] = [
   {
     id: 6,
     name: 'Cant Let Go',
+    planetName: 'Saturn',
     groundColor: '#4a3728',
     backgroundColor: '#2a1a10',
     length: 8500,
@@ -486,6 +492,25 @@ export const LEVELS: Level[] = [
   },
 ];
 
+// Universe color override — set before entering game, cleared on exit
+let activeColorOverride: { groundColor?: string; backgroundColor?: string } | null = null;
+
+export const setColorOverride = (override: { groundColor?: string; backgroundColor?: string } | null): void => {
+  activeColorOverride = override;
+};
+
+export const getColorOverride = (): { groundColor?: string; backgroundColor?: string } | null => {
+  return activeColorOverride;
+};
+
 export const getCurrentLevel = (levelId: number): Level => {
-  return LEVELS.find(l => l.id === levelId) || LEVELS[0];
+  const level = LEVELS.find(l => l.id === levelId) || LEVELS[0];
+  if (activeColorOverride) {
+    return {
+      ...level,
+      groundColor: activeColorOverride.groundColor ?? level.groundColor,
+      backgroundColor: activeColorOverride.backgroundColor ?? level.backgroundColor,
+    };
+  }
+  return level;
 };

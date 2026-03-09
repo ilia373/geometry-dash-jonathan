@@ -15,12 +15,14 @@ interface UniverseLevelSelectorProps {
   universeId: string;
   onStartGame: (levelId: number, cheats: CheatState) => void;
   onBack: () => void;
+  onOpenShop: () => void;
 }
 
 const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
   universeId,
   onStartGame,
   onBack,
+  onOpenShop,
 }) => {
   const universe = getUniverseById(universeId);
   const universeLevels = universe
@@ -107,14 +109,14 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
           <span>Map</span>
         </button>
 
-        <div className="coin-display">
-          <div className="coin-icon">
-            <span>★</span>
-          </div>
-          <span className="coin-amount">{coins.toLocaleString()}</span>
-        </div>
-
         <div className="top-bar-right">
+          <div className="coin-display">
+            <div className="coin-icon">
+              <span>★</span>
+            </div>
+            <span className="coin-amount">{coins.toLocaleString()}</span>
+          </div>
+
           {user ? (
             <div className="user-section">
               <span className={`user-info ${isAdmin() ? 'is-admin' : ''}`}>
@@ -139,6 +141,12 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
               <div className="btn-shine" />
             </button>
           )}
+
+          <button type="button" className="shop-button" onClick={onOpenShop}>
+            <span className="btn-icon">🛒</span>
+            <span className="btn-text">Shop</span>
+            <div className="btn-shine" />
+          </button>
         </div>
       </div>
 

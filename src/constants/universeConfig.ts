@@ -12,12 +12,12 @@ export const UNIVERSES: Universe[] = [
     position: { x: 20, y: 50 },
     connections: ['andromeda'],
     theme: {
-      primaryColor: '#00ff88',
-      secondaryColor: '#00cc66',
-      glowColor: '#00ff88',
-      accentColor: '#0f4f2e',
-      groundColorOverride: '#1a4d2e',
-      backgroundColorOverride: '#0a1f14',
+      primaryColor: '#5ee8b0',
+      secondaryColor: '#3cbf8a',
+      glowColor: '#5ee8b0',
+      accentColor: '#1a5c40',
+      groundColorOverride: '#1e4d38',
+      backgroundColorOverride: '#0c1f18',
     },
   },
   {

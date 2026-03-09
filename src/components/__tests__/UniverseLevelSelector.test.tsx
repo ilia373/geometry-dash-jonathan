@@ -50,6 +50,7 @@ import UniverseLevelSelector from '../UniverseLevelSelector';
 describe('UniverseLevelSelector Component', () => {
   const mockOnStartGame = vi.fn();
   const mockOnBack = vi.fn();
+  const mockOnOpenShop = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,6 +62,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="milky-way"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     expect(screen.getByText('Milky Way')).toBeInTheDocument();
@@ -72,6 +74,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="milky-way"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     expect(document.querySelectorAll('.planet-card')).toHaveLength(6);
@@ -83,6 +86,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="milky-way"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     const backButton = document.querySelector('.back-button') as HTMLElement;
@@ -96,6 +100,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="milky-way"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     const level3Card = document.querySelectorAll('.planet-card')[2] as HTMLButtonElement;
@@ -108,6 +113,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="milky-way"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     expect(document.querySelector('.badge-icon.completed')).not.toBeNull();
@@ -119,6 +125,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="milky-way"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     expect(document.querySelector('.universe-play-button')).toBeInTheDocument();
@@ -130,6 +137,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="milky-way"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     const playButton = document.querySelector('.universe-play-button') as HTMLElement;
@@ -143,6 +151,7 @@ describe('UniverseLevelSelector Component', () => {
         universeId="does-not-exist"
         onStartGame={mockOnStartGame}
         onBack={mockOnBack}
+        onOpenShop={mockOnOpenShop}
       />
     );
     expect(document.querySelector('.universe-level-selector')).toBeNull();

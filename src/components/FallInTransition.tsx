@@ -8,6 +8,8 @@ interface FallInTransitionProps {
   onComplete: () => void;
 }
 
+const TUNNEL_RINGS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
+
 const FallInTransition: React.FC<FallInTransitionProps> = ({
   isActive,
   universeTheme,
@@ -25,31 +27,21 @@ const FallInTransition: React.FC<FallInTransitionProps> = ({
 
   if (!isActive) return null;
 
-  const primaryColor = universeTheme?.primaryColor ?? '#00ff88';
-  const backgroundColor = universeTheme?.backgroundColorOverride ?? '#0a0a0f';
+  const borderColor = universeTheme?.primaryColor ?? '#ffffff';
 
   return (
-    <div
-      className="fall-in-overlay"
-      style={{ backgroundColor }}
-    >
-      <div
-        className="fall-in-ring"
-        style={{
-          background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)`,
-        }}
-      />
-      <div
-        className="fall-in-ring-inner"
-        style={{
-          background: `radial-gradient(circle, ${primaryColor} 0%, transparent 60%)`,
-        }}
-      />
-      <div className="fall-in-lines" />
-      <div
-        className="fall-in-flash"
-        style={{ background: primaryColor }}
-      />
+    <div className="fall-in-overlay">
+      <div className="fall-in-tunnel">
+        {TUNNEL_RINGS.map((id) => (
+          <div
+            key={id}
+            className="fall-in-tunnel-ring"
+            style={{ borderColor: `${borderColor}33` }}
+          />
+        ))}
+      </div>
+      <div className="fall-in-stars" />
+      <div className="fall-in-vignette" />
       <div className="fall-in-whiteout" />
     </div>
   );

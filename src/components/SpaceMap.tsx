@@ -44,6 +44,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [panAtDragStart, setPanAtDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [zoom, setZoom] = useState<number>(1);
 
   const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -133,8 +134,25 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
 
   const clamp = (val: number, min: number, max: number) => Math.max(min, Math.min(max, val));
 
+  const ZOOM_MIN = 0.5;
+  const ZOOM_MAX = 2.0;
+  const ZOOM_STEP = 0.2;
+
+  const handleZoomIn = () => {
+    setZoom(prev => clamp(prev + ZOOM_STEP, ZOOM_MIN, ZOOM_MAX));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => clamp(prev - ZOOM_STEP, ZOOM_MIN, ZOOM_MAX));
+  };
+
+  const handleRecenter = () => {
+    setPanOffset({ x: 0, y: 0 });
+    setZoom(1);
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.universe-node, .space-map-top-bar')) return;
+    if ((e.target as HTMLElement).closest('.universe-node, .space-map-top-bar, .map-controls')) return;
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
     setPanAtDragStart({ ...panOffset });
@@ -159,7 +177,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.universe-node, .space-map-top-bar')) return;
+    if ((e.target as HTMLElement).closest('.universe-node, .space-map-top-bar, .map-controls')) return;
     const touch = e.touches[0];
     setIsDragging(true);
     setDragStart({ x: touch.clientX, y: touch.clientY });
@@ -274,7 +292,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
 
       <div
         className="space-map-world"
-        style={{ transform: `translate(calc(-50% + ${panOffset.x}px), calc(-50% + ${panOffset.y}px))` }}
+        style={{ transform: `translate(calc(-50% + ${panOffset.x}px), calc(-50% + ${panOffset.y}px)) scale(${zoom})` }}
       >
         <svg
           className="connection-svg"
@@ -382,6 +400,32 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
             </button>
           );
         })}
+      </div>
+
+      <div className="map-controls">
+        <button type="button" className="map-control-btn recenter-btn" onClick={handleRecenter} aria-label="Recenter map">
+          <span className="control-icon">⊕</span>
+        </button>
+        <div className="zoom-controls">
+          <button
+            type="button"
+            className="map-control-btn zoom-in-btn"
+            onClick={handleZoomIn}
+            disabled={zoom >= ZOOM_MAX}
+            aria-label="Zoom in"
+          >
+            <span className="control-icon">+</span>
+          </button>
+          <button
+            type="button"
+            className="map-control-btn zoom-out-btn"
+            onClick={handleZoomOut}
+            disabled={zoom <= ZOOM_MIN}
+            aria-label="Zoom out"
+          >
+            <span className="control-icon">−</span>
+          </button>
+        </div>
       </div>
 
       {userIsAdmin && (

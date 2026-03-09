@@ -89,6 +89,7 @@ function App() {
           universeId={currentUniverseId}
           onStartGame={handleStartGame}
           onBack={handleBackToMap}
+          onOpenShop={handleOpenShop}
         />
       )}
       {screen === 'game' && (

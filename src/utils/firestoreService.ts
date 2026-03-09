@@ -22,6 +22,7 @@ export interface UserData {
   ownedSkins: string[];
   selectedWeapon?: string;
   ownedWeapons?: string[];
+  unlockedUniverses: string[];
   lastUpdated: number;
 }
 
@@ -34,6 +35,7 @@ const defaultUserData: UserData = {
   ownedSkins: ['default'],
   selectedWeapon: '',
   ownedWeapons: [],
+  unlockedUniverses: ['milky-way'],
   lastUpdated: Date.now(),
 };
 
@@ -46,6 +48,7 @@ const LOCAL_KEYS = {
   ownedSkins: 'geometry-dash-owned-skins',
   selectedWeapon: 'geometry-dash-selected-weapon',
   ownedWeapons: 'geometry-dash-owned-weapons',
+  unlockedUniverses: 'geometry-dash-unlocked-universes',
 };
 
 // Active listener unsubscribe function
@@ -77,6 +80,7 @@ export const loadUserData = async (): Promise<UserData | null> => {
         ownedSkins: data.ownedSkins ?? ['default'],
         selectedWeapon: data.selectedWeapon ?? '',
         ownedWeapons: data.ownedWeapons ?? [],
+        unlockedUniverses: data.unlockedUniverses ?? ['milky-way'],
         lastUpdated: data.lastUpdated ?? Date.now(),
       };
     } else {
@@ -179,6 +183,9 @@ const loadLocalData = (): UserData => {
       ownedWeapons: JSON.parse(
         localStorage.getItem(LOCAL_KEYS.ownedWeapons) || '[]'
       ),
+      unlockedUniverses: JSON.parse(
+        localStorage.getItem(LOCAL_KEYS.unlockedUniverses) || '["milky-way"]'
+      ),
       lastUpdated: Date.now(),
     };
   } catch {
@@ -216,6 +223,9 @@ const saveLocalData = (data: Partial<UserData>): void => {
     if (data.ownedWeapons !== undefined) {
       localStorage.setItem(LOCAL_KEYS.ownedWeapons, JSON.stringify(data.ownedWeapons));
     }
+    if (data.unlockedUniverses !== undefined) {
+      localStorage.setItem(LOCAL_KEYS.unlockedUniverses, JSON.stringify(data.unlockedUniverses));
+    }
   } catch (error) {
     console.error('Error saving to localStorage:', error);
   }
@@ -249,6 +259,9 @@ export const syncLocalToCloud = async (): Promise<void> => {
     selectedWeapon: cloudData.selectedWeapon || localData.selectedWeapon,
     ownedWeapons: [
       ...new Set([...(localData.ownedWeapons ?? []), ...(cloudData.ownedWeapons ?? [])]),
+    ],
+    unlockedUniverses: [
+      ...new Set([...(localData.unlockedUniverses ?? ['milky-way']), ...(cloudData.unlockedUniverses ?? ['milky-way'])]),
     ],
     lastUpdated: Date.now(),
   };

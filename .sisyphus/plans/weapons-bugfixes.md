@@ -109,7 +109,7 @@ Critical Path: T1+T2+T3 (parallel) → T4
 
 ## TODOs
 
-- [ ] 1. Fix Menu Button Label: "Skins" → "Shop"
+- [x] 1. Fix Menu Button Label: "Skins" → "Shop"
 
   **What to do**:
   - In `src/components/Menu.tsx` line 222-226, change:
@@ -176,7 +176,7 @@ Critical Path: T1+T2+T3 (parallel) → T4
 
 ---
 
-- [ ] 2. Fix Stretched Weapon Cards
+- [x] 2. Fix Stretched Weapon Cards
 
   **What to do**:
   - In `src/components/WeaponSelector.css`, fix the `.weapons-grid` to prevent cards from stretching:
@@ -238,7 +238,7 @@ Critical Path: T1+T2+T3 (parallel) → T4
 
 ---
 
-- [ ] 3. Make Equip Instant (Optimistic UI)
+- [x] 3. Make Equip Instant (Optimistic UI)
 
   **What to do**:
   - In `src/components/WeaponSelector.tsx`, change `handleEquip` from async+await to fire-and-forget:
@@ -350,7 +350,7 @@ Critical Path: T1+T2+T3 (parallel) → T4
 
 ---
 
-- [ ] 4. Update Tests + Full Verification
+- [x] 4. Update Tests + Full Verification
 
   **What to do**:
   - In `src/components/__tests__/Menu.test.tsx`:

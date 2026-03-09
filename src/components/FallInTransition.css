@@ -1,0 +1,162 @@
+.fall-in-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  overflow: hidden;
+  background: #000;
+  animation: overlayFade 1.5s ease-in forwards;
+}
+
+.fall-in-tunnel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 800px;
+}
+
+.fall-in-tunnel-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  animation: tunnelZoom 1.5s ease-in forwards;
+}
+
+.fall-in-tunnel-ring:nth-child(1) {
+  width: 30vmax;
+  height: 30vmax;
+  animation-delay: 0s;
+}
+
+.fall-in-tunnel-ring:nth-child(2) {
+  width: 50vmax;
+  height: 50vmax;
+  animation-delay: 0.05s;
+}
+
+.fall-in-tunnel-ring:nth-child(3) {
+  width: 70vmax;
+  height: 70vmax;
+  animation-delay: 0.1s;
+}
+
+.fall-in-tunnel-ring:nth-child(4) {
+  width: 90vmax;
+  height: 90vmax;
+  animation-delay: 0.15s;
+}
+
+.fall-in-tunnel-ring:nth-child(5) {
+  width: 110vmax;
+  height: 110vmax;
+  animation-delay: 0.2s;
+}
+
+.fall-in-tunnel-ring:nth-child(6) {
+  width: 130vmax;
+  height: 130vmax;
+  animation-delay: 0.25s;
+}
+
+.fall-in-tunnel-ring:nth-child(7) {
+  width: 150vmax;
+  height: 150vmax;
+  animation-delay: 0.3s;
+}
+
+.fall-in-tunnel-ring:nth-child(8) {
+  width: 170vmax;
+  height: 170vmax;
+  animation-delay: 0.35s;
+}
+
+.fall-in-stars {
+  position: absolute;
+  inset: 0;
+  animation: starsStretch 1.3s ease-in forwards;
+  background:
+    radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 30% 60%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 50% 10%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 70% 40%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 80% 70%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 90% 30%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 15% 80%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 40% 90%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 60% 50%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 25% 35%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 85% 85%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 55% 75%, rgba(255, 255, 255, 0.5), transparent);
+}
+
+.fall-in-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+  animation: vignetteClose 1.3s ease-in forwards;
+}
+
+.fall-in-whiteout {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  animation: whiteOut 0.35s ease-in 1.15s forwards;
+}
+
+@keyframes overlayFade {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+@keyframes tunnelZoom {
+  0% {
+    transform: scale(1) translateZ(0);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0) translateZ(600px);
+    opacity: 0;
+  }
+}
+
+@keyframes starsStretch {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes vignetteClose {
+  0% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+}
+
+@keyframes whiteOut {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}

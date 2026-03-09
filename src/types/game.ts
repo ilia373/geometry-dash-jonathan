@@ -35,6 +35,7 @@ export interface Obstacle extends Position, Dimensions {
 export interface Level {
   id: number;
   name: string;
+  planetName?: string;
   obstacles: Obstacle[];
   quants: Quant[];       // Quant enemies in this level
   groundColor: string;

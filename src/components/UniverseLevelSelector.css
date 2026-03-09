@@ -174,6 +174,58 @@
   z-index: 2;
 }
 
+.level-badge {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.badge-number {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.badge-icon {
+  font-size: 1.1rem;
+}
+
+.badge-icon.completed {
+  color: #00ff88;
+}
+
+.badge-icon.locked {
+  font-size: 1rem;
+}
+
+.level-info {
+  margin-bottom: 0.5rem;
+}
+
+.difficulty-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.difficulty-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.difficulty-dot.active {
+  background: linear-gradient(135deg, #ff6b6b, #ffa500);
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+}
+
 .planet-name {
   display: block;
   font-size: 1rem;
@@ -244,6 +296,196 @@
   background: linear-gradient(135deg, #444 0%, #333 100%);
 }
 
+.play-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.play-icon {
+  font-size: 1.5rem;
+  color: #000;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.play-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #000;
+  letter-spacing: 0.1em;
+}
+
+.play-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+
+.universe-play-button:hover:not(:disabled) .play-shine {
+  left: 150%;
+}
+
+.coin-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 50px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.coin-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+  animation: coinPulse 2s ease-in-out infinite;
+}
+
+.coin-icon span {
+  font-size: 1.2rem;
+  color: #000;
+}
+
+@keyframes coinPulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+  50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+}
+
+.coin-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  letter-spacing: 0.05em;
+}
+
+.top-bar-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.user-info.is-admin {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 140, 0, 0.3) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.5);
+}
+
+.admin-crown {
+  font-size: 1rem;
+}
+
+.guest-icon {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.user-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.login-button,
+.logout-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-button {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.8) 0%, rgba(0, 168, 204, 0.8) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, rgba(255, 100, 100, 0.8) 0%, rgba(204, 50, 50, 0.8) 100%);
+  border: 1px solid rgba(255, 100, 100, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 100, 100, 0.3);
+  padding: 10px 20px;
+}
+
+.login-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(0, 212, 255, 0.5);
+  border-color: rgba(0, 212, 255, 0.8);
+}
+
+.logout-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(255, 100, 100, 0.5);
+  border-color: rgba(255, 100, 100, 0.8);
+}
+
+.btn-icon {
+  font-size: 1.3rem;
+}
+
+.btn-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: btnShine 3s ease-in-out infinite;
+}
+
+@keyframes btnShine {
+  0%, 100% { left: -100%; }
+  50% { left: 100%; }
+}
+
 @media (max-width: 768px) {
   .universe-title {
     font-size: 2rem;
@@ -265,6 +507,21 @@
 
   .back-button {
     padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .coin-display {
+    padding: 8px 16px;
+  }
+
+  .login-button,
+  .logout-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .user-info {
+    padding: 8px 12px;
     font-size: 0.85rem;
   }
 }

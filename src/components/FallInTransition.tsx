@@ -31,10 +31,27 @@ const FallInTransition: React.FC<FallInTransitionProps> = ({
   return (
     <div
       className="fall-in-overlay"
-      style={{
-        backgroundImage: `radial-gradient(circle at center, ${primaryColor} 0%, ${backgroundColor} 100%)`,
-      }}
-    />
+      style={{ backgroundColor }}
+    >
+      <div
+        className="fall-in-ring"
+        style={{
+          background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)`,
+        }}
+      />
+      <div
+        className="fall-in-ring-inner"
+        style={{
+          background: `radial-gradient(circle, ${primaryColor} 0%, transparent 60%)`,
+        }}
+      />
+      <div className="fall-in-lines" />
+      <div
+        className="fall-in-flash"
+        style={{ background: primaryColor }}
+      />
+      <div className="fall-in-whiteout" />
+    </div>
   );
 };
 

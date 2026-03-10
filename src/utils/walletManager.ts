@@ -13,8 +13,7 @@ export const syncWalletFromCloud = async (): Promise<void> => {
   activeSyncPromise = (async () => {
     const user = getCurrentUser();
 
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       try {
         const userData = await loadUserData();
         cachedCoins = userData?.coins ?? 0;
@@ -38,8 +37,7 @@ export const addCoins = async (amount: number): Promise<void> => {
   cachedCoins += amount;
   
   const user = getCurrentUser();
-  if (!user || isGuest()) {
-  } else {
+  if (user && !isGuest()) {
     await saveUserData({ coins: cachedCoins });
   }
 };
@@ -67,8 +65,7 @@ export const spendCoins = async (amount: number): Promise<boolean> => {
     cachedCoins -= amount;
     
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ coins: cachedCoins });
     }
     return true;
@@ -86,8 +83,7 @@ export const resetWallet = async (): Promise<void> => {
   cacheInitialized = true;
   
   const user = getCurrentUser();
-  if (!user || isGuest()) {
-  } else {
+  if (user && !isGuest()) {
     await saveUserData({ coins: 0 });
   }
 };

@@ -126,8 +126,7 @@ export const unlockWeapon = async (weaponId: number): Promise<void> => {
     const ownedWeaponNames = cachedOwnedWeaponIds.map(weaponIdToName);
 
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ ownedWeapons: ownedWeaponNames });
     }
   }
@@ -155,8 +154,7 @@ export const setSelectedWeapon = async (weaponId: number): Promise<void> => {
     const weaponName = weaponIdToName(weaponId);
 
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ selectedWeapon: weaponName });
     }
   }

@@ -77,7 +77,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
     };
     syncData();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [user]);
 
   useEffect(() => {

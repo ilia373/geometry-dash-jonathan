@@ -117,8 +117,7 @@ export const unlockSkin = async (skinId: number): Promise<void> => {
     const ownedSkinNames = cachedUnlockedSkinIds.map(skinIdToName);
     
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ ownedSkins: ownedSkinNames });
     }
   }
@@ -144,8 +143,7 @@ export const setSelectedSkin = async (skinId: number): Promise<void> => {
     const skinName = skinIdToName(skinId);
     
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ selectedSkin: skinName });
     }
   }

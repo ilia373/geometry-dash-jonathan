@@ -63,8 +63,7 @@ export const unlockUniverse = async (id: string): Promise<void> => {
     cachedUnlockedUniverses.push(id);
 
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ unlockedUniverses: cachedUnlockedUniverses });
     }
   }

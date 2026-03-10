@@ -36,8 +36,7 @@ export const markLevelComplete = async (levelId: number): Promise<void> => {
     cachedCompletedLevels.push(levelId);
     
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ completedLevels: cachedCompletedLevels });
     }
   }
@@ -104,8 +103,7 @@ export const resetProgress = async (): Promise<void> => {
   cacheInitialized = true;
   
   const user = getCurrentUser();
-  if (!user || isGuest()) {
-  } else {
+  if (user && !isGuest()) {
     await saveUserData({ completedLevels: [] });
   }
 };

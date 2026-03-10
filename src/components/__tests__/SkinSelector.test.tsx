@@ -16,6 +16,10 @@ vi.mock('../../utils/walletManager', () => ({
   spendCoins: vi.fn(() => true),
 }));
 
+vi.mock('../../utils/authService', () => ({
+  isGuest: vi.fn(() => false),
+}));
+
 describe('SkinSelector Component', () => {
   const mockOnBack = vi.fn();
 

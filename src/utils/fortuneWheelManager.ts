@@ -1,4 +1,5 @@
 // Fortune Wheel utility functions for timing and storage management
+import { isGuest } from './authService';
 
 // Fortune Wheel Storage Keys
 const LAST_WHEEL_TIME_KEY = 'geometry-dash-last-wheel-time';
@@ -7,6 +8,9 @@ const SPINS_LEFT_KEY = 'geometry-dash-spins-left';
 // Wheel constants
 export const WHEEL_COOLDOWN_MS = 10 * 60 * 60 * 1000; // 10 hours in milliseconds
 export const DEFAULT_SPINS = 2;
+
+let cachedLastWheelTime: number = 0;
+let cachedSpinsLeft: number = 0;
 
 // Wheel portion definitions (A-H)
 export interface WheelPortion {
@@ -46,41 +50,49 @@ export const getWeightedRandomPortion = (): WheelPortion => {
 
 // Utility functions for wheel timing management
 export const getLastWheelTime = (): number => {
+  if (isGuest()) return cachedLastWheelTime;
   const saved = localStorage.getItem(LAST_WHEEL_TIME_KEY);
   return saved ? parseInt(saved, 10) : 0;
 };
 
 export const setLastWheelTime = (time: number): void => {
-  localStorage.setItem(LAST_WHEEL_TIME_KEY, time.toString());
+  cachedLastWheelTime = time;
+  if (!isGuest()) {
+    localStorage.setItem(LAST_WHEEL_TIME_KEY, time.toString());
+  }
 };
 
 export const resetSpins = (): void => {
-  localStorage.setItem(SPINS_LEFT_KEY, DEFAULT_SPINS.toString());
+  cachedSpinsLeft = DEFAULT_SPINS;
+  if (!isGuest()) {
+    localStorage.setItem(SPINS_LEFT_KEY, DEFAULT_SPINS.toString());
+  }
 };
 
 export const getSpinsLeft = (): number => {
+  if (isGuest()) return cachedSpinsLeft;
   const saved = localStorage.getItem(SPINS_LEFT_KEY);
   return saved !== null ? parseInt(saved, 10) : 0;
 };
 
 export const saveSpins = (spins: number): void => {
-  localStorage.setItem(SPINS_LEFT_KEY, spins.toString());
+  cachedSpinsLeft = spins;
+  if (!isGuest()) {
+    localStorage.setItem(SPINS_LEFT_KEY, spins.toString());
+  }
 };
 
 export const shouldShowWheel = (): boolean => {
   const lastTime = getLastWheelTime();
   const now = Date.now();
-  const spins = getSpinsLeft();
   
-  // Show wheel if enough time has passed OR if user still has spins
   if (now - lastTime >= WHEEL_COOLDOWN_MS) {
-    // Reset spins and update last time
     resetSpins();
     setLastWheelTime(now);
     return true;
   }
   
-  return spins > 0;
+  return false;
 };
 
 export const initializeWheelForNewUser = (): void => {

@@ -9,9 +9,16 @@ import {
 import type { Unsubscribe } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getCurrentUser, isGuest, onAuthChange } from './authService';
-import { setCoins } from './walletManager';
-import { setCompletedLevels } from './progressManager';
-import { setOwnedSkins, setSelectedSkinCache } from './skinManager';
+import { getUnlockedUniverses } from './universeManager';
+import { getTotalCoins, setCoins } from './walletManager';
+import { getCompletedLevels, setCompletedLevels } from './progressManager';
+import {
+  getOwnedSkinNames,
+  getSelectedSkinName,
+  setOwnedSkins,
+  setSelectedSkinCache,
+} from './skinManager';
+import { getOwnedWeaponNames, getSelectedWeaponName } from './weaponManager';
 
 // User data structure stored in Firestore
 export interface UserData {
@@ -63,7 +70,7 @@ export const loadUserData = async (): Promise<UserData | null> => {
   
   if (!user || isGuest()) {
     // Load from localStorage for guests
-    return loadLocalData();
+    return getSessionData();
   }
 
   try {
@@ -100,8 +107,6 @@ export const saveUserData = async (data: Partial<UserData>): Promise<void> => {
   const user = getCurrentUser();
   
   if (!user || isGuest()) {
-    // Save to localStorage for guests
-    saveLocalData(data);
     return;
   }
 
@@ -136,7 +141,7 @@ export const subscribeToUserData = (
   
   if (!user || isGuest()) {
     // For guests, just call with local data once
-    callback(loadLocalData());
+    callback(getSessionData());
     return () => {};
   }
 
@@ -162,6 +167,40 @@ export const subscribeToUserData = (
       activeUnsubscribe = null;
     }
   };
+};
+
+export const getSessionData = (): UserData => {
+  return {
+    coins: getTotalCoins(),
+    completedLevels: getCompletedLevels(),
+    bestProgress: {},
+    selectedSkin: getSelectedSkinName(),
+    ownedSkins: getOwnedSkinNames(),
+    selectedWeapon: getSelectedWeaponName(),
+    ownedWeapons: getOwnedWeaponNames(),
+    unlockedUniverses: getUnlockedUniverses(),
+    lastUpdated: Date.now(),
+  };
+};
+
+export const clearGuestLocalStorage = (): void => {
+  try {
+    Object.values(LOCAL_KEYS).forEach((key) => {
+      localStorage.removeItem(key);
+    });
+  } catch (error) {
+    console.error('Error clearing guest localStorage:', error);
+  }
+};
+
+export const hasGuestSessionProgress = (): boolean => {
+  const data = getSessionData();
+  return (
+    data.coins > 0 ||
+    data.completedLevels.length > 0 ||
+    data.ownedSkins.length > 1 ||
+    (data.ownedWeapons ?? []).length > 0
+  );
 };
 
 // Load data from localStorage
@@ -236,7 +275,7 @@ export const syncLocalToCloud = async (): Promise<void> => {
   const user = getCurrentUser();
   if (!user || isGuest()) return;
 
-  const localData = loadLocalData();
+  const localData = getSessionData();
   const cloudData = await loadUserData();
 
   if (!cloudData) {

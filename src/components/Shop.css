@@ -168,6 +168,11 @@
   letter-spacing: 0.03em;
 }
 
+/* Invisible placeholder to keep header layout balanced when coins are hidden */
+.shop-coins-placeholder {
+  width: 90px;
+}
+
 /* ========================================
    SHOP CONTENT
    ======================================== */
@@ -199,6 +204,10 @@
 
   .shop-coins {
     padding: 8px 12px;
+  }
+
+  .shop-coins-placeholder {
+    width: 70px;
   }
 
   .shop-coin-amount {

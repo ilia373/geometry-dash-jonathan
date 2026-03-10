@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { SKINS, SKIN_CATEGORIES, getSkinById, type SkinCategory } from '../types/skins';
 import { getSelectedSkinId, setSelectedSkin, isSkinUnlocked, unlockSkin, getSkinPrice } from '../utils/skinManager';
 import { getTotalCoins, spendCoins } from '../utils/walletManager';
+import { isGuest } from '../utils/authService';
 import './SkinSelector.css';
 
 interface SkinSelectorProps {
@@ -43,6 +44,7 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onCoinsChange }) => {
 
   const handleBuySkin = async (skinId: number, event: React.MouseEvent) => {
     event.stopPropagation();
+    if (isGuest()) return;
     
     const price = getSkinPrice(skinId);
     if (coins >= price && !isSkinUnlocked(skinId)) {
@@ -142,7 +144,7 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onCoinsChange }) => {
               </div>
               <span className="skin-name">{skin.name}</span>
               {selectedSkinId === skin.id && isUnlocked && <span className="equipped-badge">✓</span>}
-              {!isUnlocked && ( 
+              {!isUnlocked && !isGuest() && ( 
                 <button 
                   className={`buy-button ${canAfford ? '' : 'disabled'}`}
                   onClick={(e) => handleBuySkin(skin.id, e)}

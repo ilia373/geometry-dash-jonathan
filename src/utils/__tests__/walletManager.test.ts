@@ -26,6 +26,9 @@ import {
   setCoins,
   resetWalletCache,
 } from '../walletManager';
+import { isGuest } from '../authService';
+
+const mockIsGuest = vi.mocked(isGuest);
 
 describe('walletManager', () => {
   beforeEach(() => {
@@ -66,6 +69,7 @@ describe('walletManager', () => {
 
   describe('spendCoins', () => {
     it('should spend coins when balance is sufficient', async () => {
+      mockIsGuest.mockReturnValue(false);
       await addCoins(500);
       const result = await spendCoins(200);
       expect(result).toBe(true);
@@ -73,6 +77,7 @@ describe('walletManager', () => {
     });
 
     it('should return false when balance is insufficient', async () => {
+      mockIsGuest.mockReturnValue(false);
       await addCoins(100);
       const result = await spendCoins(200);
       expect(result).toBe(false);
@@ -80,6 +85,7 @@ describe('walletManager', () => {
     });
 
     it('should spend exact balance', async () => {
+      mockIsGuest.mockReturnValue(false);
       await addCoins(200);
       const result = await spendCoins(200);
       expect(result).toBe(true);
@@ -87,10 +93,19 @@ describe('walletManager', () => {
     });
 
     it('should handle spending zero coins', async () => {
+      mockIsGuest.mockReturnValue(false);
       await addCoins(100);
       const result = await spendCoins(0);
       expect(result).toBe(true);
       expect(getTotalCoins()).toBe(100);
+    });
+
+    it('should reject spending for guests', async () => {
+      mockIsGuest.mockReturnValue(true);
+      await addCoins(500);
+      const result = await spendCoins(200);
+      expect(result).toBe(false);
+      expect(getTotalCoins()).toBe(500);
     });
   });
 

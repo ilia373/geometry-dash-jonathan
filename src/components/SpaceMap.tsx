@@ -34,6 +34,14 @@ const WORLD_HEIGHT = 1000;
 const PAN_CLAMP_X = 600;
 const PAN_CLAMP_Y = 400;
 
+const getInitialZoom = (): number => {
+  const vw = window.innerWidth;
+  if (vw < 768) {
+    return Math.max(0.5, Math.min(0.8, vw / WORLD_WIDTH * 1.8));
+  }
+  return 1;
+};
+
 const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => {
   const [coins, setCoins] = useState<number>(getTotalCoins());
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
@@ -44,7 +52,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [panAtDragStart, setPanAtDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(getInitialZoom);
 
   const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -56,16 +64,21 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
   const [unlimitedSpins, setUnlimitedSpins] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const syncData = async () => {
       await syncWalletFromCloud();
       await syncProgressFromCloud();
       await syncSkinsFromCloud();
       await syncUniversesFromCloud();
-      setCoins(getTotalCoins());
-      setRefreshKey(prev => prev + 1);
+      if (!cancelled) {
+        setCoins(getTotalCoins());
+        setRefreshKey(prev => prev + 1);
+      }
     };
     syncData();
-  }, []);
+    return () => { cancelled = true; };
+
+  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onAuthChange((authUser) => {
@@ -83,19 +96,6 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
       return () => clearTimeout(timer);
     }
   }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    const syncData = async () => {
-      await syncWalletFromCloud();
-      await syncProgressFromCloud();
-      await syncSkinsFromCloud();
-      await syncUniversesFromCloud();
-      setCoins(getTotalCoins());
-      setRefreshKey(prev => prev + 1);
-    };
-    syncData();
-  }, [user]);
 
   const handleCoinsUpdate = useCallback(() => {
     setCoins(getTotalCoins());
@@ -148,7 +148,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
 
   const handleRecenter = () => {
     setPanOffset({ x: 0, y: 0 });
-    setZoom(1);
+    setZoom(getInitialZoom());
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -249,12 +249,14 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
       ))}
 
       <div className="space-map-top-bar">
-        <div className="coin-display">
-          <div className="coin-icon">
-            <span>★</span>
+        {!isGuest() && (
+          <div className="coin-display">
+            <div className="coin-icon">
+              <span>🪙</span>
+            </div>
+            <span className="coin-amount">{coins.toLocaleString()}</span>
           </div>
-          <span className="coin-amount">{coins.toLocaleString()}</span>
-        </div>
+        )}
 
         <div className="top-bar-right">
           {user ? (

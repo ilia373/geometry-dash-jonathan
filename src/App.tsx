@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Game from './components/Game';
 import Shop from './components/Shop';
 import SpaceMap from './components/SpaceMap';
 import UniverseLevelSelector from './components/UniverseLevelSelector';
 import FallInTransition from './components/FallInTransition';
-import { initializeAuth } from './utils/authService';
-import { initializeFirestoreSync } from './utils/firestoreService';
+import GuestWarning from './components/GuestWarning';
+import { initializeAuth, isGuest } from './utils/authService';
+import { initializeFirestoreSync, clearGuestLocalStorage, hasGuestSessionProgress } from './utils/firestoreService';
 import { syncWeaponsFromCloud } from './utils/weaponManager';
 import { syncUniversesFromCloud } from './utils/universeManager';
 import { getUniverseById } from './constants/universeConfig';
@@ -23,8 +24,10 @@ function App() {
   const [currentCheats, setCurrentCheats] = useState<CheatState>(defaultCheatState);
   const [currentUniverseId, setCurrentUniverseId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [showGuestWarning, setShowGuestWarning] = useState<boolean>(false);
 
   useEffect(() => {
+    clearGuestLocalStorage();
     initializeAuth();
     initializeFirestoreSync();
     syncWeaponsFromCloud().catch(() => {});
@@ -32,6 +35,26 @@ function App() {
     initAnalytics().catch((error) => {
       console.error('Failed to initialize analytics', error);
     });
+  }, []);
+
+  // Native browser beforeunload prompt for guests with progress
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isGuest() && hasGuestSessionProgress()) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Show guest warning when navigating back if guest has unsaved progress
+  const checkGuestWarning = useCallback((): boolean => {
+    if (isGuest() && hasGuestSessionProgress()) {
+      setShowGuestWarning(true);
+      return true;
+    }
+    return false;
   }, []);
 
   const handleSelectUniverse = (id: string) => {
@@ -59,17 +82,30 @@ function App() {
 
   const handleBackFromGame = () => {
     setColorOverride(null);
+    checkGuestWarning();
     setScreen('universe');
   };
 
   const handleBackToMap = () => {
     setColorOverride(null);
     setCurrentUniverseId(null);
+    checkGuestWarning();
     setScreen('space-map');
   };
 
   const handleOpenShop = () => {
     setScreen('shop');
+  };
+
+  const handleGuestWarningLogin = () => {
+    setShowGuestWarning(false);
+    setColorOverride(null);
+    setCurrentUniverseId(null);
+    setScreen('space-map');
+  };
+
+  const handleGuestWarningDismiss = () => {
+    setShowGuestWarning(false);
   };
 
   const transitionTheme = currentUniverseId
@@ -107,6 +143,12 @@ function App() {
         universeTheme={transitionTheme}
         onComplete={handleTransitionComplete}
       />
+      {showGuestWarning && (
+        <GuestWarning
+          onLogin={handleGuestWarningLogin}
+          onDismiss={handleGuestWarningDismiss}
+        />
+      )}
     </div>
   );
 }

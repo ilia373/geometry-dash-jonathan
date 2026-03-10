@@ -41,6 +41,7 @@ let cacheInitialized: boolean = false;
 
 // Load from localStorage (for guests only)
 const loadFromLocalStorage = (): void => {
+  if (isGuest()) return;
   try {
     const storedOwned = localStorage.getItem(OWNED_WEAPONS_KEY);
     if (storedOwned) {
@@ -125,9 +126,7 @@ export const unlockWeapon = async (weaponId: number): Promise<void> => {
     const ownedWeaponNames = cachedOwnedWeaponIds.map(weaponIdToName);
 
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-      localStorage.setItem(OWNED_WEAPONS_KEY, JSON.stringify(ownedWeaponNames));
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ ownedWeapons: ownedWeaponNames });
     }
   }
@@ -155,9 +154,7 @@ export const setSelectedWeapon = async (weaponId: number): Promise<void> => {
     const weaponName = weaponIdToName(weaponId);
 
     const user = getCurrentUser();
-    if (!user || isGuest()) {
-      localStorage.setItem(WEAPON_STORAGE_KEY, weaponName);
-    } else {
+    if (user && !isGuest()) {
       await saveUserData({ selectedWeapon: weaponName });
     }
   }
@@ -182,4 +179,14 @@ export const resetWeaponCache = (): void => {
   cachedOwnedWeaponIds = [...DEFAULT_UNLOCKED_WEAPONS];
   cachedSelectedWeaponId = null;
   cacheInitialized = false;
+};
+
+export const getOwnedWeaponNames = (): string[] => {
+  if (!cacheInitialized) loadFromLocalStorage();
+  return cachedOwnedWeaponIds.map(weaponIdToName);
+};
+
+export const getSelectedWeaponName = (): string => {
+  if (!cacheInitialized) loadFromLocalStorage();
+  return cachedSelectedWeaponId !== null ? weaponIdToName(cachedSelectedWeaponId) : '';
 };

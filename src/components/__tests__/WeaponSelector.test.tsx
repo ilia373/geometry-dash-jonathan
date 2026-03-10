@@ -13,6 +13,10 @@ vi.mock('../../utils/walletManager', () => ({
   spendCoins: vi.fn(() => Promise.resolve(true)),
 }));
 
+vi.mock('../../utils/authService', () => ({
+  isGuest: vi.fn(() => false),
+}));
+
 import WeaponSelector from '../WeaponSelector';
 
 describe('WeaponSelector Component', () => {

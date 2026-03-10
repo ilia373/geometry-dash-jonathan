@@ -2,6 +2,7 @@ import { useState } from 'react';
 import SkinSelector from './SkinSelector';
 import WeaponSelector from './WeaponSelector';
 import { getTotalCoins } from '../utils/walletManager';
+import { isGuest } from '../utils/authService';
 import './Shop.css';
 
 interface ShopProps {
@@ -40,10 +41,14 @@ const Shop: React.FC<ShopProps> = ({ onBack }) => {
             style={{ transform: activeTab === 'weapons' ? 'translateX(100%)' : 'translateX(0)' }}
           />
         </div>
-        <div className="shop-coins">
-          <span className="shop-coin-icon">🪙</span>
-          <span className="shop-coin-amount">{coins}</span>
-        </div>
+        {!isGuest() ? (
+          <div className="shop-coins">
+            <span className="shop-coin-icon">🪙</span>
+            <span className="shop-coin-amount">{coins}</span>
+          </div>
+        ) : (
+          <div className="shop-coins-placeholder" />
+        )}
       </div>
       <div className="shop-content">
         {activeTab === 'skins' ? (

@@ -50,11 +50,7 @@ describe('universeManager', () => {
     });
 
     it('should return values from localStorage if present', () => {
-      localStorage.setItem(
-        'geometry-dash-unlocked-universes',
-        JSON.stringify(['milky-way', 'andromeda'])
-      );
-      resetUniverseCache();
+      setUnlockedUniverses(['milky-way', 'andromeda']);
       const universes = getUnlockedUniverses();
       expect(universes).toContain('milky-way');
       expect(universes).toContain('andromeda');
@@ -93,10 +89,8 @@ describe('universeManager', () => {
 
     it('should persist to localStorage for guest users', async () => {
       await unlockUniverse('andromeda');
-      const stored = JSON.parse(
-        localStorage.getItem('geometry-dash-unlocked-universes') ?? '[]'
-      );
-      expect(stored).toContain('andromeda');
+      expect(isUniverseUnlocked('andromeda')).toBe(true);
+      expect(localStorage.getItem('geometry-dash-unlocked-universes')).toBeNull();
     });
   });
 
@@ -163,12 +157,9 @@ describe('universeManager', () => {
     });
 
     it('should load data from localStorage for guest users', async () => {
-      localStorage.setItem(
-        'geometry-dash-unlocked-universes',
-        JSON.stringify(['milky-way', 'andromeda'])
-      );
       await syncUniversesFromCloud();
-      expect(isUniverseUnlocked('andromeda')).toBe(true);
+      expect(isUniverseUnlocked('andromeda')).toBe(false);
+      expect(isUniverseUnlocked('milky-way')).toBe(true);
     });
   });
 

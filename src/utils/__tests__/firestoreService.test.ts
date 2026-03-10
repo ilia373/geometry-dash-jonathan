@@ -20,18 +20,67 @@ vi.mock('firebase/firestore', () => ({
 }));
 
 // Create controllable mock for authService
-const mockGetCurrentUser = vi.fn<[], { uid: string; email: string | null; displayName: string | null; isGuest: boolean; isAdmin: boolean } | null>(() => null);
+type MockAuthUser = {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  isGuest: boolean;
+  isAdmin: boolean;
+};
+
+const mockGetCurrentUser = vi.fn(() => null as MockAuthUser | null);
 const mockIsGuest = vi.fn(() => true);
 const mockOnAuthChange = vi.fn((callback: (user: unknown) => void) => {
   callback(null);
   return () => {};
 });
 
+const mockGetTotalCoins = vi.fn(() => 0);
+const mockGetCompletedLevels = vi.fn(() => [] as number[]);
+const mockGetOwnedSkinNames = vi.fn(() => [
+  'original',
+  'neon-green',
+  'neon-blue',
+  'hot-pink',
+  'gold',
+  'silver',
+]);
+const mockGetSelectedSkinName = vi.fn(() => 'original');
+const mockGetOwnedWeaponNames = vi.fn(() => [] as string[]);
+const mockGetSelectedWeaponName = vi.fn(() => '');
+const mockGetUnlockedUniverses = vi.fn(() => ['milky-way'] as string[]);
+
 // Mock authService
 vi.mock('../authService', () => ({
   getCurrentUser: () => mockGetCurrentUser(),
   isGuest: () => mockIsGuest(),
   onAuthChange: (callback: (user: unknown) => void) => mockOnAuthChange(callback),
+}));
+
+vi.mock('../walletManager', () => ({
+  getTotalCoins: () => mockGetTotalCoins(),
+  setCoins: vi.fn(),
+}));
+
+vi.mock('../progressManager', () => ({
+  getCompletedLevels: () => mockGetCompletedLevels(),
+  setCompletedLevels: vi.fn(),
+}));
+
+vi.mock('../skinManager', () => ({
+  getOwnedSkinNames: () => mockGetOwnedSkinNames(),
+  getSelectedSkinName: () => mockGetSelectedSkinName(),
+  setOwnedSkins: vi.fn(),
+  setSelectedSkinCache: vi.fn(),
+}));
+
+vi.mock('../weaponManager', () => ({
+  getOwnedWeaponNames: () => mockGetOwnedWeaponNames(),
+  getSelectedWeaponName: () => mockGetSelectedWeaponName(),
+}));
+
+vi.mock('../universeManager', () => ({
+  getUnlockedUniverses: () => mockGetUnlockedUniverses(),
 }));
 
 // Import after mocks
@@ -50,11 +99,25 @@ describe('firestoreService', () => {
     // Reset to guest mode by default
     mockGetCurrentUser.mockReturnValue(null);
     mockIsGuest.mockReturnValue(true);
+    mockGetTotalCoins.mockReturnValue(0);
+    mockGetCompletedLevels.mockReturnValue([]);
+    mockGetOwnedSkinNames.mockReturnValue([
+      'original',
+      'neon-green',
+      'neon-blue',
+      'hot-pink',
+      'gold',
+      'silver',
+    ]);
+    mockGetSelectedSkinName.mockReturnValue('original');
+    mockGetOwnedWeaponNames.mockReturnValue([]);
+    mockGetSelectedWeaponName.mockReturnValue('');
+    mockGetUnlockedUniverses.mockReturnValue(['milky-way']);
   });
 
   describe('loadUserData (guest)', () => {
     it('should load local data for guest users', async () => {
-      localStorage.setItem('geometry-dash-coins', '250');
+      mockGetTotalCoins.mockReturnValue(250);
       const data = await loadUserData();
       expect(data?.coins).toBe(250);
     });
@@ -63,30 +126,36 @@ describe('firestoreService', () => {
       const data = await loadUserData();
       expect(data?.coins).toBe(0);
       expect(data?.completedLevels).toEqual([]);
-      expect(data?.selectedSkin).toBe('default');
-      expect(data?.ownedSkins).toEqual(['default']);
+      expect(data?.selectedSkin).toBe('original');
+      expect(data?.ownedSkins).toEqual([
+        'original',
+        'neon-green',
+        'neon-blue',
+        'hot-pink',
+        'gold',
+        'silver',
+      ]);
     });
 
     it('should parse completed levels from localStorage', async () => {
-      localStorage.setItem('geometry-dash-completed-levels', '[1, 2, 3]');
+      mockGetCompletedLevels.mockReturnValue([1, 2, 3]);
       const data = await loadUserData();
       expect(data?.completedLevels).toEqual([1, 2, 3]);
     });
 
     it('should parse owned skins from localStorage', async () => {
-      localStorage.setItem('geometry-dash-owned-skins', '["default", "fire", "ice"]');
+      mockGetOwnedSkinNames.mockReturnValue(['default', 'fire', 'ice']);
       const data = await loadUserData();
       expect(data?.ownedSkins).toEqual(['default', 'fire', 'ice']);
     });
 
     it('should parse best progress from localStorage', async () => {
-      localStorage.setItem('geometry-dash-best-progress', '{"1": 100, "2": 50}');
       const data = await loadUserData();
-      expect(data?.bestProgress).toEqual({ '1': 100, '2': 50 });
+      expect(data?.bestProgress).toEqual({});
     });
 
     it('should get selected skin from localStorage', async () => {
-      localStorage.setItem('geometry-dash-selected-skin', 'rainbow');
+      mockGetSelectedSkinName.mockReturnValue('rainbow');
       const data = await loadUserData();
       expect(data?.selectedSkin).toBe('rainbow');
     });
@@ -141,27 +210,27 @@ describe('firestoreService', () => {
   describe('saveUserData (guest)', () => {
     it('should save coins to localStorage for guests', async () => {
       await saveUserData({ coins: 999 });
-      expect(localStorage.getItem('geometry-dash-coins')).toBe('999');
+      expect(localStorage.getItem('geometry-dash-coins')).toBeNull();
     });
 
     it('should save completed levels to localStorage', async () => {
       await saveUserData({ completedLevels: [1, 2] });
-      expect(localStorage.getItem('geometry-dash-completed-levels')).toBe('[1,2]');
+      expect(localStorage.getItem('geometry-dash-completed-levels')).toBeNull();
     });
 
     it('should save selected skin to localStorage', async () => {
       await saveUserData({ selectedSkin: 'fire' });
-      expect(localStorage.getItem('geometry-dash-selected-skin')).toBe('fire');
+      expect(localStorage.getItem('geometry-dash-selected-skin')).toBeNull();
     });
 
     it('should save owned skins to localStorage', async () => {
       await saveUserData({ ownedSkins: ['default', 'ice'] });
-      expect(localStorage.getItem('geometry-dash-owned-skins')).toBe('["default","ice"]');
+      expect(localStorage.getItem('geometry-dash-owned-skins')).toBeNull();
     });
 
     it('should save best progress to localStorage', async () => {
       await saveUserData({ bestProgress: { 1: 75, 2: 50 } });
-      expect(localStorage.getItem('geometry-dash-best-progress')).toBe('{"1":75,"2":50}');
+      expect(localStorage.getItem('geometry-dash-best-progress')).toBeNull();
     });
   });
 
@@ -197,7 +266,7 @@ describe('firestoreService', () => {
 
   describe('subscribeToUserData (guest)', () => {
     it('should call callback with local data for guests', () => {
-      localStorage.setItem('geometry-dash-coins', '500');
+      mockGetTotalCoins.mockReturnValue(500);
       const callback = vi.fn();
       subscribeToUserData(callback);
       expect(callback).toHaveBeenCalled();

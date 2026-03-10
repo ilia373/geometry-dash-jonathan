@@ -46,17 +46,19 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenShop }) => {
   const [showFortuneWheel, setShowFortuneWheel] = useState(false);
   const [unlimitedSpins, setUnlimitedSpins] = useState(false);
   
-  // Sync wallet and progress from cloud on auth change
   useEffect(() => {
+    let cancelled = false;
     const syncData = async () => {
       await syncWalletFromCloud();
       await syncProgressFromCloud();
       await syncSkinsFromCloud();
-      setCoins(getTotalCoins());
-      // Force re-render to update level states
-      setRefreshKey(prev => prev + 1);
+      if (!cancelled) {
+        setCoins(getTotalCoins());
+        setRefreshKey(prev => prev + 1);
+      }
     };
     syncData();
+    return () => { cancelled = true; };
   }, [user]);
   
   // Subscribe to auth state changes
@@ -187,12 +189,14 @@ const Menu: React.FC<MenuProps> = ({ onStartGame, onOpenShop }) => {
 
       {/* Top bar */}
       <div className="top-bar">
-        <div className="coin-display">
-          <div className="coin-icon">
-            <span>★</span>
+        {!isGuest() && (
+          <div className="coin-display">
+            <div className="coin-icon">
+              <span>🪙</span>
+            </div>
+            <span className="coin-amount">{coins.toLocaleString()}</span>
           </div>
-          <span className="coin-amount">{coins.toLocaleString()}</span>
-        </div>
+        )}
         
         <div className="top-bar-right">
           {user ? (

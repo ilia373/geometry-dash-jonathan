@@ -124,8 +124,8 @@ describe('authService', () => {
   });
 
   describe('isGuest', () => {
-    it('should return false initially', () => {
-      expect(isGuest()).toBe(false);
+    it('should return true initially when no user is logged in', () => {
+      expect(isGuest()).toBe(true);
     });
   });
 
@@ -188,7 +188,7 @@ describe('authService', () => {
       // Then log out
       await logOut();
       expect(getCurrentUser()).toBeNull();
-      expect(isGuest()).toBe(false);
+      expect(isGuest()).toBe(true);
     });
 
     it('should notify listeners on logout', async () => {

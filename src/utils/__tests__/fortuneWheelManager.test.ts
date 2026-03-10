@@ -1,4 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.mock('../authService', () => ({
+  isGuest: vi.fn(() => false),
+}));
+
 import {
   WHEEL_PORTIONS,
   WHEEL_COOLDOWN_MS,
@@ -131,12 +136,12 @@ describe('fortuneWheelManager', () => {
       expect(getSpinsLeft()).toBe(DEFAULT_SPINS);
     });
 
-    it('should return true when user has spins left', () => {
+    it('should return false when user has spins left but cooldown not passed', () => {
       const recentTime = Date.now() - 1000; // 1 second ago
       setLastWheelTime(recentTime);
       saveSpins(1);
 
-      expect(shouldShowWheel()).toBe(true);
+      expect(shouldShowWheel()).toBe(false);
     });
 
     it('should return false when no spins and cooldown not passed', () => {

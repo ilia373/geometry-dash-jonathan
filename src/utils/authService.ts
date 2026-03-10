@@ -69,9 +69,9 @@ export const getCurrentUser = (): AuthUser | null => {
   return currentUser;
 };
 
-// Check if in guest mode
+// Check if in guest mode (includes not-logged-in state)
 export const isGuest = (): boolean => {
-  return isGuestMode;
+  return isGuestMode || currentUser === null;
 };
 
 // Subscribe to auth state changes

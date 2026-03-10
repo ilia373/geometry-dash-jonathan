@@ -12,13 +12,11 @@ vi.mock('../../config/firebase', () => ({
 const mockSignInWithEmail = vi.fn();
 const mockSignUpWithEmail = vi.fn();
 const mockSignInWithGoogle = vi.fn();
-const mockPlayAsGuest = vi.fn();
 
 vi.mock('../../utils/authService', () => ({
   signInWithEmail: (...args: unknown[]) => mockSignInWithEmail(...args),
   signUpWithEmail: (...args: unknown[]) => mockSignUpWithEmail(...args),
   signInWithGoogle: () => mockSignInWithGoogle(),
-  playAsGuest: () => mockPlayAsGuest(),
   isSuperAdmin: (email: string) => email === 'ilia209@gmail.com',
 }));
 
@@ -93,14 +91,6 @@ describe('AuthModal', () => {
     expect(screen.queryByText('👑 Super Admin')).not.toBeInTheDocument();
   });
 
-  it('should call playAsGuest and onSuccess when guest button clicked', () => {
-    render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    const guestButton = screen.getByText('👤 Play as Guest');
-    fireEvent.click(guestButton);
-    expect(mockPlayAsGuest).toHaveBeenCalledTimes(1);
-    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
-  });
-
   it('should render Google sign-in button', () => {
     render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
     expect(screen.getByText('Continue with Google')).toBeInTheDocument();
@@ -114,11 +104,6 @@ describe('AuthModal', () => {
     await waitFor(() => {
       expect(mockSignInWithGoogle).toHaveBeenCalledTimes(1);
     });
-  });
-
-  it('should show warning about guest progress', () => {
-    render(<AuthModal onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    expect(screen.getByText("⚠️ Guest progress won't be saved")).toBeInTheDocument();
   });
 
   it('should call signInWithEmail on login form submit', async () => {

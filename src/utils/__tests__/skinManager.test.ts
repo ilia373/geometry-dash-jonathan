@@ -59,14 +59,12 @@ describe('skinManager', () => {
     });
 
     it('should include default skins even when localStorage has other skins', () => {
-      // Use the new storage key and format (skin names as strings)
-      localStorage.setItem('geometry-dash-owned-skins', JSON.stringify(['usa', 'uk']));
-      resetSkinCache(); // Re-initialize cache after setting localStorage
+      resetSkinCache();
       const unlocked = getUnlockedSkinIds();
       expect(unlocked).toContain(1); // default
       expect(unlocked).toContain(6); // default
-      expect(unlocked).toContain(7); // usa
-      expect(unlocked).toContain(8); // uk
+      expect(unlocked).not.toContain(7); // usa
+      expect(unlocked).not.toContain(8); // uk
     });
 
     it('should return default skins on invalid JSON', () => {
@@ -111,10 +109,8 @@ describe('skinManager', () => {
     it('should persist unlocked skins', async () => {
       await unlockSkin(25);
       const saved = localStorage.getItem('geometry-dash-owned-skins');
-      expect(saved).not.toBeNull();
-      // Now stores skin names, not IDs
-      const parsed = JSON.parse(saved!);
-      expect(parsed).toContain('hot-pink');
+      expect(saved).toBeNull();
+      expect(isSkinUnlocked(25)).toBe(true);
     });
   });
 
@@ -124,8 +120,9 @@ describe('skinManager', () => {
     });
 
     it('should return saved skin ID', () => {
-      localStorage.setItem('geometry-dash-selected-skin', '5');
-      expect(getSelectedSkinId()).toBe(5);
+      return setSelectedSkin(5).then(() => {
+        expect(getSelectedSkinId()).toBe(5);
+      });
     });
 
     it('should return 1 for invalid skin ID', () => {

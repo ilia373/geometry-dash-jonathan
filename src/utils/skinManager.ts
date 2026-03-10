@@ -38,6 +38,7 @@ let cacheInitialized: boolean = false;
 
 // Load from localStorage (for guests only)
 const loadFromLocalStorage = (): void => {
+  if (isGuest()) return;
   try {
     const storedUnlocked = localStorage.getItem(UNLOCKED_SKINS_KEY);
     if (storedUnlocked) {
@@ -117,7 +118,6 @@ export const unlockSkin = async (skinId: number): Promise<void> => {
     
     const user = getCurrentUser();
     if (!user || isGuest()) {
-      localStorage.setItem(UNLOCKED_SKINS_KEY, JSON.stringify(ownedSkinNames));
     } else {
       await saveUserData({ ownedSkins: ownedSkinNames });
     }
@@ -145,7 +145,6 @@ export const setSelectedSkin = async (skinId: number): Promise<void> => {
     
     const user = getCurrentUser();
     if (!user || isGuest()) {
-      localStorage.setItem(SKIN_STORAGE_KEY, skinName);
     } else {
       await saveUserData({ selectedSkin: skinName });
     }
@@ -169,4 +168,14 @@ export const resetSkinCache = (): void => {
   cachedUnlockedSkinIds = [...DEFAULT_UNLOCKED_SKINS];
   cachedSelectedSkinId = 1;
   cacheInitialized = false;
+};
+
+export const getOwnedSkinNames = (): string[] => {
+  if (!cacheInitialized) loadFromLocalStorage();
+  return cachedUnlockedSkinIds.map(skinIdToName);
+};
+
+export const getSelectedSkinName = (): string => {
+  if (!cacheInitialized) loadFromLocalStorage();
+  return skinIdToName(cachedSelectedSkinId);
 };

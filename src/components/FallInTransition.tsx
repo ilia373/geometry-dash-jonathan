@@ -28,6 +28,7 @@ const FallInTransition: React.FC<FallInTransitionProps> = ({
   if (!isActive) return null;
 
   const borderColor = universeTheme?.primaryColor ?? '#ffffff';
+  const whiteoutColor = universeTheme?.glowColor ?? '#1a1a2e';
 
   return (
     <div className="fall-in-overlay">
@@ -42,7 +43,7 @@ const FallInTransition: React.FC<FallInTransitionProps> = ({
       </div>
       <div className="fall-in-stars" />
       <div className="fall-in-vignette" />
-      <div className="fall-in-whiteout" />
+      <div className="fall-in-whiteout" style={{ background: whiteoutColor }} />
     </div>
   );
 };

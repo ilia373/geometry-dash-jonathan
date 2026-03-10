@@ -36,6 +36,7 @@ import {
 import { soundManager } from '../utils/soundManager';
 import { markLevelComplete } from '../utils/progressManager';
 import { addCoins, getTotalCoins } from '../utils/walletManager';
+import { isGuest } from '../utils/authService';
 import { createProjectile, updateProjectiles, checkAllProjectileCollisions } from '../utils/projectilePhysics';
 import { getSelectedWeapon } from '../utils/weaponManager';
 import './Game.css';
@@ -589,7 +590,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             <h2>💀 You Crashed!</h2>
             <p>Progress: {Math.floor(stats.progress * 100)}%</p>
             <p>Best: {Math.floor(stats.bestProgress * 100)}%</p>
-            <p className="coins-lost">★ {stats.coinsCollected} coins lost!</p>
+            {!isGuest() && <p className="coins-lost">🪙 {stats.coinsCollected} coins lost!</p>}
             <div className="modal-buttons">
               <button className="retry-button" onClick={(e) => { e.stopPropagation(); resetGame(); }}>
                 🔄 Retry
@@ -608,8 +609,8 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             <h2>🎉 Level Complete!</h2>
             <p>{level.name}</p>
             <p>Attempts: {stats.attempts}</p>
-            <p className="coins-earned">★ {stats.coinsCollected} coins earned!</p>
-            <p className="total-coins">Total: ★ {getTotalCoins()}</p>
+            {!isGuest() && <p className="coins-earned">🪙 {stats.coinsCollected} coins earned!</p>}
+            {!isGuest() && <p className="total-coins">Total: 🪙 {getTotalCoins()}</p>}
             <button className="back-button" onClick={onBack}>
               Back to Menu
             </button>

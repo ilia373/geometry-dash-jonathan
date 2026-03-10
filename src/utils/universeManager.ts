@@ -18,10 +18,7 @@ export const syncUniversesFromCloud = async (): Promise<void> => {
 
   if (!user || isGuest()) {
     // Guest: load from localStorage
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
-    } catch {
+    if (cachedUnlockedUniverses.length === 0) {
       cachedUnlockedUniverses = ['milky-way'];
     }
   } else {
@@ -43,11 +40,15 @@ export const syncUniversesFromCloud = async (): Promise<void> => {
 // Return cached array (lazy-init from localStorage if not initialized)
 export const getUnlockedUniverses = (): string[] => {
   if (!cacheInitialized) {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
-    } catch {
-      cachedUnlockedUniverses = ['milky-way'];
+    if (!isGuest()) {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
+      } catch {
+        cachedUnlockedUniverses = ['milky-way'];
+      }
+    } else {
+      cachedUnlockedUniverses = cachedUnlockedUniverses.length > 0 ? cachedUnlockedUniverses : ['milky-way'];
     }
     cacheInitialized = true;
   }
@@ -63,7 +64,6 @@ export const unlockUniverse = async (id: string): Promise<void> => {
 
     const user = getCurrentUser();
     if (!user || isGuest()) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedUnlockedUniverses));
     } else {
       await saveUserData({ unlockedUniverses: cachedUnlockedUniverses });
     }
@@ -73,11 +73,15 @@ export const unlockUniverse = async (id: string): Promise<void> => {
 // Check if ID is in cached array
 export const isUniverseUnlocked = (id: string): boolean => {
   if (!cacheInitialized) {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
-    } catch {
-      cachedUnlockedUniverses = ['milky-way'];
+    if (!isGuest()) {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
+      } catch {
+        cachedUnlockedUniverses = ['milky-way'];
+      }
+    } else {
+      cachedUnlockedUniverses = cachedUnlockedUniverses.length > 0 ? cachedUnlockedUniverses : ['milky-way'];
     }
     cacheInitialized = true;
   }

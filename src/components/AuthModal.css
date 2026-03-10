@@ -234,37 +234,6 @@
   cursor: not-allowed;
 }
 
-.auth-guest-btn {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 0.75rem;
-}
-
-.auth-guest-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.auth-guest-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.auth-guest-note {
-  text-align: center;
-  color: rgba(255, 200, 100, 0.7);
-  font-size: 0.75rem;
-  margin: 0.5rem 0 0 0;
-}
-
 .auth-switch {
   text-align: center;
   margin-top: 1.5rem;

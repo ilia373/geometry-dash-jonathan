@@ -16,12 +16,6 @@ export const syncProgressFromCloud = async (): Promise<void> => {
   
   if (!user || isGuest()) {
     // Guest: load from localStorage
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
-    } catch {
-      cachedCompletedLevels = [];
-    }
   } else {
     // Authenticated: load from Firestore (has built-in offline support)
     try {
@@ -43,7 +37,6 @@ export const markLevelComplete = async (levelId: number): Promise<void> => {
     
     const user = getCurrentUser();
     if (!user || isGuest()) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedCompletedLevels));
     } else {
       await saveUserData({ completedLevels: cachedCompletedLevels });
     }
@@ -56,11 +49,13 @@ export const isLevelUnlocked = (levelId: number): boolean => {
   
   if (!cacheInitialized) {
     // Sync read for guests from localStorage
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
-    } catch {
-      cachedCompletedLevels = [];
+    if (!isGuest()) {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        cachedCompletedLevels = saved ? JSON.parse(saved) : [];
+      } catch {
+        cachedCompletedLevels = [];
+      }
     }
     cacheInitialized = true;
   }
@@ -70,11 +65,13 @@ export const isLevelUnlocked = (levelId: number): boolean => {
 
 export const isLevelCompleted = (levelId: number): boolean => {
   if (!cacheInitialized) {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
-    } catch {
-      cachedCompletedLevels = [];
+    if (!isGuest()) {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        cachedCompletedLevels = saved ? JSON.parse(saved) : [];
+      } catch {
+        cachedCompletedLevels = [];
+      }
     }
     cacheInitialized = true;
   }
@@ -83,11 +80,13 @@ export const isLevelCompleted = (levelId: number): boolean => {
 
 export const getCompletedLevels = (): number[] => {
   if (!cacheInitialized) {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      cachedCompletedLevels = saved ? JSON.parse(saved) : [];
-    } catch {
-      cachedCompletedLevels = [];
+    if (!isGuest()) {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        cachedCompletedLevels = saved ? JSON.parse(saved) : [];
+      } catch {
+        cachedCompletedLevels = [];
+      }
     }
     cacheInitialized = true;
   }
@@ -106,7 +105,6 @@ export const resetProgress = async (): Promise<void> => {
   
   const user = getCurrentUser();
   if (!user || isGuest()) {
-    localStorage.setItem(STORAGE_KEY, '[]');
   } else {
     await saveUserData({ completedLevels: [] });
   }

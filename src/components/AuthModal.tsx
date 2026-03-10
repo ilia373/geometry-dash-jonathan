@@ -3,7 +3,6 @@ import {
   signInWithEmail,
   signUpWithEmail,
   signInWithGoogle,
-  playAsGuest,
   isSuperAdmin,
 } from '../utils/authService';
 import './AuthModal.css';
@@ -53,11 +52,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGuestPlay = () => {
-    playAsGuest();
-    onSuccess();
   };
 
   return (
@@ -147,18 +141,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
           </svg>
           Continue with Google
         </button>
-
-        <button
-          className="auth-guest-btn"
-          onClick={handleGuestPlay}
-          disabled={loading}
-        >
-          👤 Play as Guest
-        </button>
-
-        <p className="auth-guest-note">
-          ⚠️ Guest progress won't be saved
-        </p>
 
         <div className="auth-switch">
           {mode === 'login' ? (

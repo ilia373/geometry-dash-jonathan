@@ -347,25 +347,19 @@
 }
 
 .coin-icon {
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
   animation: coinPulse 2s ease-in-out infinite;
 }
 
 .coin-icon span {
-  font-size: 0.85rem;
-  color: #000;
+  font-size: 1.3rem;
 }
 
 @keyframes coinPulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 .coin-amount {
@@ -380,6 +374,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  margin-left: auto;
 }
 
 .user-section {

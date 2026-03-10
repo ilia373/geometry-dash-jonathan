@@ -72,10 +72,8 @@ describe('weaponManager', () => {
     it('should persist owned weapons to localStorage as JSON', async () => {
       await unlockWeapon(1);
       const stored = localStorage.getItem('geometry-dash-owned-weapons');
-      expect(stored).not.toBeNull();
-      const parsed = JSON.parse(stored!);
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed).toContain('pistol');
+      expect(stored).toBeNull();
+      expect(isWeaponUnlocked(1)).toBe(true);
     });
 
     it('should not duplicate when unlocking the same weapon twice', async () => {
@@ -126,8 +124,8 @@ describe('weaponManager', () => {
 
       // loadUserData should not be called for guests
       expect(loadUserData).not.toHaveBeenCalled();
-      expect(isWeaponUnlocked(1)).toBe(true);
-      expect(getSelectedWeaponId()).toBe(1);
+      expect(isWeaponUnlocked(1)).toBe(false);
+      expect(getSelectedWeaponId()).toBeNull();
     });
 
     it('as authenticated: calls loadUserData and merges ownedWeapons', async () => {

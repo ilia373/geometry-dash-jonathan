@@ -110,12 +110,14 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
         </button>
 
         <div className="top-bar-right">
-          <div className="coin-display">
-            <div className="coin-icon">
-              <span>★</span>
+          {!isGuest() && (
+            <div className="coin-display">
+              <div className="coin-icon">
+                <span>🪙</span>
+              </div>
+              <span className="coin-amount">{coins.toLocaleString()}</span>
             </div>
-            <span className="coin-amount">{coins.toLocaleString()}</span>
-          </div>
+          )}
 
           {user ? (
             <div className="user-section">

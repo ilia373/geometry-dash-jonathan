@@ -3,6 +3,7 @@ import { WEAPONS, WEAPON_CATEGORIES } from '../types/weapons';
 import type { Weapon, WeaponCategory } from '../types/weapons';
 import { getOwnedWeaponIds, getSelectedWeaponId, unlockWeapon, setSelectedWeapon } from '../utils/weaponManager';
 import { getTotalCoins, spendCoins } from '../utils/walletManager';
+import { isGuest } from '../utils/authService';
 import './WeaponSelector.css';
 
 interface WeaponSelectorProps {
@@ -21,6 +22,7 @@ const WeaponSelector: React.FC<WeaponSelectorProps> = ({ onCoinsChange }) => {
     : WEAPONS.filter(w => w.category === activeCategory);
 
   const handleBuy = async (weapon: Weapon) => {
+    if (isGuest()) return;
     if (coins < weapon.price) return;
     const success = await spendCoins(weapon.price);
     if (success) {
@@ -93,6 +95,8 @@ const WeaponSelector: React.FC<WeaponSelectorProps> = ({ onCoinsChange }) => {
                 <button className="btn-equip" onClick={() => handleEquip(weapon.id)}>
                   Equip
                 </button>
+              ) : isGuest() ? (
+                <div className="btn-buy btn-disabled">🔒 Login to buy</div>
               ) : (
                 <button
                   className={`btn-buy ${!canAfford ? 'btn-disabled' : ''}`}

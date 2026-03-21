@@ -1,4 +1,0 @@
-
-> geometry-dash-jonathan@0.0.0 lint
-> eslint .
-

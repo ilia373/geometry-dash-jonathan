@@ -611,9 +611,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             <p>Attempts: {stats.attempts}</p>
             {!isGuest() && <p className="coins-earned">🪙 {stats.coinsCollected} coins earned!</p>}
             {!isGuest() && <p className="total-coins">Total: 🪙 {getTotalCoins()}</p>}
-            <button className="back-button" onClick={onBack}>
-              Back to Menu
-            </button>
+            <div className="modal-buttons">
+              <button className="back-button" onClick={onBack}>
+                Back to Menu
+              </button>
+            </div>
           </div>
         </div>
       )}

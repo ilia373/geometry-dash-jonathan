@@ -5,6 +5,7 @@ import SpaceMap from './components/SpaceMap';
 import UniverseLevelSelector from './components/UniverseLevelSelector';
 import FallInTransition from './components/FallInTransition';
 import GuestWarning from './components/GuestWarning';
+import AuthModal from './components/AuthModal';
 import { initializeAuth, isGuest } from './utils/authService';
 import { initializeFirestoreSync, clearGuestLocalStorage, hasGuestSessionProgress } from './utils/firestoreService';
 import { syncWeaponsFromCloud } from './utils/weaponManager';
@@ -25,6 +26,7 @@ function App() {
   const [currentUniverseId, setCurrentUniverseId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [showGuestWarning, setShowGuestWarning] = useState<boolean>(false);
+  const [showAuthFromGuest, setShowAuthFromGuest] = useState<boolean>(false);
 
   useEffect(() => {
     clearGuestLocalStorage();
@@ -99,9 +101,18 @@ function App() {
 
   const handleGuestWarningLogin = () => {
     setShowGuestWarning(false);
+    setShowAuthFromGuest(true);
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthFromGuest(false);
     setColorOverride(null);
     setCurrentUniverseId(null);
     setScreen('space-map');
+  };
+
+  const handleAuthClose = () => {
+    setShowAuthFromGuest(false);
   };
 
   const handleGuestWarningDismiss = () => {
@@ -147,6 +158,12 @@ function App() {
         <GuestWarning
           onLogin={handleGuestWarningLogin}
           onDismiss={handleGuestWarningDismiss}
+        />
+      )}
+      {showAuthFromGuest && (
+        <AuthModal
+          onClose={handleAuthClose}
+          onSuccess={handleAuthSuccess}
         />
       )}
     </div>

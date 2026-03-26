@@ -285,15 +285,16 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
            bossFireTimerRef.current = result.fireTimer;
            bossJumpTimerRef.current = result.jumpTimer;
 
-           if (result.shouldFire) {
-             const proj = createBossProjectile(
-               bossRef.current,
-               bossConfigRef.current,
-               bossProjectileIdCounterRef.current++,
-               result.fireTimer.shotIndex
-             );
-             bossProjectilesRef.current.push(proj);
-           }
+            if (result.shouldFire) {
+              const proj = createBossProjectile(
+                bossRef.current,
+                bossConfigRef.current,
+                bossProjectileIdCounterRef.current++,
+                result.fireTimer.shotIndex,
+                playerRef.current.y
+              );
+              bossProjectilesRef.current.push(proj);
+            }
          }
 
          // Update boss projectiles

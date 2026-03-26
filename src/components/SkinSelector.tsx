@@ -123,7 +123,7 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onCoinsChange }) => {
           const canAfford = coins >= skinPrice;
           
           return (
-            <button
+            <div
               key={skin.id}
               className={`skin-card ${selectedSkinId === skin.id ? 'selected' : ''} ${!isUnlocked ? 'locked' : ''}`}
               onClick={() => handleSelectSkin(skin.id)}
@@ -153,7 +153,7 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ onCoinsChange }) => {
                   <span className="buy-coin-icon">🪙</span> {skinPrice}
                 </button>
               )}
-            </button>
+            </div>
           );
         })}
       </div>

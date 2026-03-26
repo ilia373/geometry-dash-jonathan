@@ -15,16 +15,20 @@ export interface BossConfig {
     width: number;
     height: number;
   };
-  projectileHeights: [number, number];
+  projectileHeights: number[];
   jumpInterval: number;
   jumpForce: number;
   coinDropMin: number;
   coinDropMax: number;
+  aimAtPlayer?: boolean;
+  aimChance?: number;
+  burstCount?: number;
+  burstDelay?: number;
 }
 
 export interface BossFireTimer {
   timer: number;
-  shotIndex: 0 | 1;
+  shotIndex: number;
 }
 
 export interface BossPhysicsUpdate {
@@ -105,7 +109,7 @@ export const updateBossPhysics = (
   if (nextFireTimer >= config.fireRate) {
     shouldFire = true;
     nextFireTimer = 0;
-    nextShotIndex = fireTimer.shotIndex === 0 ? 1 : 0;
+    nextShotIndex = (fireTimer.shotIndex + 1) % config.projectileHeights.length;
   }
 
   return {
@@ -127,12 +131,20 @@ export const createBossProjectile = (
   boss: Quant,
   config: BossConfig,
   projectileId: number,
-  heightIndex: 0 | 1
+  heightIndex: number,
+  playerY?: number
 ): BossProjectile => {
+  let y: number;
+  if (config.aimAtPlayer && playerY !== undefined && Math.random() < (config.aimChance ?? 0)) {
+    y = playerY;
+  } else {
+    y = config.projectileHeights[heightIndex % config.projectileHeights.length];
+  }
+
   return {
     id: projectileId,
     x: boss.x - config.projectileSize.width,
-    y: config.projectileHeights[heightIndex],
+    y,
     vx: -config.projectileSpeed,
     width: config.projectileSize.width,
     height: config.projectileSize.height,

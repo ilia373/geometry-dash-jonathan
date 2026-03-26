@@ -14,11 +14,15 @@ export interface BossConfig {
   fireRate: number;
   projectileSpeed: number;
   projectileSize: { width: number; height: number };
-  projectileHeights: [number, number];
+  projectileHeights: number[];
   jumpInterval: number;
   jumpForce: number;
   coinDropMin: number;
   coinDropMax: number;
+  aimAtPlayer?: boolean;
+  aimChance?: number;
+  burstCount?: number;
+  burstDelay?: number;
 }
 
 export const BOSS_CONFIGS: Record<string, BossConfig> = {
@@ -30,14 +34,16 @@ export const BOSS_CONFIGS: Record<string, BossConfig> = {
     size: 90,
     color: '#FF6B35',
     glowColor: '#FF8C5A',
-    fireRate: 120,
-    projectileSpeed: 6,
-    projectileSize: { width: 20, height: 12 },
-    projectileHeights: [555, 400],
-    jumpInterval: 90,
+    fireRate: 70,
+    projectileSpeed: 8,
+    projectileSize: { width: 30, height: 18 },
+    projectileHeights: [590, 560, 540],
+    jumpInterval: 60,
     jumpForce: -15,
     coinDropMin: 100,
     coinDropMax: 500,
+    aimAtPlayer: true,
+    aimChance: 0.3,
   },
   andromeda: {
     universeId: 'andromeda',
@@ -47,14 +53,18 @@ export const BOSS_CONFIGS: Record<string, BossConfig> = {
     size: 105,
     color: '#9b59b6',
     glowColor: '#b379d4',
-    fireRate: 90,
-    projectileSpeed: 8,
-    projectileSize: { width: 24, height: 14 },
-    projectileHeights: [555, 400],
-    jumpInterval: 90,
-    jumpForce: -15,
+    fireRate: 50,
+    projectileSpeed: 10,
+    projectileSize: { width: 36, height: 20 },
+    projectileHeights: [590, 570, 545, 510],
+    jumpInterval: 45,
+    jumpForce: -18,
     coinDropMin: 200,
     coinDropMax: 700,
+    aimAtPlayer: true,
+    aimChance: 0.5,
+    burstCount: 2,
+    burstDelay: 8,
   },
 };
 

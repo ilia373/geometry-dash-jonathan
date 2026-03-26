@@ -170,7 +170,7 @@ describe('bossPhysics', () => {
       expect(result.fireTimer.timer).toBe(0);
     });
 
-    it('should toggle shotIndex from 0 to 1 when firing', () => {
+    it('should cycle shotIndex from 0 to 1 when firing', () => {
       const boss = createTestBoss();
       const fireTimer: BossFireTimer = { timer: config.fireRate - 1, shotIndex: 0 };
       const result = updateBossPhysics(boss, config, fireTimer, 0);
@@ -178,9 +178,18 @@ describe('bossPhysics', () => {
       expect(result.fireTimer.shotIndex).toBe(1);
     });
 
-    it('should toggle shotIndex from 1 to 0 when firing again', () => {
+    it('should cycle shotIndex from 1 to 2 when firing (3 heights)', () => {
       const boss = createTestBoss();
       const fireTimer: BossFireTimer = { timer: config.fireRate - 1, shotIndex: 1 };
+      const result = updateBossPhysics(boss, config, fireTimer, 0);
+
+      expect(result.fireTimer.shotIndex).toBe(2);
+    });
+
+    it('should wrap shotIndex back to 0 after reaching last height index', () => {
+      const boss = createTestBoss();
+      const lastIndex = config.projectileHeights.length - 1;
+      const fireTimer: BossFireTimer = { timer: config.fireRate - 1, shotIndex: lastIndex };
       const result = updateBossPhysics(boss, config, fireTimer, 0);
 
       expect(result.fireTimer.shotIndex).toBe(0);
@@ -226,6 +235,20 @@ describe('bossPhysics', () => {
       expect(proj.y).toBe(config.projectileHeights[1]);
     });
 
+    it('should set y to projectileHeights[2] when heightIndex=2', () => {
+      const boss = createTestBoss();
+      const proj = createBossProjectile(boss, config, 3, 2);
+
+      expect(proj.y).toBe(config.projectileHeights[2]);
+    });
+
+    it('should wrap heightIndex via modulo when out of range', () => {
+      const boss = createTestBoss();
+      const proj = createBossProjectile(boss, config, 4, config.projectileHeights.length);
+
+      expect(proj.y).toBe(config.projectileHeights[0]);
+    });
+
     it('should set vx to negative projectileSpeed (moves left)', () => {
       const boss = createTestBoss();
       const proj = createBossProjectile(boss, config, 1, 0);
@@ -260,6 +283,53 @@ describe('bossPhysics', () => {
       const proj = createBossProjectile(boss, config, 42, 0);
 
       expect(proj.id).toBe(42);
+    });
+
+    it('should use fixed height when aimAtPlayer is false', () => {
+      const noAimConfig: BossConfig = { ...config, aimAtPlayer: false };
+      const boss = createTestBoss();
+      const proj = createBossProjectile(boss, noAimConfig, 1, 0, 400);
+
+      expect(proj.y).toBe(noAimConfig.projectileHeights[0]);
+    });
+
+    it('should use fixed height when playerY is undefined', () => {
+      const boss = createTestBoss();
+      const proj = createBossProjectile(boss, config, 1, 0, undefined);
+
+      expect(proj.y).toBe(config.projectileHeights[0]);
+    });
+
+    it('should aim at playerY when aimAtPlayer is true and random < aimChance', () => {
+      const spy = vi.spyOn(Math, 'random').mockReturnValue(0);
+      const aimConfig: BossConfig = { ...config, aimAtPlayer: true, aimChance: 0.5 };
+      const boss = createTestBoss();
+      const playerY = 580;
+      const proj = createBossProjectile(boss, aimConfig, 1, 0, playerY);
+
+      expect(proj.y).toBe(playerY);
+      spy.mockRestore();
+    });
+
+    it('should use fixed height when aimAtPlayer is true but random >= aimChance', () => {
+      const spy = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+      const aimConfig: BossConfig = { ...config, aimAtPlayer: true, aimChance: 0.5 };
+      const boss = createTestBoss();
+      const proj = createBossProjectile(boss, aimConfig, 1, 0, 580);
+
+      expect(proj.y).toBe(aimConfig.projectileHeights[0]);
+      spy.mockRestore();
+    });
+
+    it('should default aimChance to 0 when not specified', () => {
+      const spy = vi.spyOn(Math, 'random').mockReturnValue(0);
+      const noChanceConfig: BossConfig = { ...config, aimAtPlayer: true, aimChance: undefined };
+      const boss = createTestBoss();
+      const proj = createBossProjectile(boss, noChanceConfig, 1, 0, 580);
+
+      // aimChance defaults to 0, random() returns 0, 0 < 0 is false → use fixed height
+      expect(proj.y).toBe(noChanceConfig.projectileHeights[0]);
+      spy.mockRestore();
     });
   });
 

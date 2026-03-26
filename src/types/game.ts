@@ -41,6 +41,7 @@ export interface Level {
   groundColor: string;
   backgroundColor: string;
   length: number;
+  levelType?: 'normal' | 'boss';  // Level type (normal or boss)
 }
 
 export type GameState = 'menu' | 'playing' | 'paused' | 'dead' | 'won';
@@ -74,7 +75,7 @@ export interface GameStats {
 }
 
 // Quant (enemy) types
-export type QuantType = 'static' | 'moving' | 'jumping';
+export type QuantType = 'static' | 'moving' | 'jumping' | 'boss';
 
 export interface Quant extends Position, Dimensions {
   type: QuantType;
@@ -112,4 +113,16 @@ export interface Projectile {
   life: number;         // frames remaining (TTL, 300 = ~5 seconds at 60fps)
   category: WeaponCategory;  // determines visual style
   color: string;        // projectile color from weapon
+}
+
+// Boss projectile fired at the player
+export interface BossProjectile {
+  id: number;
+  x: number;            // world-space X position
+  y: number;            // world-space Y position
+  vx: number;           // horizontal velocity (NEGATIVE — moves left toward player)
+  width: number;
+  height: number;
+  damage: number;       // damage per hit (typically 1)
+  life: number;         // frames remaining (TTL, ~300 frames)
 }

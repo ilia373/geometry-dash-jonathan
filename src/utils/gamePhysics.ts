@@ -267,6 +267,10 @@ export const updateQuantPhysics = (
       break;
     }
       
+    case 'boss':
+      // Boss physics handled externally by bossPhysics.ts
+      break;
+    
     case 'static':
     default:
       // Static quants don't move
@@ -353,6 +357,11 @@ export const checkQuantCollision = (
   
   if (!colliding) {
     return { type: null, quant: null };
+  }
+  
+  // Boss type: any collision = player death (cannot stomp boss)
+  if (quant.type === 'boss') {
+    return { type: 'death', quant };
   }
   
   // CHECK: Jumping on TOP of the quant kills it

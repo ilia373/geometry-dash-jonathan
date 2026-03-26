@@ -16,51 +16,59 @@ let cacheInitialized: boolean = false;
 export const syncUniversesFromCloud = async (): Promise<void> => {
   const user = getCurrentUser();
 
+  // Preserve any in-memory unlocks that haven't been persisted yet
+  const currentCache = [...cachedUnlockedUniverses];
+
   if (!user || isGuest()) {
     // Guest: load from localStorage
-    if (cachedUnlockedUniverses.length === 0) {
-      cachedUnlockedUniverses = ['milky-way'];
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const fromStorage: string[] = saved ? JSON.parse(saved) : [];
+      // Merge localStorage with any in-memory unlocks
+      const merged = Array.from(new Set([...fromStorage, ...currentCache]));
+      cachedUnlockedUniverses = merged.length > 0 ? merged : ['milky-way'];
+    } catch {
+      cachedUnlockedUniverses = currentCache.length > 0 ? currentCache : ['milky-way'];
     }
   } else {
     // Authenticated: load from Firestore (has built-in offline support)
     try {
       const userData = await loadUserData();
-      cachedUnlockedUniverses = userData?.unlockedUniverses ?? ['milky-way'];
-      if (cachedUnlockedUniverses.length === 0) {
-        cachedUnlockedUniverses = ['milky-way'];
-      }
+      const fromFirestore: string[] = userData?.unlockedUniverses ?? [];
+      // Merge Firestore data with in-memory cache to avoid losing recent unlocks
+      const merged = Array.from(new Set([...fromFirestore, ...currentCache]));
+      cachedUnlockedUniverses = merged.length > 0 ? merged : ['milky-way'];
     } catch (error) {
       console.error('Failed to load universe data:', error);
-      cachedUnlockedUniverses = ['milky-way'];
+      cachedUnlockedUniverses = currentCache.length > 0 ? currentCache : ['milky-way'];
     }
   }
+
+  // Always persist to localStorage as fallback
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedUnlockedUniverses));
   cacheInitialized = true;
 };
 
-// Return cached array (lazy-init from localStorage if not initialized)
 export const getUnlockedUniverses = (): string[] => {
   if (!cacheInitialized) {
-    if (!isGuest()) {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
-      } catch {
-        cachedUnlockedUniverses = ['milky-way'];
-      }
-    } else {
-      cachedUnlockedUniverses = cachedUnlockedUniverses.length > 0 ? cachedUnlockedUniverses : ['milky-way'];
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
+    } catch {
+      cachedUnlockedUniverses = ['milky-way'];
     }
     cacheInitialized = true;
   }
   return [...cachedUnlockedUniverses];
 };
 
-// Add to cache, persist to localStorage/Firestore
 export const unlockUniverse = async (id: string): Promise<void> => {
   if (!cacheInitialized) await syncUniversesFromCloud();
 
   if (!cachedUnlockedUniverses.includes(id)) {
     cachedUnlockedUniverses.push(id);
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedUnlockedUniverses));
 
     const user = getCurrentUser();
     if (user && !isGuest()) {
@@ -69,18 +77,13 @@ export const unlockUniverse = async (id: string): Promise<void> => {
   }
 };
 
-// Check if ID is in cached array
 export const isUniverseUnlocked = (id: string): boolean => {
   if (!cacheInitialized) {
-    if (!isGuest()) {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
-      } catch {
-        cachedUnlockedUniverses = ['milky-way'];
-      }
-    } else {
-      cachedUnlockedUniverses = cachedUnlockedUniverses.length > 0 ? cachedUnlockedUniverses : ['milky-way'];
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      cachedUnlockedUniverses = saved ? JSON.parse(saved) : ['milky-way'];
+    } catch {
+      cachedUnlockedUniverses = ['milky-way'];
     }
     cacheInitialized = true;
   }

@@ -93,8 +93,8 @@ describe('SpaceMap Component', () => {
 
   it('coming-soon nodes are disabled', () => {
     render(<SpaceMap onSelectUniverse={mockOnSelectUniverse} onOpenShop={mockOnOpenShop} />);
-    const andromedaButton = screen.getByRole('button', { name: 'Andromeda — Coming Soon' });
-    expect(andromedaButton).toBeDisabled();
+    const nebulaButton = screen.getByRole('button', { name: 'Nebula Vortex — Coming Soon' });
+    expect(nebulaButton).toBeDisabled();
   });
 
   it('calls onSelectUniverse when milky-way is clicked', () => {
@@ -116,8 +116,8 @@ describe('SpaceMap Component', () => {
 
   it('does not call onSelectUniverse when a disabled node is clicked', () => {
     render(<SpaceMap onSelectUniverse={mockOnSelectUniverse} onOpenShop={mockOnOpenShop} />);
-    const andromedaButton = screen.getByRole('button', { name: 'Andromeda — Coming Soon' });
-    fireEvent.click(andromedaButton);
+    const nebulaButton = screen.getByRole('button', { name: 'Nebula Vortex — Coming Soon' });
+    fireEvent.click(nebulaButton);
     expect(mockOnSelectUniverse).not.toHaveBeenCalled();
   });
 });

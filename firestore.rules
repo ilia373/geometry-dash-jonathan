@@ -41,7 +41,8 @@ service cloud.firestore {
         // Validate data structure
         && request.resource.data.keys().hasOnly([
           'coins', 'completedLevels', 'bestProgress', 
-          'selectedSkin', 'ownedSkins', 'lastUpdated'
+          'selectedSkin', 'ownedSkins', 'selectedWeapon',
+          'ownedWeapons', 'unlockedUniverses', 'lastUpdated'
         ])
         // Coins must be a non-negative number (prevent cheating)
         && request.resource.data.coins is number

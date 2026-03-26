@@ -17,15 +17,15 @@ describe('universeConfig', () => {
       expect(UNIVERSES[0].id).toBe('milky-way');
     });
 
-    it('should have milky-way as the only non-comingSoon universe', () => {
+    it('should have milky-way and andromeda as non-comingSoon universes', () => {
       const unlocked = UNIVERSES.filter(u => !u.comingSoon);
-      expect(unlocked).toHaveLength(1);
-      expect(unlocked[0].id).toBe('milky-way');
+      expect(unlocked).toHaveLength(2);
+      expect(unlocked.map(u => u.id)).toEqual(['milky-way', 'andromeda']);
     });
 
-    it('should assign 6 levels to milky-way', () => {
+    it('should assign 7 levels to milky-way', () => {
       const milkyWay = UNIVERSES.find(u => u.id === 'milky-way');
-      expect(milkyWay?.levelIds).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(milkyWay?.levelIds).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
 
     it('should have empty levelIds for coming-soon universes', () => {
@@ -97,6 +97,16 @@ describe('universeConfig', () => {
     it('should return milky-way for level 6', () => {
       const u = getUniverseForLevel(6);
       expect(u?.id).toBe('milky-way');
+    });
+
+    it('should return milky-way for level 7 (boss)', () => {
+      const u = getUniverseForLevel(7);
+      expect(u?.id).toBe('milky-way');
+    });
+
+    it('should return andromeda for level 8', () => {
+      const u = getUniverseForLevel(8);
+      expect(u?.id).toBe('andromeda');
     });
 
     it('should return undefined for a level not in any universe', () => {

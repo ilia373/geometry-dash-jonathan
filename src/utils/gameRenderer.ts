@@ -1,5 +1,6 @@
-import type { Player, Obstacle, Particle, GameConfig, Level, Quant, DroppedCoin, Projectile } from '../types/game';
+import type { Player, Obstacle, Particle, GameConfig, Level, Quant, DroppedCoin, Projectile, BossProjectile } from '../types/game';
 import type { Weapon } from '../types/weapons';
+import type { BossConfig } from '../constants/bossConfig';
 import { getSelectedSkin } from './skinManager';
 
 // Draw the background with gradient and stars
@@ -556,6 +557,16 @@ const drawQuant = (
         ctx.stroke();
       }
        break;
+
+    case 'boss': {
+      // Boss rendering is handled via drawBoss() directly in Game.tsx
+      // Draw minimal fallback here in case drawBoss isn't called
+      ctx.fillStyle = quant.color;
+      ctx.shadowColor = quant.color;
+      ctx.shadowBlur = 20;
+      ctx.fillRect(screenX, quant.y, quant.width, quant.height);
+      break;
+    }
    }
    
    // Flash overlay when quant takes damage
@@ -819,6 +830,195 @@ export const drawWeaponHUD = (
   ctx.fillStyle = '#ffffff';
   const name = weapon.name.length > 10 ? weapon.name.slice(0, 10) + '…' : weapon.name;
   ctx.fillText(name, x + size / 2, y + size - 8);
+
+  ctx.restore();
+};
+
+export const drawBoss = (
+  ctx: CanvasRenderingContext2D,
+  quant: Quant,
+  config: BossConfig,
+  time: number
+): void => {
+  if (quant.isDead) return;
+
+  ctx.save();
+
+  const screenX = quant.x;
+  const centerX = screenX + quant.width / 2;
+  const centerY = quant.y + quant.height / 2;
+
+  const pulse = Math.sin(time * 0.08) * 4;
+
+  ctx.shadowColor = config.glowColor;
+  ctx.shadowBlur = 30 + pulse;
+
+  const gradient = ctx.createRadialGradient(
+    centerX - quant.width * 0.15, centerY - quant.height * 0.15, 0,
+    centerX, centerY, quant.width * 0.7
+  );
+  gradient.addColorStop(0, config.glowColor);
+  gradient.addColorStop(0.5, config.color);
+  gradient.addColorStop(1, '#1a0010');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(screenX, quant.y, quant.width, quant.height);
+
+  ctx.strokeStyle = config.glowColor;
+  ctx.lineWidth = 3;
+  ctx.shadowBlur = 0;
+  ctx.strokeRect(screenX, quant.y, quant.width, quant.height);
+
+  const eyeScale = 2;
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.ellipse(centerX - 12 * eyeScale * 0.5, centerY - 6, 5 * eyeScale, 6 * eyeScale, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(centerX + 12 * eyeScale * 0.5, centerY - 6, 5 * eyeScale, 6 * eyeScale, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ff0000';
+  ctx.beginPath();
+  ctx.arc(centerX - 16 * eyeScale * 0.5, centerY - 4, 3 * eyeScale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(centerX + 8 * eyeScale * 0.5, centerY - 4, 3 * eyeScale, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(centerX - 24 * eyeScale * 0.5, centerY - 20);
+  ctx.lineTo(centerX - 6 * eyeScale * 0.5, centerY - 12);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(centerX + 6 * eyeScale * 0.5, centerY - 12);
+  ctx.lineTo(centerX + 24 * eyeScale * 0.5, centerY - 20);
+  ctx.stroke();
+
+  ctx.font = `${quant.width * 0.35}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(config.emoji, centerX, centerY + quant.height * 0.15);
+
+  if (quant.flashTimer > 0) {
+    ctx.save();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillRect(screenX, quant.y, quant.width, quant.height);
+    ctx.restore();
+  }
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${Math.max(12, quant.width * 0.14)}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(config.name, centerX, quant.y - 8);
+
+  ctx.restore();
+};
+
+export const drawBossHPBar = (
+  ctx: CanvasRenderingContext2D,
+  boss: Quant,
+  config: BossConfig,
+  canvasWidth: number
+): void => {
+  const barWidth = 600;
+  const barHeight = 28;
+  const x = (canvasWidth - barWidth) / 2;
+  const y = 20;
+  const hpFraction = Math.max(0, boss.hp / boss.maxHp);
+  const isLow = hpFraction < 0.25;
+
+  ctx.save();
+
+  ctx.shadowColor = config.glowColor;
+  ctx.shadowBlur = 12;
+
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillRect(x, y, barWidth, barHeight);
+
+  if (hpFraction > 0) {
+    const fillGradient = ctx.createLinearGradient(x, y, x + barWidth * hpFraction, y);
+    if (isLow) {
+      fillGradient.addColorStop(0, '#cc0000');
+      fillGradient.addColorStop(1, '#ff4444');
+    } else {
+      fillGradient.addColorStop(0, config.color);
+      fillGradient.addColorStop(1, config.glowColor);
+    }
+    ctx.fillStyle = fillGradient;
+    ctx.fillRect(x, y, barWidth * hpFraction, barHeight);
+  }
+
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x, y, barWidth, barHeight);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 13px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`${boss.hp} / ${boss.maxHp}`, x + barWidth / 2, y + barHeight / 2);
+
+  ctx.font = 'bold 14px Arial';
+  ctx.textBaseline = 'bottom';
+  ctx.shadowColor = config.glowColor;
+  ctx.shadowBlur = 6;
+  ctx.fillText(`${config.emoji} ${config.name}`, x + barWidth / 2, y - 4);
+
+  ctx.restore();
+};
+
+export const drawBossProjectiles = (
+  ctx: CanvasRenderingContext2D,
+  projectiles: BossProjectile[]
+): void => {
+  for (const proj of projectiles) {
+    ctx.save();
+
+    for (let i = 3; i >= 1; i--) {
+      ctx.globalAlpha = 0.15 * (4 - i) / 3;
+      ctx.fillStyle = '#FF4400';
+      ctx.fillRect(
+        proj.x + proj.width * 0.3 * i,
+        proj.y,
+        proj.width,
+        proj.height
+      );
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = '#FF6600';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = '#FF4400';
+    ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
+
+    ctx.restore();
+  }
+};
+
+export const drawBossArenaOverlay = (
+  ctx: CanvasRenderingContext2D,
+  canvasWidth: number,
+  canvasHeight: number,
+  _level: Level
+): void => {
+  ctx.save();
+
+  const gradient = ctx.createRadialGradient(
+    canvasWidth / 2, canvasHeight / 2, canvasHeight * 0.25,
+    canvasWidth / 2, canvasHeight / 2, canvasHeight * 0.85
+  );
+  gradient.addColorStop(0, 'rgba(200, 0, 0, 0)');
+  gradient.addColorStop(1, 'rgba(200, 0, 0, 0.15)');
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
   ctx.restore();
 };

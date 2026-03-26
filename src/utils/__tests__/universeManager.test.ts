@@ -9,7 +9,7 @@ vi.mock('../firestoreService', () => ({
   loadUserData: vi.fn(() => Promise.resolve(null)),
 }));
 
-const mockGetCurrentUser = vi.fn(() => null);
+const mockGetCurrentUser = vi.fn<() => Record<string, unknown> | null>(() => null);
 const mockIsGuest = vi.fn(() => true);
 const mockGetCompletedLevels = vi.fn<() => number[]>(() => []);
 
@@ -90,7 +90,8 @@ describe('universeManager', () => {
     it('should persist to localStorage for guest users', async () => {
       await unlockUniverse('andromeda');
       expect(isUniverseUnlocked('andromeda')).toBe(true);
-      expect(localStorage.getItem('geometry-dash-unlocked-universes')).toBeNull();
+      const stored = JSON.parse(localStorage.getItem('geometry-dash-unlocked-universes') ?? '[]');
+      expect(stored).toContain('andromeda');
     });
   });
 
@@ -112,8 +113,8 @@ describe('universeManager', () => {
       expect(isUniverseCompleted('milky-way')).toBe(false);
     });
 
-    it('should return true when all 6 milky-way levels are completed', () => {
-      mockGetCompletedLevels.mockReturnValue([1, 2, 3, 4, 5, 6]);
+    it('should return true when all 7 milky-way levels are completed', () => {
+      mockGetCompletedLevels.mockReturnValue([1, 2, 3, 4, 5, 6, 7]);
       expect(isUniverseCompleted('milky-way')).toBe(true);
     });
 
@@ -121,15 +122,15 @@ describe('universeManager', () => {
       expect(isUniverseCompleted('does-not-exist')).toBe(false);
     });
 
-    it('should return false for a coming-soon universe with no levelIds', () => {
+    it('should return false for andromeda when no levels are completed', () => {
       expect(isUniverseCompleted('andromeda')).toBe(false);
     });
   });
 
   describe('getUniverseCompletion', () => {
-    it('should return total=6 for milky-way', () => {
+    it('should return total=7 for milky-way', () => {
       const result = getUniverseCompletion('milky-way');
-      expect(result.total).toBe(6);
+      expect(result.total).toBe(7);
     });
 
     it('should return completed=0 when nothing done', () => {
@@ -141,7 +142,7 @@ describe('universeManager', () => {
       mockGetCompletedLevels.mockReturnValue([1, 2, 3]);
       const result = getUniverseCompletion('milky-way');
       expect(result.completed).toBe(3);
-      expect(result.total).toBe(6);
+      expect(result.total).toBe(7);
     });
 
     it('should return 0/0 for an invalid universe id', () => {
@@ -157,8 +158,36 @@ describe('universeManager', () => {
     });
 
     it('should load data from localStorage for guest users', async () => {
+      localStorage.setItem('geometry-dash-unlocked-universes', JSON.stringify(['milky-way', 'andromeda']));
       await syncUniversesFromCloud();
-      expect(isUniverseUnlocked('andromeda')).toBe(false);
+      expect(isUniverseUnlocked('andromeda')).toBe(true);
+      expect(isUniverseUnlocked('milky-way')).toBe(true);
+    });
+
+    it('should preserve in-memory unlocks when syncing (race condition fix)', async () => {
+      await unlockUniverse('andromeda');
+      expect(isUniverseUnlocked('andromeda')).toBe(true);
+      await syncUniversesFromCloud();
+      expect(isUniverseUnlocked('andromeda')).toBe(true);
+    });
+
+    it('should merge Firestore data with in-memory cache for authenticated users', async () => {
+      const { loadUserData } = await import('../firestoreService');
+      mockGetCurrentUser.mockReturnValue({ uid: 'test-uid', email: 'test@test.com' });
+      mockIsGuest.mockReturnValue(false);
+      vi.mocked(loadUserData).mockResolvedValue({
+        coins: 0,
+        completedLevels: [],
+        bestProgress: {},
+        selectedSkin: 'default',
+        ownedSkins: ['default'],
+        unlockedUniverses: ['milky-way'],
+        lastUpdated: Date.now(),
+      });
+
+      await unlockUniverse('andromeda');
+      await syncUniversesFromCloud();
+      expect(isUniverseUnlocked('andromeda')).toBe(true);
       expect(isUniverseUnlocked('milky-way')).toBe(true);
     });
   });

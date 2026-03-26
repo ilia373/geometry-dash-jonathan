@@ -68,7 +68,7 @@ describe('UniverseLevelSelector Component', () => {
     expect(screen.getByText('Milky Way')).toBeInTheDocument();
   });
 
-  it('renders all 6 planet cards for milky-way', () => {
+  it('renders all 7 planet cards for milky-way', () => {
     render(
       <UniverseLevelSelector
         universeId="milky-way"
@@ -77,7 +77,7 @@ describe('UniverseLevelSelector Component', () => {
         onOpenShop={mockOnOpenShop}
       />
     );
-    expect(document.querySelectorAll('.planet-card')).toHaveLength(6);
+    expect(document.querySelectorAll('.planet-card')).toHaveLength(7);
   });
 
   it('back button calls onBack', () => {

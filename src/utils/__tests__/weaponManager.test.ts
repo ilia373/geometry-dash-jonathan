@@ -72,7 +72,7 @@ describe('weaponManager', () => {
     it('should persist owned weapons to localStorage as JSON', async () => {
       await unlockWeapon(1);
       const stored = localStorage.getItem('geometry-dash-owned-weapons');
-      expect(stored).toBeNull();
+      expect(stored).toBe('["pistol"]');
       expect(isWeaponUnlocked(1)).toBe(true);
     });
 

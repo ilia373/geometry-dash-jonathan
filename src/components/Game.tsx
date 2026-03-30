@@ -115,6 +115,9 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
    const bossJumpTimerRef = useRef<number>(0);
    const bossProjectileIdCounterRef = useRef<number>(0);
    const bossConfigRef = useRef<BossConfig | null>(null);
+   const bossDefeatedPhaseRef = useRef<boolean>(false);
+   const bossDefeatedTimerRef = useRef<number>(0);
+   const BOSS_COIN_COLLECTION_FRAMES = 300; // ~5 seconds for coins to spread and magnet
   
   // Clone level to avoid mutating original level data
   const levelRef = useRef(JSON.parse(JSON.stringify(getCurrentLevel(levelId))));
@@ -196,6 +199,8 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
     bossProjectilesRef.current = [];
     bossFireTimerRef.current = { timer: 0, shotIndex: 0 };
     bossJumpTimerRef.current = 0;
+    bossDefeatedPhaseRef.current = false;
+    bossDefeatedTimerRef.current = 0;
     // Re-initialize boss if boss level
     if (level.levelType === 'boss' && bossConfigRef.current) {
       const universeId = getUniverseForLevel(level.id)?.id ?? 'milky-way';
@@ -336,33 +341,21 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
            // Check if this hit is on the boss (id=9999)
            if (level.levelType === 'boss' && bossRef.current && hit.quantId === 9999) {
              applyDamageToQuant(bossRef.current, hit.damage);
-             if (bossRef.current.isDead) {
-               // Boss defeated!
-               const config = bossConfigRef.current;
-               if (config) {
-                 droppedCoinsRef.current = [
-                   ...droppedCoinsRef.current,
-                   ...createBossDeathCoins(config, GAME_CONFIG.canvasWidth, GAME_CONFIG.canvasHeight, bossProjectileIdCounterRef.current),
-                 ];
-               }
-               setStats(prev => ({ ...prev, coinsCollected: coinsCollectedRef.current, progress: 1 }));
-               setGameState('won');
-               soundManager.playSound('success');
-               soundManager.stopBackgroundMusic();
-               projectilesRef.current = [];
-               bossProjectilesRef.current = [];
-               markLevelComplete(levelId);
-               addCoins(coinsCollectedRef.current);
-               // Unlock next universe (fire and forget)
-               const universeId = getUniverseForLevel(level.id)?.id;
-               if (universeId) {
-                 const universes = ['milky-way', 'andromeda']; // ordered
-                 const currentIdx = universes.indexOf(universeId);
-                 if (currentIdx >= 0 && currentIdx < universes.length - 1) {
-                   unlockUniverse(universes[currentIdx + 1]).catch(console.error);
-                 }
-               }
-             }
+              if (bossRef.current.isDead && !bossDefeatedPhaseRef.current) {
+                bossDefeatedPhaseRef.current = true;
+                bossDefeatedTimerRef.current = 0;
+                const config = bossConfigRef.current;
+                if (config) {
+                  droppedCoinsRef.current = [
+                    ...droppedCoinsRef.current,
+                    ...createBossDeathCoins(config, GAME_CONFIG.canvasWidth, GAME_CONFIG.canvasHeight, bossProjectileIdCounterRef.current),
+                  ];
+                }
+                soundManager.playSound('success');
+                soundManager.stopBackgroundMusic();
+                projectilesRef.current = [];
+                bossProjectilesRef.current = [];
+              }
              continue; // Don't process this hit further against quants array
            }
 
@@ -576,9 +569,25 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
           progressRef.current = Math.min(cameraXRef.current / level.length, 1);
         }
 
-        // Boss win condition (safety guard — primary trigger is in projectile collision block)
-        if (level.levelType === 'boss' && bossRef.current?.isDead && gameState === 'playing') {
-          // Already handled above in projectile collision block
+        if (level.levelType === 'boss' && bossDefeatedPhaseRef.current && gameState === 'playing') {
+          bossDefeatedTimerRef.current++;
+          const allCoinsCollected = droppedCoinsRef.current.every(c => c.collected);
+          const timedOut = bossDefeatedTimerRef.current >= BOSS_COIN_COLLECTION_FRAMES;
+
+          if (allCoinsCollected || timedOut) {
+            setStats(prev => ({ ...prev, coinsCollected: coinsCollectedRef.current, progress: 1 }));
+            setGameState('won');
+            markLevelComplete(levelId);
+            addCoins(coinsCollectedRef.current);
+            const universeId = getUniverseForLevel(level.id)?.id;
+            if (universeId) {
+              const universes = ['milky-way', 'andromeda'];
+              const currentIdx = universes.indexOf(universeId);
+              if (currentIdx >= 0 && currentIdx < universes.length - 1) {
+                unlockUniverse(universes[currentIdx + 1]).catch(console.error);
+              }
+            }
+          }
         }
 
         // Check win condition (normal levels only)

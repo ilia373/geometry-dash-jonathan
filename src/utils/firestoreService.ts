@@ -18,7 +18,7 @@ import {
   setOwnedSkins,
   setSelectedSkinCache,
 } from './skinManager';
-import { getOwnedWeaponNames, getSelectedWeaponName } from './weaponManager';
+import { getOwnedWeaponNames, getSelectedWeaponName, setOwnedWeapons, setSelectedWeaponCache } from './weaponManager';
 
 // User data structure stored in Firestore
 export interface UserData {
@@ -324,6 +324,9 @@ export const syncLocalToCloud = async (): Promise<void> => {
   // Update skin cache with merged skins
   setOwnedSkins(mergedData.ownedSkins);
   setSelectedSkinCache(mergedData.selectedSkin);
+  
+  setOwnedWeapons(mergedData.ownedWeapons ?? []);
+  setSelectedWeaponCache(mergedData.selectedWeapon ?? '');
 };
 
 // Initialize Firestore sync on auth changes

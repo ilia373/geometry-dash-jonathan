@@ -125,6 +125,9 @@ export const unlockWeapon = async (weaponId: number): Promise<void> => {
     cachedOwnedWeaponIds.push(weaponId);
     const ownedWeaponNames = cachedOwnedWeaponIds.map(weaponIdToName);
 
+    // Persist to localStorage so weapons survive refresh
+    localStorage.setItem(OWNED_WEAPONS_KEY, JSON.stringify(ownedWeaponNames));
+
     const user = getCurrentUser();
     if (user && !isGuest()) {
       await saveUserData({ ownedWeapons: ownedWeaponNames });
@@ -152,6 +155,8 @@ export const setSelectedWeapon = async (weaponId: number): Promise<void> => {
   if (WEAPONS.find((w) => w.id === weaponId)) {
     cachedSelectedWeaponId = weaponId;
     const weaponName = weaponIdToName(weaponId);
+
+    localStorage.setItem(WEAPON_STORAGE_KEY, weaponName);
 
     const user = getCurrentUser();
     if (user && !isGuest()) {

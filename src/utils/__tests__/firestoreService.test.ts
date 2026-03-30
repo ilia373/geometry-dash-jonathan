@@ -77,6 +77,8 @@ vi.mock('../skinManager', () => ({
 vi.mock('../weaponManager', () => ({
   getOwnedWeaponNames: () => mockGetOwnedWeaponNames(),
   getSelectedWeaponName: () => mockGetSelectedWeaponName(),
+  setOwnedWeapons: vi.fn(),
+  setSelectedWeaponCache: vi.fn(),
 }));
 
 vi.mock('../universeManager', () => ({

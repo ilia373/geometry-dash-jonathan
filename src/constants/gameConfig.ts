@@ -23,6 +23,7 @@ export const QUANT_CONFIG = {
     static: '#8B00FF',   // Purple for static quants
     moving: '#FF4500',   // Orange-red for moving quants
     jumping: '#00CED1',  // Cyan for jumping quants
+    boss: '#FF0000',
   },
 };
 
@@ -32,6 +33,7 @@ export const QUANT_HP_CONFIG = {
     static: 20,
     moving: 40,
     jumping: 60,
+    boss: 500,
   },
   // index = levelId - 1, values scale quant HP (16 entries for 16 levels across 2 universes)
   levelMultipliers: [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5],

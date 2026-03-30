@@ -1005,8 +1005,7 @@ export const drawBossProjectiles = (
 export const drawBossArenaOverlay = (
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
-  canvasHeight: number,
-  _level: Level
+  canvasHeight: number
 ): void => {
   ctx.save();
 

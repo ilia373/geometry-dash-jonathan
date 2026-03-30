@@ -625,7 +625,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
 
       // Draw boss arena overlay (boss levels only)
       if (level.levelType === 'boss') {
-        drawBossArenaOverlay(ctx, GAME_CONFIG.canvasWidth, GAME_CONFIG.canvasHeight, level);
+        drawBossArenaOverlay(ctx, GAME_CONFIG.canvasWidth, GAME_CONFIG.canvasHeight);
       }
       
       // Draw quants

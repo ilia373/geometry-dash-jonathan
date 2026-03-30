@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import type { Player, Particle, GameState, GameStats, Quant, DroppedCoin, Projectile } from '../types/game';
+import type { BossProjectile } from '../types/game';
 import type { CheatState } from '../types/cheats';
 import { GAME_CONFIG, getCurrentLevel, resetQuantIdCounter } from '../constants/gameConfig';
 import {
@@ -32,6 +33,10 @@ import {
   drawDroppedCoins,
   drawProjectiles,
   drawWeaponHUD,
+  drawBoss,
+  drawBossHPBar,
+  drawBossProjectiles,
+  drawBossArenaOverlay,
 } from '../utils/gameRenderer';
 import { soundManager } from '../utils/soundManager';
 import { markLevelComplete } from '../utils/progressManager';
@@ -39,6 +44,19 @@ import { addCoins, getTotalCoins } from '../utils/walletManager';
 import { isGuest } from '../utils/authService';
 import { createProjectile, updateProjectiles, checkAllProjectileCollisions } from '../utils/projectilePhysics';
 import { getSelectedWeapon } from '../utils/weaponManager';
+import { getBossConfig } from '../constants/bossConfig';
+import type { BossConfig } from '../constants/bossConfig';
+import type { BossFireTimer } from '../utils/bossPhysics';
+import {
+  createBoss,
+  updateBossPhysics,
+  createBossProjectile,
+  updateBossProjectiles,
+  checkBossProjectilePlayerCollision,
+  createBossDeathCoins,
+} from '../utils/bossPhysics';
+import { unlockUniverse } from '../utils/universeManager';
+import { getUniverseForLevel } from '../constants/universeConfig';
 import './Game.css';
 
 interface GameProps {
@@ -89,6 +107,17 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
    const weaponCooldownRef = useRef<number>(0);
    const projectileIdCounterRef = useRef<number>(0);
    const MAX_PROJECTILES = 50;
+
+   // Boss refs
+   const bossRef = useRef<Quant | null>(null);
+   const bossProjectilesRef = useRef<BossProjectile[]>([]);
+   const bossFireTimerRef = useRef<BossFireTimer>({ timer: 0, shotIndex: 0 });
+   const bossJumpTimerRef = useRef<number>(0);
+   const bossProjectileIdCounterRef = useRef<number>(0);
+   const bossConfigRef = useRef<BossConfig | null>(null);
+   const bossDefeatedPhaseRef = useRef<boolean>(false);
+   const bossDefeatedTimerRef = useRef<number>(0);
+   const BOSS_COIN_COLLECTION_FRAMES = 300; // ~5 seconds for coins to spread and magnet
   
   // Clone level to avoid mutating original level data
   const levelRef = useRef(JSON.parse(JSON.stringify(getCurrentLevel(levelId))));
@@ -98,6 +127,19 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
   useEffect(() => {
     resetQuantIdCounter();
     quantsRef.current = JSON.parse(JSON.stringify(level.quants || []));
+  }, [level]);
+
+  // Initialize boss for boss levels
+  useEffect(() => {
+    if (level.levelType === 'boss') {
+      const universeId = getUniverseForLevel(level.id)?.id ?? 'milky-way';
+      const configKey = universeId.replace(/-/g, '_');
+      const config = getBossConfig(configKey);
+      if (config) {
+        bossConfigRef.current = config;
+        bossRef.current = createBoss(config, universeId);
+      }
+    }
   }, [level]);
   
   // Keep cheatsRef in sync with props
@@ -153,6 +195,19 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
      projectilesRef.current = [];
      weaponCooldownRef.current = 0;
      resetCoins();
+    // Reset boss refs
+    bossProjectilesRef.current = [];
+    bossFireTimerRef.current = { timer: 0, shotIndex: 0 };
+    bossJumpTimerRef.current = 0;
+    bossDefeatedPhaseRef.current = false;
+    bossDefeatedTimerRef.current = 0;
+    // Re-initialize boss if boss level
+    if (level.levelType === 'boss' && bossConfigRef.current) {
+      const universeId = getUniverseForLevel(level.id)?.id ?? 'milky-way';
+      bossRef.current = createBoss(bossConfigRef.current, universeId);
+    } else {
+      bossRef.current = null;
+    }
     setGameState('playing');
     setStats(prev => ({
       ...prev,
@@ -195,8 +250,10 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
         if (activeCheat.speedBoost) speedMod = 2;
         if (activeCheat.slowMotion) speedMod = 0.5;
         
-        // Update camera (move forward)
-        cameraXRef.current += GAME_CONFIG.playerSpeed * speedMod;
+        // Update camera (only for non-boss levels)
+        if (!level.levelType || level.levelType !== 'boss') {
+          cameraXRef.current += GAME_CONFIG.playerSpeed * speedMod;
+        }
         
         // Apply float cheat (disable gravity)
         if (activeCheat.float) {
@@ -220,6 +277,35 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
            quantsRef.current,
            cameraXRef.current
          );
+
+         // Boss physics (boss levels only)
+         if (level.levelType === 'boss' && bossRef.current && bossConfigRef.current && !bossRef.current.isDead) {
+           const result = updateBossPhysics(
+             bossRef.current,
+             bossConfigRef.current,
+             bossFireTimerRef.current,
+             bossJumpTimerRef.current
+           );
+           bossRef.current = result.boss;
+           bossFireTimerRef.current = result.fireTimer;
+           bossJumpTimerRef.current = result.jumpTimer;
+
+            if (result.shouldFire) {
+              const proj = createBossProjectile(
+                bossRef.current,
+                bossConfigRef.current,
+                bossProjectileIdCounterRef.current++,
+                result.fireTimer.shotIndex,
+                playerRef.current.y
+              );
+              bossProjectilesRef.current.push(proj);
+            }
+         }
+
+         // Update boss projectiles
+         if (level.levelType === 'boss') {
+           bossProjectilesRef.current = updateBossProjectiles(bossProjectilesRef.current);
+         }
          
          // Auto-fire weapon
          const currentWeapon = getSelectedWeapon();
@@ -242,13 +328,37 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
          // Update projectiles
          projectilesRef.current = updateProjectiles(projectilesRef.current);
          
-         // Check projectile-quant collisions
+         // Check projectile-quant collisions (for boss levels, check against boss entity)
+         const projectileTargets = (level.levelType === 'boss' && bossRef.current)
+           ? [bossRef.current]
+           : quantsRef.current;
          const hitResults = checkAllProjectileCollisions(
            projectilesRef.current,
-           quantsRef.current,
+           projectileTargets,
            cameraXRef.current
          );
          for (const hit of hitResults) {
+           // Check if this hit is on the boss (id=9999)
+           if (level.levelType === 'boss' && bossRef.current && hit.quantId === 9999) {
+             applyDamageToQuant(bossRef.current, hit.damage);
+              if (bossRef.current.isDead && !bossDefeatedPhaseRef.current) {
+                bossDefeatedPhaseRef.current = true;
+                bossDefeatedTimerRef.current = 0;
+                const config = bossConfigRef.current;
+                if (config) {
+                  droppedCoinsRef.current = [
+                    ...droppedCoinsRef.current,
+                    ...createBossDeathCoins(config, GAME_CONFIG.canvasWidth, GAME_CONFIG.canvasHeight, bossProjectileIdCounterRef.current),
+                  ];
+                }
+                soundManager.playSound('success');
+                soundManager.stopBackgroundMusic();
+                projectilesRef.current = [];
+                bossProjectilesRef.current = [];
+              }
+             continue; // Don't process this hit further against quants array
+           }
+
            const quant = quantsRef.current.find(q => q.id === hit.quantId);
            if (quant) {
              applyDamageToQuant(quant, hit.damage);
@@ -267,6 +377,22 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
          }
          // Remove consumed projectiles
          projectilesRef.current = projectilesRef.current.filter(p => p.life > 0);
+
+         // Check boss projectile -> player collision (boss levels only, 1-hit death)
+         if (level.levelType === 'boss' && !activeCheat.ghostMode) {
+           for (const proj of bossProjectilesRef.current) {
+             if (checkBossProjectilePlayerCollision(playerRef.current, proj)) {
+               particlesRef.current = [
+                 ...particlesRef.current,
+                 ...createDeathParticles(playerRef.current),
+               ];
+               playerRef.current.isDead = true;
+               setGameState('dead');
+               soundManager.playSound('fail');
+               break;
+             }
+           }
+         }
          
          // Update dropped coins with magnet effect toward player
         droppedCoinsRef.current = updateDroppedCoins(
@@ -437,10 +563,35 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
         }
         
         // Update progress
-        progressRef.current = Math.min(cameraXRef.current / level.length, 1);
-        
-        // Check win condition
-        if (cameraXRef.current >= level.length) {
+        if (level.levelType === 'boss' && bossRef.current) {
+          progressRef.current = 1 - (bossRef.current.hp / bossRef.current.maxHp);
+        } else {
+          progressRef.current = Math.min(cameraXRef.current / level.length, 1);
+        }
+
+        if (level.levelType === 'boss' && bossDefeatedPhaseRef.current && gameState === 'playing') {
+          bossDefeatedTimerRef.current++;
+          const allCoinsCollected = droppedCoinsRef.current.every(c => c.collected);
+          const timedOut = bossDefeatedTimerRef.current >= BOSS_COIN_COLLECTION_FRAMES;
+
+          if (allCoinsCollected || timedOut) {
+            setStats(prev => ({ ...prev, coinsCollected: coinsCollectedRef.current, progress: 1 }));
+            setGameState('won');
+            markLevelComplete(levelId);
+            addCoins(coinsCollectedRef.current);
+            const universeId = getUniverseForLevel(level.id)?.id;
+            if (universeId) {
+              const universes = ['milky-way', 'andromeda'];
+              const currentIdx = universes.indexOf(universeId);
+              if (currentIdx >= 0 && currentIdx < universes.length - 1) {
+                unlockUniverse(universes[currentIdx + 1]).catch(console.error);
+              }
+            }
+          }
+        }
+
+        // Check win condition (normal levels only)
+        if ((!level.levelType || level.levelType !== 'boss') && cameraXRef.current >= level.length) {
           // Update stats for the modal display
           setStats(prev => ({
             ...prev,
@@ -471,6 +622,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       
       // Draw obstacles
       drawObstacles(ctx, level.obstacles, cameraXRef.current, GAME_CONFIG.canvasWidth, timeRef.current);
+
+      // Draw boss arena overlay (boss levels only)
+      if (level.levelType === 'boss') {
+        drawBossArenaOverlay(ctx, GAME_CONFIG.canvasWidth, GAME_CONFIG.canvasHeight);
+      }
       
       // Draw quants
       drawQuants(ctx, quantsRef.current, cameraXRef.current, GAME_CONFIG.canvasWidth, timeRef.current);
@@ -480,6 +636,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       
       // Draw dropped coins
       drawDroppedCoins(ctx, droppedCoinsRef.current, timeRef.current);
+
+      // Draw boss projectiles
+      if (level.levelType === 'boss') {
+        drawBossProjectiles(ctx, bossProjectilesRef.current);
+      }
       
       // Draw particles
       drawParticles(ctx, particlesRef.current);
@@ -487,6 +648,12 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       // Draw player (if not dead)
       if (!playerRef.current.isDead) {
         drawPlayer(ctx, playerRef.current);
+      }
+
+      // Draw boss (boss levels — boss is NOT in quantsRef, it's in bossRef)
+      if (level.levelType === 'boss' && bossRef.current && bossConfigRef.current) {
+        drawBoss(ctx, bossRef.current, bossConfigRef.current, timeRef.current);
+        drawBossHPBar(ctx, bossRef.current, bossConfigRef.current, GAME_CONFIG.canvasWidth);
       }
       
       // Draw UI
@@ -606,7 +773,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
       {gameState === 'won' && (
         <div className="game-overlay won">
           <div className="game-over-modal won">
-            <h2>🎉 Level Complete!</h2>
+            <h2>{level.levelType === 'boss' ? '⚔️ Boss Defeated!' : '🎉 Level Complete!'}</h2>
             <p>{level.name}</p>
             <p>Attempts: {stats.attempts}</p>
             {!isGuest() && <p className="coins-earned">🪙 {stats.coinsCollected} coins earned!</p>}

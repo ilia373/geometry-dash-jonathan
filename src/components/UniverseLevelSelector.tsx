@@ -3,6 +3,7 @@ import { LEVELS } from '../constants/gameConfig';
 import { getUniverseById } from '../constants/universeConfig';
 import { isLevelUnlocked, isLevelCompleted } from '../utils/progressManager';
 import { isAdmin, getCurrentUser, onAuthChange, logOut, getDisplayName, isGuest } from '../utils/authService';
+import { getSelectedWeapon } from '../utils/weaponManager';
 import type { AuthUser } from '../utils/authService';
 import { getTotalCoins } from '../utils/walletManager';
 import AuthModal from './AuthModal';
@@ -35,6 +36,7 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
   const [cheats, setCheats] = useState<CheatState>(defaultCheatState);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showWeaponWarning, setShowWeaponWarning] = useState<boolean>(false);
   const [coins, setCoins] = useState<number>(getTotalCoins());
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
   const [, setRefreshKey] = useState<number>(0);
@@ -57,9 +59,14 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
   };
 
   const handleStartGame = () => {
-    if (isLevelUnlocked(selectedLevel)) {
-      onStartGame(selectedLevel, cheats);
+    if (!isLevelUnlocked(selectedLevel)) return;
+    const levelData = LEVELS.find(l => l.id === selectedLevel);
+    if (levelData?.levelType === 'boss' && getSelectedWeapon() === null) {
+      setShowWeaponWarning(true);
+      return;
     }
+    setShowWeaponWarning(false);
+    onStartGame(selectedLevel, cheats);
   };
 
   const handleToggleCheat = (cheat: keyof CheatState) => {
@@ -207,6 +214,12 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
             );
           })}
         </div>
+
+        {showWeaponWarning && (
+          <div className="weapon-warning">
+            ⚔️ A weapon is required to fight the boss! Visit the Shop to equip one.
+          </div>
+        )}
 
         <button
           type="button"

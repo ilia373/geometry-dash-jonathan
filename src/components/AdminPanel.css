@@ -201,6 +201,34 @@
   box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
 }
 
+.unlock-all-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.unlock-all-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(74, 144, 217, 0.4);
+}
+
+.unlock-all-button.active {
+  background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+  color: #1a1a2e;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.unlock-all-button.active:hover {
+  box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5);
+}
+
 @keyframes pulse-fortune {
   0%, 100% { box-shadow: 0 0 0 rgba(255, 215, 0, 0.4); }
   50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }

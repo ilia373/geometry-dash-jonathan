@@ -66,6 +66,27 @@ export const BOSS_CONFIGS: Record<string, BossConfig> = {
     burstCount: 2,
     burstDelay: 8,
   },
+  nebula_vortex: {
+    universeId: 'nebula_vortex',
+    name: 'Nebula Devourer',
+    emoji: '💫',
+    hp: 1200,
+    size: 115,
+    color: '#ff69b4',
+    glowColor: '#ff1493',
+    fireRate: 35,
+    projectileSpeed: 13,
+    projectileSize: { width: 40, height: 22 },
+    projectileHeights: [590, 570, 545, 510, 480],
+    jumpInterval: 35,
+    jumpForce: -20,
+    coinDropMin: 300,
+    coinDropMax: 900,
+    aimAtPlayer: true,
+    aimChance: 0.7,
+    burstCount: 3,
+    burstDelay: 6,
+  },
 };
 
 /**

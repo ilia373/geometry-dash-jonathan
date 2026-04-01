@@ -10,6 +10,8 @@ interface AdminPanelProps {
   isVisible: boolean;
   onToggleVisibility: () => void;
   onOpenFortuneWheel?: () => void;
+  unlockAllActive?: boolean;
+  onToggleUnlockAll?: () => void;
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -19,6 +21,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   isVisible,
   onToggleVisibility,
   onOpenFortuneWheel,
+  unlockAllActive,
+  onToggleUnlockAll,
 }) => {
   const cheatKeys = Object.keys(defaultCheatState) as (keyof CheatState)[];
   const activeCount = cheatKeys.filter(key => cheats[key]).length;
@@ -64,6 +68,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
           
           <div className="admin-actions">
+            {onToggleUnlockAll && (
+              <button
+                className={`unlock-all-button ${unlockAllActive ? 'active' : ''}`}
+                onClick={onToggleUnlockAll}
+              >
+                {unlockAllActive ? '🔓 Unlock All: ON' : '🔒 Unlock All: OFF'}
+              </button>
+            )}
+
             <button className="reset-button" onClick={onReset}>
               🔄 Reset All Cheats
             </button>

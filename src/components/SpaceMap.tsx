@@ -15,6 +15,7 @@ import {
 import type { AuthUser } from '../utils/authService';
 import type { CheatState } from '../types/cheats';
 import { defaultCheatState } from '../types/cheats';
+import { getUnlockAllLevels, setUnlockAllLevels } from '../utils/adminOverrides';
 import AuthModal from './AuthModal';
 import AdminPanel from './AdminPanel';
 import FortuneWheel from './FortuneWheel';
@@ -62,6 +63,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
 
   const [showFortuneWheel, setShowFortuneWheel] = useState(false);
   const [unlimitedSpins, setUnlimitedSpins] = useState(false);
+  const [unlockAllActive, setUnlockAllActive] = useState(getUnlockAllLevels());
 
   useEffect(() => {
     let cancelled = false;
@@ -199,9 +201,17 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
     setIsDragging(false);
   };
 
+  const handleToggleUnlockAll = useCallback(() => {
+    const next = !unlockAllActive;
+    setUnlockAllLevels(next);
+    setUnlockAllActive(next);
+    setRefreshKey(prev => prev + 1);
+  }, [unlockAllActive]);
+
   const handleUniverseClick = (universeId: string, comingSoon: boolean) => {
-    if (comingSoon || isTransitioning) return;
-    if (!isUniverseUnlocked(universeId)) return;
+    if (isTransitioning) return;
+    if (!unlockAllActive && comingSoon) return;
+    if (!unlockAllActive && !isUniverseUnlocked(universeId)) return;
     setIsTransitioning(true);
     onSelectUniverse(universeId);
   };
@@ -358,15 +368,18 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
         </svg>
 
         {UNIVERSES.map(universe => {
-          const unlocked = isUniverseUnlocked(universe.id);
+          const isUnimplemented = universe.comingSoon && universe.levelIds.length === 0;
+          const unlocked = !isUnimplemented && (unlockAllActive || isUniverseUnlocked(universe.id));
+          const effectiveComingSoon = isUnimplemented;
           const completion = getUniverseCompletion(universe.id);
           const isCompleted = completion.total > 0 && completion.completed === completion.total;
+          const isLocked = !unlocked && !effectiveComingSoon;
 
           return (
             <button
               key={universe.id}
               type="button"
-              className={`universe-node ${unlocked ? 'unlocked' : 'locked'} ${universe.comingSoon ? 'coming-soon' : ''} ${isCompleted ? 'completed' : ''}`}
+              className={`universe-node ${unlocked ? 'unlocked' : 'locked'} ${effectiveComingSoon ? 'coming-soon' : ''} ${isLocked ? 'progression-locked' : ''} ${isCompleted ? 'completed' : ''}`}
               style={{
                 left: `${universe.position.x}%`,
                 top: `${universe.position.y}%`,
@@ -375,18 +388,20 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
                 '--node-secondary': universe.theme.secondaryColor,
               } as React.CSSProperties}
               onClick={() => handleUniverseClick(universe.id, universe.comingSoon)}
-              aria-label={universe.comingSoon ? `${universe.name} — Coming Soon` : universe.name}
-              disabled={universe.comingSoon}
+              aria-label={effectiveComingSoon ? `${universe.name} — Coming Soon` : isLocked ? `${universe.name} — Locked` : universe.name}
+              disabled={effectiveComingSoon || isLocked}
             >
-              {unlocked && !universe.comingSoon && (
+              {unlocked && !effectiveComingSoon && (
                 <div className="node-glow-ring" />
               )}
 
               <div className="node-content">
                 <span className="node-emoji">{universe.emoji}</span>
                 <span className="node-name">{universe.name}</span>
-                {universe.comingSoon ? (
+                {effectiveComingSoon ? (
                   <span className="node-badge coming-soon-badge">Coming Soon</span>
+                ) : isLocked ? (
+                  <span className="node-badge locked-badge">🔒 Locked</span>
                 ) : isCompleted ? (
                   <span className="node-badge completed-badge">✓ Complete</span>
                 ) : completion.total > 0 ? (
@@ -394,7 +409,7 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
                 ) : null}
               </div>
 
-              {universe.comingSoon && (
+              {(effectiveComingSoon || isLocked) && (
                 <div className="node-lock-overlay">
                   <span className="lock-icon">🔒</span>
                 </div>
@@ -438,6 +453,8 @@ const SpaceMap: React.FC<SpaceMapProps> = ({ onSelectUniverse, onOpenShop }) => 
           isVisible={showAdminPanel}
           onToggleVisibility={() => setShowAdminPanel(!showAdminPanel)}
           onOpenFortuneWheel={handleOpenFortuneWheelAdmin}
+          unlockAllActive={unlockAllActive}
+          onToggleUnlockAll={handleToggleUnlockAll}
         />
       )}
 

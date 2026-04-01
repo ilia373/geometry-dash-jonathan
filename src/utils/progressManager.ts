@@ -3,6 +3,7 @@
 // Uses localStorage only for guests
 import { saveUserData, loadUserData } from './firestoreService';
 import { getCurrentUser, isGuest } from './authService';
+import { getUnlockAllLevels } from './adminOverrides';
 
 const STORAGE_KEY = 'geometry-dash-completed-levels';
 
@@ -43,6 +44,8 @@ export const markLevelComplete = async (levelId: number): Promise<void> => {
 };
 
 export const isLevelUnlocked = (levelId: number): boolean => {
+  if (getUnlockAllLevels()) return true;
+
   // Level 1 is always unlocked
   if (levelId === 1) return true;
   

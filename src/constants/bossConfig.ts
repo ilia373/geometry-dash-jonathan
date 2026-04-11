@@ -87,6 +87,27 @@ export const BOSS_CONFIGS: Record<string, BossConfig> = {
     burstCount: 3,
     burstDelay: 6,
   },
+  quantum_realm: {
+    universeId: 'quantum_realm',
+    name: 'Quantum Colossus',
+    emoji: '⚛️',
+    hp: 1600,
+    size: 125,
+    color: '#00bcd4',
+    glowColor: '#00e5ff',
+    fireRate: 25,
+    projectileSpeed: 16,
+    projectileSize: { width: 44, height: 24 },
+    projectileHeights: [590, 570, 545, 510, 480, 450],
+    jumpInterval: 28,
+    jumpForce: -22,
+    coinDropMin: 400,
+    coinDropMax: 1200,
+    aimAtPlayer: true,
+    aimChance: 0.85,
+    burstCount: 4,
+    burstDelay: 5,
+  },
 };
 
 /**

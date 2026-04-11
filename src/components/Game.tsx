@@ -56,7 +56,7 @@ import {
   createBossDeathCoins,
 } from '../utils/bossPhysics';
 import { unlockUniverse } from '../utils/universeManager';
-import { getUniverseForLevel } from '../constants/universeConfig';
+import { UNIVERSES, getUniverseForLevel } from '../constants/universeConfig';
 import './Game.css';
 
 interface GameProps {
@@ -596,10 +596,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             addCoins(coinsCollectedRef.current);
             const universeId = getUniverseForLevel(level.id)?.id;
             if (universeId) {
-              const universes = ['milky-way', 'andromeda'];
-              const currentIdx = universes.indexOf(universeId);
-              if (currentIdx >= 0 && currentIdx < universes.length - 1) {
-                unlockUniverse(universes[currentIdx + 1]).catch(console.error);
+              const nextUniverse = UNIVERSES.find(
+                u => u.requiredUniverseId === universeId && !u.comingSoon
+              );
+              if (nextUniverse) {
+                unlockUniverse(nextUniverse.id).catch(console.error);
               }
             }
           }

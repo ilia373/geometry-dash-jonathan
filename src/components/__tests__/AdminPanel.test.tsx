@@ -101,4 +101,48 @@ describe('AdminPanel', () => {
     render(<AdminPanel {...defaultProps} isVisible={false} />);
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
+
+  describe('Unlock All toggle', () => {
+    const mockOnToggleUnlockAll = vi.fn();
+
+    it('should render unlock-all button when onToggleUnlockAll is provided', () => {
+      render(
+        <AdminPanel
+          {...defaultProps}
+          unlockAllActive={false}
+          onToggleUnlockAll={mockOnToggleUnlockAll}
+        />
+      );
+      expect(screen.getByText('🔒 Unlock All: OFF')).toBeInTheDocument();
+    });
+
+    it('should show ON state when unlockAllActive is true', () => {
+      render(
+        <AdminPanel
+          {...defaultProps}
+          unlockAllActive={true}
+          onToggleUnlockAll={mockOnToggleUnlockAll}
+        />
+      );
+      expect(screen.getByText('🔓 Unlock All: ON')).toBeInTheDocument();
+    });
+
+    it('should call onToggleUnlockAll when button is clicked', () => {
+      render(
+        <AdminPanel
+          {...defaultProps}
+          unlockAllActive={false}
+          onToggleUnlockAll={mockOnToggleUnlockAll}
+        />
+      );
+      const unlockButton = screen.getByText('🔒 Unlock All: OFF');
+      fireEvent.click(unlockButton);
+      expect(mockOnToggleUnlockAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not render unlock-all button when onToggleUnlockAll is not provided', () => {
+      render(<AdminPanel {...defaultProps} />);
+      expect(screen.queryByText(/Unlock All/)).not.toBeInTheDocument();
+    });
+  });
 });

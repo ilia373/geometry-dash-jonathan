@@ -17,10 +17,15 @@ describe('universeConfig', () => {
       expect(UNIVERSES[0].id).toBe('milky-way');
     });
 
-    it('should have milky-way and andromeda as non-comingSoon universes', () => {
+    it('should have milky-way, andromeda, and nebula-vortex as non-comingSoon universes', () => {
       const unlocked = UNIVERSES.filter(u => !u.comingSoon);
-      expect(unlocked).toHaveLength(2);
-      expect(unlocked.map(u => u.id)).toEqual(['milky-way', 'andromeda']);
+      expect(unlocked).toHaveLength(3);
+      expect(unlocked.map(u => u.id)).toEqual(['milky-way', 'andromeda', 'nebula-vortex']);
+    });
+
+    it('should assign 9 levels (17-25) to nebula-vortex', () => {
+      const nebulaVortex = UNIVERSES.find(u => u.id === 'nebula-vortex');
+      expect(nebulaVortex?.levelIds).toEqual([17, 18, 19, 20, 21, 22, 23, 24, 25]);
     });
 
     it('should assign 7 levels to milky-way', () => {
@@ -107,6 +112,16 @@ describe('universeConfig', () => {
     it('should return andromeda for level 8', () => {
       const u = getUniverseForLevel(8);
       expect(u?.id).toBe('andromeda');
+    });
+
+    it('should return nebula-vortex for level 17', () => {
+      const u = getUniverseForLevel(17);
+      expect(u?.id).toBe('nebula-vortex');
+    });
+
+    it('should return nebula-vortex for level 25 (boss)', () => {
+      const u = getUniverseForLevel(25);
+      expect(u?.id).toBe('nebula-vortex');
     });
 
     it('should return undefined for a level not in any universe', () => {

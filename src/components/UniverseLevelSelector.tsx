@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { LEVELS } from '../constants/gameConfig';
 import { getUniverseById } from '../constants/universeConfig';
 import { isLevelUnlocked, isLevelCompleted } from '../utils/progressManager';
@@ -6,6 +6,7 @@ import { isAdmin, getCurrentUser, onAuthChange, logOut, getDisplayName, isGuest 
 import { getSelectedWeapon } from '../utils/weaponManager';
 import type { AuthUser } from '../utils/authService';
 import { getTotalCoins } from '../utils/walletManager';
+import { getUnlockAllLevels, setUnlockAllLevels } from '../utils/adminOverrides';
 import AuthModal from './AuthModal';
 import AdminPanel from './AdminPanel';
 import type { CheatState } from '../types/cheats';
@@ -40,6 +41,7 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
   const [coins, setCoins] = useState<number>(getTotalCoins());
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
   const [, setRefreshKey] = useState<number>(0);
+  const [unlockAllActive, setUnlockAllActive] = useState(getUnlockAllLevels());
 
   const userIsAdmin = isAdmin();
 
@@ -53,13 +55,13 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
   }, []);
 
   const handleLevelSelect = (levelId: number) => {
-    if (isLevelUnlocked(levelId)) {
+    if (unlockAllActive || isLevelUnlocked(levelId)) {
       setSelectedLevel(levelId);
     }
   };
 
   const handleStartGame = () => {
-    if (!isLevelUnlocked(selectedLevel)) return;
+    if (!unlockAllActive && !isLevelUnlocked(selectedLevel)) return;
     const levelData = LEVELS.find(l => l.id === selectedLevel);
     if (levelData?.levelType === 'boss' && getSelectedWeapon() === null) {
       setShowWeaponWarning(true);
@@ -89,13 +91,20 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
     setShowAuthModal(false);
   };
 
+  const handleToggleUnlockAll = useCallback(() => {
+    const next = !unlockAllActive;
+    setUnlockAllLevels(next);
+    setUnlockAllActive(next);
+    setRefreshKey(prev => prev + 1);
+  }, [unlockAllActive]);
+
   if (!universe) {
     return null;
   }
 
   const theme = universe.theme;
   const selectedLevelData = LEVELS.find(l => l.id === selectedLevel);
-  const canPlay = isLevelUnlocked(selectedLevel);
+  const canPlay = unlockAllActive || isLevelUnlocked(selectedLevel);
 
   return (
     <div
@@ -168,7 +177,7 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
 
         <div className="planet-level-cards">
           {universeLevels.map(level => {
-            const unlocked = isLevelUnlocked(level.id);
+            const unlocked = unlockAllActive || isLevelUnlocked(level.id);
             const completed = isLevelCompleted(level.id);
             const isSelected = selectedLevel === level.id;
 
@@ -246,6 +255,8 @@ const UniverseLevelSelector: React.FC<UniverseLevelSelectorProps> = ({
           isVisible={showAdminPanel}
           onToggleVisibility={() => setShowAdminPanel(!showAdminPanel)}
           onOpenFortuneWheel={() => {}}
+          unlockAllActive={unlockAllActive}
+          onToggleUnlockAll={handleToggleUnlockAll}
         />
       )}
 

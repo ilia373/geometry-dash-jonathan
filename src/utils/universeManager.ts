@@ -5,6 +5,7 @@ import { saveUserData, loadUserData } from './firestoreService';
 import { getCurrentUser, isGuest } from './authService';
 import { getCompletedLevels } from './progressManager';
 import { getUniverseById } from '../constants/universeConfig';
+import { getUnlockAllLevels } from './adminOverrides';
 
 const STORAGE_KEY = 'geometry-dash-unlocked-universes';
 
@@ -78,6 +79,8 @@ export const unlockUniverse = async (id: string): Promise<void> => {
 };
 
 export const isUniverseUnlocked = (id: string): boolean => {
+  if (getUnlockAllLevels()) return true;
+
   if (!cacheInitialized) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);

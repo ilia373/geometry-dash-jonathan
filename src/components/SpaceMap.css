@@ -273,6 +273,14 @@
   animation: none;
 }
 
+.universe-node.progression-locked {
+  filter: grayscale(0.5);
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+  animation: none;
+}
+
 .universe-node.completed {
   border-color: #5ee8b0;
   animation: universeCompleted 3s ease-in-out infinite;
@@ -370,6 +378,12 @@
   background: rgba(100, 100, 120, 0.6);
   color: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.locked-badge {
+  background: rgba(100, 100, 120, 0.6);
+  color: rgba(255, 200, 100, 0.7);
+  border: 1px solid rgba(255, 200, 100, 0.25);
 }
 
 .completed-badge {

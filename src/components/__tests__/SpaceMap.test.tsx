@@ -48,6 +48,11 @@ vi.mock('../../utils/fortuneWheelManager', () => ({
   initializeWheelForNewUser: vi.fn(),
 }));
 
+vi.mock('../../utils/adminOverrides', () => ({
+  getUnlockAllLevels: vi.fn(() => false),
+  setUnlockAllLevels: vi.fn(),
+}));
+
 vi.mock('../AdminPanel', () => ({
   default: () => null,
 }));
@@ -93,8 +98,8 @@ describe('SpaceMap Component', () => {
 
   it('coming-soon nodes are disabled', () => {
     render(<SpaceMap onSelectUniverse={mockOnSelectUniverse} onOpenShop={mockOnOpenShop} />);
-    const nebulaButton = screen.getByRole('button', { name: 'Nebula Vortex — Coming Soon' });
-    expect(nebulaButton).toBeDisabled();
+    const cosmicButton = screen.getByRole('button', { name: 'Cosmic Abyss — Coming Soon' });
+    expect(cosmicButton).toBeDisabled();
   });
 
   it('calls onSelectUniverse when milky-way is clicked', () => {
@@ -116,8 +121,8 @@ describe('SpaceMap Component', () => {
 
   it('does not call onSelectUniverse when a disabled node is clicked', () => {
     render(<SpaceMap onSelectUniverse={mockOnSelectUniverse} onOpenShop={mockOnOpenShop} />);
-    const nebulaButton = screen.getByRole('button', { name: 'Nebula Vortex — Coming Soon' });
-    fireEvent.click(nebulaButton);
+    const cosmicButton = screen.getByRole('button', { name: 'Cosmic Abyss — Coming Soon' });
+    fireEvent.click(cosmicButton);
     expect(mockOnSelectUniverse).not.toHaveBeenCalled();
   });
 });

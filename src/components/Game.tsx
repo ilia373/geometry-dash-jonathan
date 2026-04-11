@@ -386,13 +386,18 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
                  ...particlesRef.current,
                  ...createDeathParticles(playerRef.current),
                ];
-               playerRef.current.isDead = true;
-               setGameState('dead');
-               soundManager.playSound('fail');
-               break;
-             }
-           }
-         }
+                playerRef.current.isDead = true;
+                setGameState('dead');
+                setStats(prev => ({
+                  ...prev,
+                  progress: progressRef.current,
+                  bestProgress: Math.max(prev.bestProgress, progressRef.current),
+                }));
+                soundManager.playSound('fail');
+                break;
+              }
+            }
+          }
          
          // Update dropped coins with magnet effect toward player
         droppedCoinsRef.current = updateDroppedCoins(
@@ -497,6 +502,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             ];
             playerRef.current.isDead = true;
             setGameState('dead');
+            setStats(prev => ({
+              ...prev,
+              progress: progressRef.current,
+              bestProgress: Math.max(prev.bestProgress, progressRef.current),
+            }));
             soundManager.playSound('fail');
             break;
           }
@@ -526,6 +536,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
               ];
               playerRef.current.isDead = true;
               setGameState('dead');
+              setStats(prev => ({
+                ...prev,
+                progress: progressRef.current,
+                bestProgress: Math.max(prev.bestProgress, progressRef.current),
+              }));
               soundManager.playSound('fail');
               break;
               
@@ -757,7 +772,6 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             <h2>💀 You Crashed!</h2>
             <p>Progress: {Math.floor(stats.progress * 100)}%</p>
             <p>Best: {Math.floor(stats.bestProgress * 100)}%</p>
-            {!isGuest() && <p className="coins-lost">🪙 {stats.coinsCollected} coins lost!</p>}
             <div className="modal-buttons">
               <button className="retry-button" onClick={(e) => { e.stopPropagation(); resetGame(); }}>
                 🔄 Retry

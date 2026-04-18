@@ -1,4 +1,5 @@
 import type { Level } from '../../types/game';
+import type { Obstacle, Quant } from '../../types/game';
 import {
   createCoin,
   createJumpingQuant,
@@ -11,6 +12,55 @@ import {
 
 const QUANTUM_REALM_GROUND = '#003d4d';
 const QUANTUM_REALM_BACKGROUND = '#001a1f';
+
+function extendObstacles(
+  startX: number,
+  endX: number,
+  seed: number,
+  spacing: number
+): Obstacle[] {
+  const result: Obstacle[] = [];
+  let x = startX;
+  let i = seed;
+  while (x < endX) {
+    const pattern = ((i % 10) + 10) % 10;
+    if (pattern === 0) result.push(createSpike(x));
+    else if (pattern === 1) result.push(createCoin(x, 540));
+    else if (pattern === 2) result.push(createSpike(x));
+    else if (pattern === 3) result.push(createJumpPad(x));
+    else if (pattern === 4) result.push(createSpike(x));
+    else if (pattern === 5) result.push(createSpike(x));
+    else if (pattern === 6) result.push(createCoin(x, 530));
+    else if (pattern === 7) result.push(createJumpOrb(x, 490));
+    else if (pattern === 8) result.push(createSpike(x));
+    else result.push(createCoin(x, 535));
+    x += spacing + ((i % 3) - 1) * 30;
+    i++;
+  }
+  return result;
+}
+
+function extendQuants(
+  startX: number,
+  endX: number,
+  levelIndex: number,
+  count: number,
+  seed: number
+): Quant[] {
+  const result: Quant[] = [];
+  if (count <= 0 || endX <= startX) return result;
+  const step = (endX - startX) / count;
+  for (let i = 0; i < count; i++) {
+    const x = Math.round(startX + step * (i + 0.5));
+    const t = ((i + seed) % 3 + 3) % 3;
+    if (t === 0) result.push(createStaticQuant(x, undefined, levelIndex));
+    else if (t === 1) result.push(createMovingQuant(x, undefined, levelIndex));
+    else result.push(createJumpingQuant(x, undefined, levelIndex));
+  }
+  return result;
+}
+
+const EXTEND_END = 15500;
 
 export const QUANTUM_REALM_LEVELS: Level[] = [
   {
@@ -35,10 +85,12 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createSpike(5250),
       createCoin(5850, 530),
       createSpike(6300),
+      ...extendObstacles(6800, EXTEND_END, 0, 360),
     ],
     quants: [
       createStaticQuant(2100, undefined, 25),
       createStaticQuant(5200, undefined, 25),
+      ...extendQuants(7000, EXTEND_END, 25, 5, 0),
     ],
   },
   {
@@ -65,10 +117,12 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createSpike(5550),
       createJumpOrb(6000, 490),
       createSpike(6350),
+      ...extendObstacles(6850, EXTEND_END, 1, 350),
     ],
     quants: [
       createStaticQuant(2000, undefined, 26),
       createMovingQuant(5000, undefined, 26),
+      ...extendQuants(7000, EXTEND_END, 26, 5, 1),
     ],
   },
   {
@@ -94,11 +148,13 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createSpike(5050),
       createSpike(5400),
       createCoin(5750, 530),
+      ...extendObstacles(6300, EXTEND_END, 2, 340),
     ],
     quants: [
       createStaticQuant(1900, undefined, 27),
       createMovingQuant(4300, undefined, 27),
       createJumpingQuant(6200, undefined, 27),
+      ...extendQuants(7000, EXTEND_END, 27, 6, 2),
     ],
   },
   {
@@ -124,12 +180,14 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createJumpOrb(4900, 490),
       createSpike(5250),
       createSpike(5600),
+      ...extendObstacles(6100, EXTEND_END, 3, 330),
     ],
     quants: [
       createStaticQuant(2000, undefined, 28),
       createMovingQuant(3600, undefined, 28),
       createJumpingQuant(5200, undefined, 28),
       createMovingQuant(6400, undefined, 28),
+      ...extendQuants(7100, EXTEND_END, 28, 6, 3),
     ],
   },
   {
@@ -156,12 +214,14 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createJumpOrb(5250, 495),
       createSpike(5600),
       createSpike(5950),
+      ...extendObstacles(6450, EXTEND_END, 4, 320),
     ],
     quants: [
       createStaticQuant(1950, undefined, 29),
       createMovingQuant(3600, undefined, 29),
       createJumpingQuant(5200, undefined, 29),
       createMovingQuant(6600, undefined, 29),
+      ...extendQuants(7200, EXTEND_END, 29, 7, 4),
     ],
   },
   {
@@ -189,6 +249,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createSpike(5550),
       createJumpOrb(5900, 485),
       createSpike(6250),
+      ...extendObstacles(6750, EXTEND_END, 5, 310),
     ],
     quants: [
       createMovingQuant(1900, undefined, 30),
@@ -196,6 +257,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createJumpingQuant(4700, undefined, 30),
       createMovingQuant(6100, undefined, 30),
       createJumpingQuant(7200, undefined, 30),
+      ...extendQuants(8000, EXTEND_END, 30, 7, 5),
     ],
   },
   {
@@ -224,6 +286,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createSpike(5450),
       createJumpOrb(5800, 490),
       createSpike(6120),
+      ...extendObstacles(6600, EXTEND_END, 6, 300),
     ],
     quants: [
       createStaticQuant(1750, undefined, 31),
@@ -231,6 +294,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createJumpingQuant(4550, undefined, 31),
       createMovingQuant(5850, undefined, 31),
       createJumpingQuant(7200, undefined, 31),
+      ...extendQuants(8000, EXTEND_END, 31, 8, 6),
     ],
   },
   {
@@ -260,6 +324,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createJumpOrb(5450, 485),
       createSpike(5750),
       createSpike(6050),
+      ...extendObstacles(6550, EXTEND_END, 7, 290),
     ],
     quants: [
       createMovingQuant(1700, undefined, 32),
@@ -268,6 +333,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createMovingQuant(5600, undefined, 32),
       createJumpingQuant(6900, undefined, 32),
       createStaticQuant(8150, undefined, 32),
+      ...extendQuants(9000, EXTEND_END, 32, 8, 7),
     ],
   },
   {
@@ -299,6 +365,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createSpike(5900),
       createJumpPad(6200),
       createSpike(6500),
+      ...extendObstacles(7000, EXTEND_END, 8, 280),
     ],
     quants: [
       createMovingQuant(1650, undefined, 33),
@@ -309,6 +376,7 @@ export const QUANTUM_REALM_LEVELS: Level[] = [
       createStaticQuant(8200, undefined, 33),
       createMovingQuant(9400, undefined, 33),
       createJumpingQuant(10600, undefined, 33),
+      ...extendQuants(11400, EXTEND_END, 33, 5, 8),
     ],
   },
   {

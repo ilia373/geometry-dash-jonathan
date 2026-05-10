@@ -23,6 +23,10 @@ export interface BossConfig {
   aimChance?: number;
   burstCount?: number;
   burstDelay?: number;
+  quantSpawnInterval?: number;
+  quantSpawnCount?: number;
+  quantSpeed?: number;
+  quantHp?: number;
 }
 
 export const BOSS_CONFIGS: Record<string, BossConfig> = {
@@ -96,7 +100,7 @@ export const BOSS_CONFIGS: Record<string, BossConfig> = {
     color: '#00bcd4',
     glowColor: '#00e5ff',
     fireRate: 45,
-    projectileSpeed: 12,
+    projectileSpeed: 10,
     projectileSize: { width: 44, height: 24 },
     projectileHeights: [590, 570, 545, 510, 480, 450],
     jumpInterval: 45,
@@ -107,6 +111,10 @@ export const BOSS_CONFIGS: Record<string, BossConfig> = {
     aimChance: 0.55,
     burstCount: 2,
     burstDelay: 10,
+    quantSpawnInterval: 240,
+    quantSpawnCount: 1,
+    quantSpeed: 5,
+    quantHp: 60,
   },
 };
 

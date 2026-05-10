@@ -23,6 +23,10 @@ export interface BossConfig {
   aimChance?: number;
   burstCount?: number;
   burstDelay?: number;
+  quantSpawnInterval?: number;
+  quantSpawnCount?: number;
+  quantSpeed?: number;
+  quantHp?: number;
 }
 
 export const BOSS_CONFIGS: Record<string, BossConfig> = {
@@ -86,6 +90,31 @@ export const BOSS_CONFIGS: Record<string, BossConfig> = {
     aimChance: 0.7,
     burstCount: 3,
     burstDelay: 6,
+  },
+  quantum_realm: {
+    universeId: 'quantum_realm',
+    name: 'Quantum Colossus',
+    emoji: '⚛️',
+    hp: 1600,
+    size: 125,
+    color: '#00bcd4',
+    glowColor: '#00e5ff',
+    fireRate: 45,
+    projectileSpeed: 10,
+    projectileSize: { width: 44, height: 24 },
+    projectileHeights: [590, 570, 545, 510, 480, 450],
+    jumpInterval: 45,
+    jumpForce: -20,
+    coinDropMin: 400,
+    coinDropMax: 1200,
+    aimAtPlayer: true,
+    aimChance: 0.55,
+    burstCount: 2,
+    burstDelay: 10,
+    quantSpawnInterval: 240,
+    quantSpawnCount: 1,
+    quantSpeed: 5,
+    quantHp: 60,
   },
 };
 

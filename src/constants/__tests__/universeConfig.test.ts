@@ -17,10 +17,10 @@ describe('universeConfig', () => {
       expect(UNIVERSES[0].id).toBe('milky-way');
     });
 
-    it('should have milky-way, andromeda, and nebula-vortex as non-comingSoon universes', () => {
+    it('should have milky-way, andromeda, nebula-vortex, and quantum-realm as non-comingSoon universes', () => {
       const unlocked = UNIVERSES.filter(u => !u.comingSoon);
-      expect(unlocked).toHaveLength(3);
-      expect(unlocked.map(u => u.id)).toEqual(['milky-way', 'andromeda', 'nebula-vortex']);
+      expect(unlocked).toHaveLength(4);
+      expect(unlocked.map(u => u.id)).toEqual(['milky-way', 'andromeda', 'nebula-vortex', 'quantum-realm']);
     });
 
     it('should assign 9 levels (17-25) to nebula-vortex', () => {

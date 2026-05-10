@@ -46,6 +46,7 @@ import { createProjectile, updateProjectiles, checkAllProjectileCollisions } fro
 import { getSelectedWeapon } from '../utils/weaponManager';
 import { getBossConfig } from '../constants/bossConfig';
 import type { BossConfig } from '../constants/bossConfig';
+import { createMovingQuant } from '../constants/levelFactories';
 import type { BossFireTimer } from '../utils/bossPhysics';
 import {
   createBoss,
@@ -56,7 +57,7 @@ import {
   createBossDeathCoins,
 } from '../utils/bossPhysics';
 import { unlockUniverse } from '../utils/universeManager';
-import { getUniverseForLevel } from '../constants/universeConfig';
+import { UNIVERSES, getUniverseForLevel } from '../constants/universeConfig';
 import './Game.css';
 
 interface GameProps {
@@ -117,6 +118,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
    const bossConfigRef = useRef<BossConfig | null>(null);
    const bossDefeatedPhaseRef = useRef<boolean>(false);
    const bossDefeatedTimerRef = useRef<number>(0);
+   const bossSpawnTimerRef = useRef<number>(0);
    const BOSS_COIN_COLLECTION_FRAMES = 300; // ~5 seconds for coins to spread and magnet
   
   // Clone level to avoid mutating original level data
@@ -201,6 +203,7 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
     bossJumpTimerRef.current = 0;
     bossDefeatedPhaseRef.current = false;
     bossDefeatedTimerRef.current = 0;
+    bossSpawnTimerRef.current = 0;
     // Re-initialize boss if boss level
     if (level.levelType === 'boss' && bossConfigRef.current) {
       const universeId = getUniverseForLevel(level.id)?.id ?? 'milky-way';
@@ -305,6 +308,33 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
          // Update boss projectiles
          if (level.levelType === 'boss') {
            bossProjectilesRef.current = updateBossProjectiles(bossProjectilesRef.current);
+         }
+
+         // Boss quant-spawn ability (quantum_realm only via config)
+         if (
+           level.levelType === 'boss' &&
+           bossRef.current &&
+           bossConfigRef.current &&
+           !bossRef.current.isDead &&
+           bossConfigRef.current.quantSpawnInterval
+         ) {
+           bossSpawnTimerRef.current++;
+           if (bossSpawnTimerRef.current >= bossConfigRef.current.quantSpawnInterval) {
+             bossSpawnTimerRef.current = 0;
+             const cfg = bossConfigRef.current;
+             const spawnCount = cfg.quantSpawnCount ?? 1;
+             const speed = cfg.quantSpeed ?? GAME_CONFIG.playerSpeed;
+             const hp = cfg.quantHp ?? 60;
+             for (let i = 0; i < spawnCount; i++) {
+               const spawnX = bossRef.current.x - 60 - i * 50;
+               const spawnY = bossRef.current.y + bossRef.current.height / 2;
+               const newQuant = createMovingQuant(spawnX, spawnY, 0);
+               newQuant.vx = -speed;
+               newQuant.hp = hp;
+               newQuant.maxHp = hp;
+               quantsRef.current.push(newQuant);
+             }
+           }
          }
          
          // Auto-fire weapon
@@ -596,10 +626,11 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             addCoins(coinsCollectedRef.current);
             const universeId = getUniverseForLevel(level.id)?.id;
             if (universeId) {
-              const universes = ['milky-way', 'andromeda'];
-              const currentIdx = universes.indexOf(universeId);
-              if (currentIdx >= 0 && currentIdx < universes.length - 1) {
-                unlockUniverse(universes[currentIdx + 1]).catch(console.error);
+              const nextUniverse = UNIVERSES.find(
+                u => u.requiredUniverseId === universeId && !u.comingSoon
+              );
+              if (nextUniverse) {
+                unlockUniverse(nextUniverse.id).catch(console.error);
               }
             }
           }

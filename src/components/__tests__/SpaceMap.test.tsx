@@ -96,9 +96,9 @@ describe('SpaceMap Component', () => {
     expect(milkyWayButton).not.toBeDisabled();
   });
 
-  it('coming-soon nodes are disabled', () => {
+  it('locked universe nodes are disabled', () => {
     render(<SpaceMap onSelectUniverse={mockOnSelectUniverse} onOpenShop={mockOnOpenShop} />);
-    const cosmicButton = screen.getByRole('button', { name: 'Cosmic Abyss — Coming Soon' });
+    const cosmicButton = screen.getByRole('button', { name: 'Cosmic Abyss — Locked' });
     expect(cosmicButton).toBeDisabled();
   });
 
@@ -121,7 +121,7 @@ describe('SpaceMap Component', () => {
 
   it('does not call onSelectUniverse when a disabled node is clicked', () => {
     render(<SpaceMap onSelectUniverse={mockOnSelectUniverse} onOpenShop={mockOnOpenShop} />);
-    const cosmicButton = screen.getByRole('button', { name: 'Cosmic Abyss — Coming Soon' });
+    const cosmicButton = screen.getByRole('button', { name: 'Cosmic Abyss — Locked' });
     fireEvent.click(cosmicButton);
     expect(mockOnSelectUniverse).not.toHaveBeenCalled();
   });

@@ -3,23 +3,23 @@ import { LEVELS, GAME_CONFIG, QUANT_HP_CONFIG } from '../../constants/gameConfig
 
 describe('Golden Regression: gameConfig.ts', () => {
   describe('LEVELS', () => {
-    it('should have exactly 35 levels', () => {
-      expect(LEVELS).toHaveLength(35);
+    it('should have exactly 44 levels', () => {
+      expect(LEVELS).toHaveLength(44);
     });
 
-    it('should have correct level IDs from 1 to 35', () => {
+    it('should have correct level IDs from 1 to 44', () => {
       const levelIds = LEVELS.map(l => l.id);
-      expect(levelIds).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]);
+      expect(levelIds).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]);
     });
 
-    it('should have exactly 4 boss levels', () => {
+    it('should have exactly 5 boss levels', () => {
       const bossLevels = LEVELS.filter(l => l.levelType === 'boss');
-      expect(bossLevels).toHaveLength(4);
+      expect(bossLevels).toHaveLength(5);
     });
 
-    it('should have boss levels at IDs 7, 16, 25, and 35', () => {
+    it('should have boss levels at IDs 7, 16, 25, 35, and 44', () => {
       const bossIds = LEVELS.filter(l => l.levelType === 'boss').map(l => l.id);
-      expect(bossIds).toEqual([7, 16, 25, 35]);
+      expect(bossIds).toEqual([7, 16, 25, 35, 44]);
     });
 
     it('should have all boss levels with length 1280', () => {
@@ -61,8 +61,8 @@ describe('Golden Regression: gameConfig.ts', () => {
   });
 
   describe('QUANT_HP_CONFIG', () => {
-    it('should have levelMultipliers with exactly 35 entries', () => {
-      expect(QUANT_HP_CONFIG.levelMultipliers).toHaveLength(35);
+    it('should have levelMultipliers with exactly 44 entries', () => {
+      expect(QUANT_HP_CONFIG.levelMultipliers).toHaveLength(44);
     });
 
     it('should have first level multiplier of 1.0', () => {
@@ -71,6 +71,10 @@ describe('Golden Regression: gameConfig.ts', () => {
 
     it('should have last level multiplier of 18.0', () => {
       expect(QUANT_HP_CONFIG.levelMultipliers[34]).toBe(18.0);
+    });
+
+    it('should have Cosmic Abyss level multiplier of 13.0', () => {
+      expect(QUANT_HP_CONFIG.levelMultipliers[43]).toBe(13.0);
     });
 
     it('should have first QR level multiplier of 13.5', () => {

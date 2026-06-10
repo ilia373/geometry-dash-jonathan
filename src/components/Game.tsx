@@ -626,12 +626,12 @@ const Game: React.FC<GameProps> = ({ levelId, onBack, cheats }) => {
             addCoins(coinsCollectedRef.current);
             const universeId = getUniverseForLevel(level.id)?.id;
             if (universeId) {
-              const nextUniverse = UNIVERSES.find(
+              const nextUniverses = UNIVERSES.filter(
                 u => u.requiredUniverseId === universeId && !u.comingSoon
               );
-              if (nextUniverse) {
+              nextUniverses.forEach(nextUniverse => {
                 unlockUniverse(nextUniverse.id).catch(console.error);
-              }
+              });
             }
           }
         }

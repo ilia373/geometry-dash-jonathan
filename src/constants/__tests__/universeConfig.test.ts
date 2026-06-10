@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   UNIVERSES,
   UNIVERSE_CONNECTIONS,
@@ -17,10 +17,20 @@ describe('universeConfig', () => {
       expect(UNIVERSES[0].id).toBe('milky-way');
     });
 
-    it('should have milky-way, andromeda, nebula-vortex, and quantum-realm as non-comingSoon universes', () => {
+    it('should have milky-way, andromeda, nebula-vortex, cosmic-abyss, and quantum-realm as non-comingSoon universes', () => {
       const unlocked = UNIVERSES.filter(u => !u.comingSoon);
-      expect(unlocked).toHaveLength(4);
-      expect(unlocked.map(u => u.id)).toEqual(['milky-way', 'andromeda', 'nebula-vortex', 'quantum-realm']);
+      expect(unlocked).toHaveLength(5);
+      expect(unlocked.map(u => u.id)).toEqual(['milky-way', 'andromeda', 'nebula-vortex', 'cosmic-abyss', 'quantum-realm']);
+    });
+
+    it('should assign 9 levels (36-44) to cosmic-abyss', () => {
+      const cosmicAbyss = UNIVERSES.find(u => u.id === 'cosmic-abyss');
+      expect(cosmicAbyss?.levelIds).toEqual([36, 37, 38, 39, 40, 41, 42, 43, 44]);
+    });
+
+    it('should have cosmic-abyss as not coming soon', () => {
+      const cosmicAbyss = UNIVERSES.find(u => u.id === 'cosmic-abyss');
+      expect(cosmicAbyss?.comingSoon).toBe(false);
     });
 
     it('should assign 9 levels (17-25) to nebula-vortex', () => {
@@ -124,6 +134,16 @@ describe('universeConfig', () => {
       expect(u?.id).toBe('nebula-vortex');
     });
 
+    it('should return cosmic-abyss for level 36', () => {
+      const u = getUniverseForLevel(36);
+      expect(u?.id).toBe('cosmic-abyss');
+    });
+
+    it('should return cosmic-abyss for level 44 (boss)', () => {
+      const u = getUniverseForLevel(44);
+      expect(u?.id).toBe('cosmic-abyss');
+    });
+
     it('should return undefined for a level not in any universe', () => {
       expect(getUniverseForLevel(999)).toBeUndefined();
     });
@@ -133,7 +153,5 @@ describe('universeConfig', () => {
     it('should return the same array as UNIVERSE_CONNECTIONS', () => {
       expect(getUniverseConnections()).toBe(UNIVERSE_CONNECTIONS);
     });
-
-    beforeEach(() => {});
   });
 });
